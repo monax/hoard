@@ -4,6 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/sha256"
+	"encoding/json"
+	"fmt"
 	"hash"
 )
 
@@ -37,15 +39,35 @@ func (blob *encryptedBlob) EncryptedData() []byte {
 // key that is a hash of the plaintext (data/blob) itself. Allows for
 // deduplication of ciphertexts and recovery of keys from plaintext alone.
 
-// Deterministically encrypt data under hoard
+// Deterministically encrypt data
 func Encrypt(data []byte) (EncryptedBlob, error) {
 	// We'll use sha256 like IPFS, and AES-256 (using hash as key)
-	return encryptConvergent(sha256.New(), aes.NewCipher, data)
+	return encryptConvergent(sha256.New(), aes.NewCipher, data, nil)
 }
 
-// Decrypt deterministically encrypted data under hoard
+// Deterministically decrypt encrypted data
 func Decrypt(secretKey, encryptedData []byte) ([]byte, error) {
-	return decryptConvergent(aes.NewCipher, secretKey, encryptedData)
+	return decryptConvergent(aes.NewCipher, secretKey, encryptedData, nil)
+}
+
+// Deterministically encrypt data using a supplied salt to produce a
+// distinguished the encrypted result that will have a different content hash,
+// secret key, and address than the same data encrypted with a different salt
+// (or not salt). Can be used to watermark a copy of a blob shared with a
+// particular party or to hide the fact a certain plaintext is stored.
+func EncryptSalted(data, salt []byte) (EncryptedBlob, error) {
+	return encryptConvergent(sha256.New(), aes.NewCipher, salinate(data, salt),
+		additionalDataForSalt(salt))
+}
+
+// Deterministically decrypt data that was encrypted with the provided salt
+func DecryptSalted(secretKey, salt, encryptedData []byte) ([]byte, error) {
+	data, err := decryptConvergent(aes.NewCipher, secretKey, encryptedData,
+		additionalDataForSalt(salt))
+	if err != nil {
+		return nil, err
+	}
+	return desalinate(data, salt), nil
 }
 
 // Encrypt plaintext convergently by using a secure hash of the plaintext as the
@@ -69,7 +91,7 @@ func Decrypt(secretKey, encryptedData []byte) ([]byte, error) {
 // encrypted blobs. However if you want to distinguish copies of a plaintext or
 // hide them add a random salt as above.
 func encryptConvergent(hasher hash.Hash, blockCipherMaker BlockCipherMaker,
-	plaintext []byte) (EncryptedBlob, error) {
+	plaintext, additionalData []byte) (EncryptedBlob, error) {
 
 	// First hash the plaintext securely, we will use its hash as a key
 	hasher.Write(plaintext)
@@ -87,7 +109,8 @@ func encryptConvergent(hasher hash.Hash, blockCipherMaker BlockCipherMaker,
 	}
 
 	// Encrypt authenticated with Galois Counter mode
-	ciphertext := gcmCipher.Seal(nil, nil, plaintext, nil)
+	// TODO: consider storing contract address relating to blob in additional data
+	ciphertext := gcmCipher.Seal(nil, nil, plaintext, additionalData)
 
 	// Hash the ciphertext to get the canonical content address
 	hasher.Reset()
@@ -106,7 +129,7 @@ func encryptConvergent(hasher hash.Hash, blockCipherMaker BlockCipherMaker,
 // would be encrypted by encryptConvergent (though would work for any one-time
 // key case). Salt is used as GCM additional authenticated data.
 func decryptConvergent(blockCipherMaker BlockCipherMaker, secretKey,
-	ciphertext []byte) ([]byte, error) {
+	ciphertext, additionalData []byte) ([]byte, error) {
 	// Construct the underlying block cipher
 	blockCipher, err := blockCipherMaker(secretKey)
 	if err != nil {
@@ -118,5 +141,33 @@ func decryptConvergent(blockCipherMaker BlockCipherMaker, secretKey,
 		return nil, err
 	}
 
-	return gcmCipher.Open(nil, nil, ciphertext, nil)
+	return gcmCipher.Open(nil, nil, ciphertext, additionalData)
+}
+
+func salinate(plaintext, salt []byte) []byte {
+	return append(salt, plaintext...)
+}
+
+func desalinate(ciphertext, salt []byte) []byte {
+	return ciphertext[len(salt):]
+}
+
+// Provides additional authenticated data to fix context of our salting procedure
+// using this means if we try to decrypt an unsalted message with a salt or visa
+// versa we will get an error decrypting.
+func additionalDataForSalt(salt []byte) []byte {
+	additionalData := struct {
+		SaltType   string
+		SaltLength int
+	}{
+		SaltType:   "prefix",
+		SaltLength: len(salt),
+	}
+	jsonBytes, err := json.Marshal(additionalData)
+	if err != nil {
+		// We control this struct, we can exhaustively test so shouldn't panic
+		panic(fmt.Errorf("Could not marshal additional data describing "+
+			"salting procedure: %#v, error: %s", jsonBytes, err))
+	}
+	return jsonBytes
 }
