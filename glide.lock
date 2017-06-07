@@ -1,6 +1,8 @@
-hash: c98f7a47a7d7f213b2483e689a057a36309c577ccaee24a5ff1cd502931fefc0
-updated: 2017-05-23T19:04:04.014238382+01:00
+hash: b51033e7dd4ddf4d91e027bda517ef201844a7e1cc66ad1e157ebbb841a3a7fc
+updated: 2017-06-07T13:38:20.820863806+01:00
 imports:
 - name: github.com/jawher/mow.cli
   version: 8327d12beb75e6471b7f045588acc318d1147146
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
 testImports: []
