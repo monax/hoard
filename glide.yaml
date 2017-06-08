@@ -2,3 +2,5 @@ package: code.monax.io/platform/hoard
 import:
 - package: github.com/jawher/mow.cli
   version: 8327d12beb75e6471b7f045588acc318d1147146
+- package: github.com/stretchr/testify
+  version: v1.1.4
