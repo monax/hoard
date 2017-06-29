@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package hoard;
+
+service Hoard {
+    rpc Get (Reference) returns (Plaintext);
+    rpc Put (Plaintext) returns (Reference);
+    rpc Ref (Plaintext) returns (Reference);
+    rpc Stat (Address) returns (StatInfo);
+}
+
+message Reference {
+    bytes address = 1;
+    bytes secretKey = 2;
+    bytes salt = 3;
+}
+
+message Plaintext {
+    bytes data = 1;
+    bytes salt = 2;
+}
+
+message Address {
+    bytes address = 1;
+}
+
+message StatInfo {
+    bool exists = 1;
+    uint64 size = 2;
+    string location = 3;
+}
+

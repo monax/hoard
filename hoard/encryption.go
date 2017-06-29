@@ -13,13 +13,11 @@ type BlockCipherMaker func(key []byte) (cipher.Block, error)
 
 type EncryptedBlob interface {
 	SecretKey() []byte
-	Address() []byte
 	EncryptedData() []byte
 }
 
 type encryptedBlob struct {
 	secretKey     []byte
-	address       []byte
 	encryptedData []byte
 }
 
@@ -27,41 +25,29 @@ func (blob *encryptedBlob) SecretKey() []byte {
 	return blob.secretKey
 }
 
-func (blob *encryptedBlob) Address() []byte {
-	return blob.address
-}
-
 func (blob *encryptedBlob) EncryptedData() []byte {
 	return blob.encryptedData
 }
 
-// Encrypt stuff convergently. That is, using a securely generated deterministic
+// Encrypt data convergently by using a securely generated deterministic
 // key that is a hash of the plaintext (data/blob) itself. Allows for
 // deduplication of ciphertexts and recovery of keys from plaintext alone.
-
-// Deterministically encrypt data
-func Encrypt(data []byte) (EncryptedBlob, error) {
-	// We'll use sha256 like IPFS, and AES-256 (using hash as key)
-	return encryptConvergent(sha256.New(), aes.NewCipher, data, nil)
-}
-
-// Deterministically decrypt encrypted data
-func Decrypt(secretKey, encryptedData []byte) ([]byte, error) {
-	return decryptConvergent(aes.NewCipher, secretKey, encryptedData, nil)
-}
 
 // Deterministically encrypt data using a supplied salt to produce a
 // distinguished the encrypted result that will have a different content hash,
 // secret key, and address than the same data encrypted with a different salt
 // (or not salt). Can be used to watermark a copy of a blob shared with a
 // particular party or to hide the fact a certain plaintext is stored.
-func EncryptSalted(data, salt []byte) (EncryptedBlob, error) {
+func Encrypt(data, salt []byte) (EncryptedBlob, error) {
+	// The SHA 256 hasher will be used to generate the secret key for AES. Since
+	// the AES cipher is parameterised by the length of the secret key in this case
+	// with the 32 byte key from SHA 256 we will get a AES 256 block cipher.
 	return encryptConvergent(sha256.New(), aes.NewCipher, salinate(data, salt),
 		additionalDataForSalt(salt))
 }
 
-// Deterministically decrypt data that was encrypted with the provided salt
-func DecryptSalted(secretKey, salt, encryptedData []byte) ([]byte, error) {
+// Decrypt data that was deterministically encrypted with the provided salt
+func Decrypt(secretKey, encryptedData, salt []byte) ([]byte, error) {
 	data, err := decryptConvergent(aes.NewCipher, secretKey, encryptedData,
 		additionalDataForSalt(salt))
 	if err != nil {
@@ -112,14 +98,8 @@ func encryptConvergent(hasher hash.Hash, blockCipherMaker BlockCipherMaker,
 	// TODO: consider storing contract address relating to blob in additional data
 	ciphertext := gcmCipher.Seal(nil, nil, plaintext, additionalData)
 
-	// Hash the ciphertext to get the canonical content address
-	hasher.Reset()
-	hasher.Write(ciphertext)
-	address := hasher.Sum(nil)
-
 	return &encryptedBlob{
 		secretKey:     secretKey,
-		address:       address,
 		encryptedData: ciphertext,
 	}, nil
 }
