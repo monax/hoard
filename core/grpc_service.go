@@ -13,13 +13,11 @@ type grpcService struct {
 	des DeterministicEncryptedStore
 }
 
-//service Hoard {
-//rpc Get (Reference) returns (Plaintext);
-//rpc Put (Plaintext) returns (Reference);
-//rpc Ref (Plaintext) returns (Reference);
-//rpc Stat (Address) returns (StatInfo);
-//}
-var _ HoardServer = (*grpcService)(nil)
+type HoardServer interface {
+	CleartextServer
+	EncryptionServer
+	StorageServer
+}
 
 func NewHoardServer(des DeterministicEncryptedStore) HoardServer {
 	return &grpcService{
@@ -52,15 +50,59 @@ func (service *grpcService) Put(ctx context.Context,
 	return protobufRef(ref), nil
 }
 
-func (service *grpcService) Ref(ctx context.Context,
-	plaintext *Plaintext) (*Reference, error) {
+func (service *grpcService) Encrypt(ctx context.Context,
+	plaintext *Plaintext) (*ReferenceAndCiphertext, error) {
 
-	ref, err := service.des.Ref(plaintext.Data, plaintext.Salt)
+	ref, encryptedData, err := service.des.Encrypt(plaintext.Data, plaintext.Salt)
 	if err != nil {
 		return nil, err
 	}
 
-	return protobufRef(ref), nil
+	return &ReferenceAndCiphertext{
+		Reference: protobufRef(ref),
+		Ciphertext: &Ciphertext{
+			EncryptedData: encryptedData,
+		},
+	}, nil
+}
+
+func (service *grpcService) Decrypt(ctx context.Context,
+	refAndCiphertext *ReferenceAndCiphertext) (*Plaintext, error) {
+	data, err := service.des.Decrypt(hoardRef(refAndCiphertext.Reference),
+		refAndCiphertext.Ciphertext.EncryptedData)
+	if err != nil {
+		return nil, err
+	}
+	return &Plaintext{
+		Data: data,
+		Salt: refAndCiphertext.Reference.Salt,
+	}, nil
+}
+
+// StorageServer
+func (service *grpcService) Push(ctx context.Context,
+	ciphertext *Ciphertext) (*Address, error) {
+	address, err := service.des.Store().Put(ciphertext.EncryptedData)
+	if err != nil {
+		return nil, err
+	}
+	return &Address{
+		Address: address,
+	}, nil
+}
+
+func (service *grpcService) Pull(ctx context.Context,
+	address *Address) (*Ciphertext, error) {
+
+	// Get from the underlying store
+	encryptedData, err := service.des.Store().Get(address.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Ciphertext{
+		EncryptedData: encryptedData,
+	}, nil
 }
 
 func (service *grpcService) Stat(ctx context.Context,
@@ -77,20 +119,6 @@ func (service *grpcService) Stat(ctx context.Context,
 	pbStatInfo.Address = address.Address
 	pbStatInfo.Location = service.des.Store().Location(address.Address)
 	return pbStatInfo, nil
-}
-
-func (service *grpcService) Cat(ctx context.Context,
-	address *Address) (*Ciphertext, error) {
-
-	// Get from the underlying store
-	encryptedData, err := service.des.Store().Get(address.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Ciphertext{
-		EncryptedData: encryptedData,
-	}, nil
 }
 
 // From bitter experience it is better to decouple your serialisation types

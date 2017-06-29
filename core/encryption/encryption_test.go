@@ -47,10 +47,8 @@ func TestSaltedEncryptionRoundTrip(t *testing.T) {
 
 func TestAdditionalDataForSalt(t *testing.T) {
 	// This function may panic on marshalling so we try to cover it here
-	assert.Equal(t, "{\"SaltType\":\"prefix\",\"SaltLength\":0}",
-		string(additionalDataForSalt(nil)))
-	assert.Equal(t, "{\"SaltType\":\"prefix\",\"SaltLength\":0}",
-		string(additionalDataForSalt([]byte(""))))
+	assert.Nil(t, additionalDataForSalt(nil))
+	assert.Nil(t, additionalDataForSalt([]byte("")))
 	assert.Equal(t, "{\"SaltType\":\"prefix\",\"SaltLength\":21}",
 		string(additionalDataForSalt([]byte("I _am_ a magical fish"))))
 }
