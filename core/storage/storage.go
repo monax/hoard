@@ -30,6 +30,7 @@ type Store interface {
 
 type ContentAddressedStore interface {
 	ReadStore
+	Locator
 	// Put the data at its address
 	Put(data []byte) (address []byte, err error)
 	// Get the address of some data without putting it at that address

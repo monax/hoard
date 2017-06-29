@@ -1,4 +1,4 @@
-package hoard
+package core
 
 import (
 	"crypto/sha256"
@@ -6,8 +6,11 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"code.monax.io/platform/hoard/hoard/reference"
-	"code.monax.io/platform/hoard/hoard/storage"
+	"code.monax.io/platform/hoard/core/encryption"
+	"code.monax.io/platform/hoard/core/reference"
+	"code.monax.io/platform/hoard/core/storage"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // This is our top level API object providing library acting as a deterministic
@@ -42,13 +45,20 @@ func NewHoard(store storage.Store, logger log.Logger) DeterministicEncryptedStor
 
 // Gets encrypted blob
 func (hrd *hoard) Get(ref *reference.Ref) ([]byte, error) {
-
 	encryptedData, err := hrd.store.Get(ref.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := Decrypt(ref.SecretKey, encryptedData, ref.Salt)
+	// Some stores return nil/empty data for 'not found'. If the address is
+	// non-zero // then by definition the encrypted data should be, so we
+	// infer there is nothing stored at address
+	if len(encryptedData) == 0 && len(ref.Address) != 0 {
+		return nil, status.Errorf(codes.NotFound,
+			"No data stored at address 0x%X", ref.Address)
+	}
+
+	data, err := encryption.Decrypt(ref.SecretKey, encryptedData, ref.Salt)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +67,7 @@ func (hrd *hoard) Get(ref *reference.Ref) ([]byte, error) {
 
 // Encrypts data and stores it in underlying store and returns the address
 func (hrd *hoard) Put(data, salt []byte) (*reference.Ref, error) {
-	blob, err := Encrypt(data, salt)
+	blob, err := encryption.Encrypt(data, salt)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +79,7 @@ func (hrd *hoard) Put(data, salt []byte) (*reference.Ref, error) {
 }
 
 func (hrd *hoard) Ref(data, salt []byte) (*reference.Ref, error) {
-	blob, err := Encrypt(data, salt)
+	blob, err := encryption.Encrypt(data, salt)
 	if err != nil {
 		return nil, err
 	}

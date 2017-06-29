@@ -1,10 +1,10 @@
-package grant
+package grants
 
 import (
 	"strings"
 	"testing"
 
-	"code.monax.io/platform/hoard/hoard/reference"
+	"code.monax.io/platform/hoard/core/reference"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/openpgp"
 )

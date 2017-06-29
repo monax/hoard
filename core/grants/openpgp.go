@@ -1,4 +1,4 @@
-package grant
+package grants
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"code.monax.io/platform/hoard/hoard/reference"
+	"code.monax.io/platform/hoard/core/reference"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )

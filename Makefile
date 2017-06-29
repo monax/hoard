@@ -49,7 +49,7 @@ fix:
 # Compile hoard.proto interface defition
 .PHONY: build_protobuf
 build_protobuf:
-	@protoc -I ./hoard hoard/hoard.proto --go_out=plugins=grpc:hoard
+	@protoc -I ./core core/hoard.proto --go_out=plugins=grpc:core
 
 # Build the hoard binary
 .PHONY: build_hoard

@@ -1,10 +1,10 @@
-package hoard
+package core
 
 import (
 	"testing"
 
-	"code.monax.io/platform/hoard/hoard/reference"
-	"code.monax.io/platform/hoard/hoard/storage"
+	"code.monax.io/platform/hoard/core/reference"
+	"code.monax.io/platform/hoard/core/storage"
 	"github.com/go-kit/kit/log"
 	"github.com/stretchr/testify/assert"
 )

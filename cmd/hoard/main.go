@@ -2,22 +2,21 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"os"
 
-	"code.monax.io/platform/hoard/cmd/shared"
-	"code.monax.io/platform/hoard/hoard"
-	"code.monax.io/platform/hoard/hoard/storage"
+	"os/signal"
+	"syscall"
+
+	"code.monax.io/platform/hoard/config"
+	"code.monax.io/platform/hoard/server"
 	"github.com/go-kit/kit/log"
 	"github.com/jawher/mow.cli"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 func main() {
 	hoardApp := cli.App("hoard",
 		"A content-addressed deterministically encrypted blob storage system")
-	listenURL := hoardApp.StringOpt("a address", "tcp://localhost:54193",
+	listenURL := hoardApp.StringOpt("a address", config.DefaultListenAddress,
 		"local address for hoard to listen on encoded as a URL with the "+
 			"network protocol as the scheme, for example 'tcp://localhost:54192' "+
 			"or 'unix:///tmp/hoard.sock'")
@@ -26,26 +25,34 @@ func main() {
 	hoardApp.Spec = "[-a]"
 
 	hoardApp.Action = func() {
-		netProtocol, localAddress, err := shared.SplitListenURL(*listenURL)
+		logger := log.NewLogfmtLogger(os.Stderr)
+		serv := server.New(*listenURL, logger)
+		// Catch interrupt etc
+		signalCh := make(chan os.Signal, 1)
+		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
+		go func(c chan os.Signal) {
+			sig := <-c
+			printf("\nCaught %s signal: shutting down...", sig)
+			// Make sure we clean up
+			serv.Stop()
+			os.Exit(0)
+		}(signalCh)
+
+		printf("Starting hoard daemon on %s...", *listenURL)
+		err := serv.Serve()
 		if err != nil {
-			shared.Fatalf("Failed to split listen URL '%s': %v", *listenURL, err)
-		}
-		lis, err := net.Listen(netProtocol, localAddress)
-		if err != nil {
-			shared.Fatalf("Failed to create listener: %v", err)
-		}
-		grpcServer := grpc.NewServer()
-		hrd := hoard.NewHoard(storage.NewMemoryStore(),
-			log.NewLogfmtLogger(os.Stderr))
-		hoard.RegisterHoardServer(grpcServer, hoard.NewHoardServer(hrd))
-		// Register reflection service on gRPC server.
-		reflection.Register(grpcServer)
-		fmt.Fprintf(os.Stderr, "Running hoard at %s://%s...\n",
-			netProtocol, localAddress)
-		if err := grpcServer.Serve(lis); err != nil {
-			shared.Fatalf("Failed to start GRPC Server: %v", err)
+			fatalf("Could not start hoard server: %s", err)
 		}
 	}
 
 	hoardApp.Run(os.Args)
+}
+
+func printf(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
+}
+
+func fatalf(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
+	os.Exit(1)
 }
