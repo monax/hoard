@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package core;
+
+service Hoard {
+    // Provide a secret reference to an encrypted blob and get the plaintext
+    // data back
+    rpc Get (Reference) returns (Plaintext);
+    // Push some plaintext data into storage and get its deterministically
+    // generated secret reference
+    rpc Put (Plaintext) returns (Reference);
+    // Process some plaintext data and get its deterministically generated
+    // secret reference
+    rpc Ref (Plaintext) returns (Reference);
+    // Get some information about the encrypted blob stored at an address,
+    // including whether it exists
+    rpc Stat (Address) returns (StatInfo);
+    // Output the encrypted blob
+    rpc Cat (Address) returns (Ciphertext);
+}
+
+message Reference {
+    bytes address = 1;
+    bytes secretKey = 2;
+    bytes salt = 3;
+}
+
+message Plaintext {
+    bytes data = 1;
+    bytes salt = 2;
+}
+
+message Ciphertext {
+    bytes encryptedData = 1;
+}
+
+message Address {
+    bytes address = 1;
+}
+
+message StatInfo {
+    // The address will be the same as the one passed in but is repeated to
+    // make result self-describing
+    bytes address = 1;
+    // If the blob does not exist this will be false instead of returning an
+    // error
+    bool exists = 2;
+    // Will be 0 if the blob does not existing (or omitted under protobuf3)
+    uint64 size = 3;
+    // The externally resolvable location of the encrypted blob. The location
+    // will be hypothetical if the blob does not exist
+    string location = 4;
+}
+

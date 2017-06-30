@@ -1,4 +1,4 @@
-package hoard
+package encryption
 
 import (
 	"testing"

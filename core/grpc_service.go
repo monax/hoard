@@ -1,8 +1,8 @@
-package hoard
+package core
 
 import (
-	"code.monax.io/platform/hoard/hoard/reference"
-	"code.monax.io/platform/hoard/hoard/storage"
+	"code.monax.io/platform/hoard/core/reference"
+	"code.monax.io/platform/hoard/core/storage"
 	"golang.org/x/net/context"
 )
 
@@ -71,7 +71,26 @@ func (service *grpcService) Stat(ctx context.Context,
 		return nil, err
 	}
 
-	return protobufStatInfo(statInfo), nil
+	pbStatInfo := protobufStatInfo(statInfo)
+	// For the master API we provide the address and the canonical
+	// location in a StatInfo message
+	pbStatInfo.Address = address.Address
+	pbStatInfo.Location = service.des.Store().Location(address.Address)
+	return pbStatInfo, nil
+}
+
+func (service *grpcService) Cat(ctx context.Context,
+	address *Address) (*Ciphertext, error) {
+
+	// Get from the underlying store
+	encryptedData, err := service.des.Store().Get(address.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Ciphertext{
+		EncryptedData: encryptedData,
+	}, nil
 }
 
 // From bitter experience it is better to decouple your serialisation types
