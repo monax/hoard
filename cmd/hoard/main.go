@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"code.monax.io/platform/hoard/config"
+	"code.monax.io/platform/hoard/core/storage"
 	"code.monax.io/platform/hoard/server"
 	"github.com/go-kit/kit/log"
 	"github.com/jawher/mow.cli"
@@ -32,7 +33,7 @@ func main() {
 		if *logging {
 			logger = log.NewLogfmtLogger(os.Stderr)
 		}
-		serv := server.New(*listenURL, logger)
+		serv := server.New(*listenURL, storage.NewMemoryStore(), logger)
 		// Catch interrupt etc
 		signalCh := make(chan os.Signal, 1)
 		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
