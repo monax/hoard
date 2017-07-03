@@ -136,6 +136,9 @@ func desalinate(ciphertext, salt []byte) []byte {
 // using this means if we try to decrypt an unsalted message with a salt or visa
 // versa we will get an error decrypting.
 func additionalDataForSalt(salt []byte) []byte {
+	if len(salt) == 0 {
+		return nil
+	}
 	additionalData := struct {
 		SaltType   string
 		SaltLength int

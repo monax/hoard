@@ -11,6 +11,7 @@ It has these top-level messages:
 	Reference
 	Plaintext
 	Ciphertext
+	ReferenceAndCiphertext
 	Address
 	StatInfo
 */
@@ -108,6 +109,30 @@ func (m *Ciphertext) GetEncryptedData() []byte {
 	return nil
 }
 
+type ReferenceAndCiphertext struct {
+	Reference  *Reference  `protobuf:"bytes,1,opt,name=reference" json:"reference,omitempty"`
+	Ciphertext *Ciphertext `protobuf:"bytes,2,opt,name=ciphertext" json:"ciphertext,omitempty"`
+}
+
+func (m *ReferenceAndCiphertext) Reset()                    { *m = ReferenceAndCiphertext{} }
+func (m *ReferenceAndCiphertext) String() string            { return proto.CompactTextString(m) }
+func (*ReferenceAndCiphertext) ProtoMessage()               {}
+func (*ReferenceAndCiphertext) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *ReferenceAndCiphertext) GetReference() *Reference {
+	if m != nil {
+		return m.Reference
+	}
+	return nil
+}
+
+func (m *ReferenceAndCiphertext) GetCiphertext() *Ciphertext {
+	if m != nil {
+		return m.Ciphertext
+	}
+	return nil
+}
+
 type Address struct {
 	Address []byte `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 }
@@ -115,7 +140,7 @@ type Address struct {
 func (m *Address) Reset()                    { *m = Address{} }
 func (m *Address) String() string            { return proto.CompactTextString(m) }
 func (*Address) ProtoMessage()               {}
-func (*Address) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*Address) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *Address) GetAddress() []byte {
 	if m != nil {
@@ -141,7 +166,7 @@ type StatInfo struct {
 func (m *StatInfo) Reset()                    { *m = StatInfo{} }
 func (m *StatInfo) String() string            { return proto.CompactTextString(m) }
 func (*StatInfo) ProtoMessage()               {}
-func (*StatInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*StatInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *StatInfo) GetAddress() []byte {
 	if m != nil {
@@ -175,6 +200,7 @@ func init() {
 	proto.RegisterType((*Reference)(nil), "core.Reference")
 	proto.RegisterType((*Plaintext)(nil), "core.Plaintext")
 	proto.RegisterType((*Ciphertext)(nil), "core.Ciphertext")
+	proto.RegisterType((*ReferenceAndCiphertext)(nil), "core.ReferenceAndCiphertext")
 	proto.RegisterType((*Address)(nil), "core.Address")
 	proto.RegisterType((*StatInfo)(nil), "core.StatInfo")
 }
@@ -187,214 +213,348 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Hoard service
+// Client API for Cleartext service
 
-type HoardClient interface {
+type CleartextClient interface {
 	// Provide a secret reference to an encrypted blob and get the plaintext
-	// data back
+	// data back.
 	Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error)
 	// Push some plaintext data into storage and get its deterministically
-	// generated secret reference
+	// generated secret reference.
 	Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error)
-	// Process some plaintext data and get its deterministically generated
-	// secret reference
-	Ref(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error)
-	// Get some information about the encrypted blob stored at an address,
-	// including whether it exists
-	Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*StatInfo, error)
-	// Output the encrypted blob
-	Cat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error)
 }
 
-type hoardClient struct {
+type cleartextClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewHoardClient(cc *grpc.ClientConn) HoardClient {
-	return &hoardClient{cc}
+func NewCleartextClient(cc *grpc.ClientConn) CleartextClient {
+	return &cleartextClient{cc}
 }
 
-func (c *hoardClient) Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error) {
+func (c *cleartextClient) Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error) {
 	out := new(Plaintext)
-	err := grpc.Invoke(ctx, "/core.Hoard/Get", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/core.Cleartext/Get", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *hoardClient) Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error) {
+func (c *cleartextClient) Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error) {
 	out := new(Reference)
-	err := grpc.Invoke(ctx, "/core.Hoard/Put", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/core.Cleartext/Put", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *hoardClient) Ref(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error) {
-	out := new(Reference)
-	err := grpc.Invoke(ctx, "/core.Hoard/Ref", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
+// Server API for Cleartext service
 
-func (c *hoardClient) Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*StatInfo, error) {
-	out := new(StatInfo)
-	err := grpc.Invoke(ctx, "/core.Hoard/Stat", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *hoardClient) Cat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error) {
-	out := new(Ciphertext)
-	err := grpc.Invoke(ctx, "/core.Hoard/Cat", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Server API for Hoard service
-
-type HoardServer interface {
+type CleartextServer interface {
 	// Provide a secret reference to an encrypted blob and get the plaintext
-	// data back
+	// data back.
 	Get(context.Context, *Reference) (*Plaintext, error)
 	// Push some plaintext data into storage and get its deterministically
-	// generated secret reference
+	// generated secret reference.
 	Put(context.Context, *Plaintext) (*Reference, error)
-	// Process some plaintext data and get its deterministically generated
-	// secret reference
-	Ref(context.Context, *Plaintext) (*Reference, error)
-	// Get some information about the encrypted blob stored at an address,
-	// including whether it exists
-	Stat(context.Context, *Address) (*StatInfo, error)
-	// Output the encrypted blob
-	Cat(context.Context, *Address) (*Ciphertext, error)
 }
 
-func RegisterHoardServer(s *grpc.Server, srv HoardServer) {
-	s.RegisterService(&_Hoard_serviceDesc, srv)
+func RegisterCleartextServer(s *grpc.Server, srv CleartextServer) {
+	s.RegisterService(&_Cleartext_serviceDesc, srv)
 }
 
-func _Hoard_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Cleartext_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Reference)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HoardServer).Get(ctx, in)
+		return srv.(CleartextServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/core.Hoard/Get",
+		FullMethod: "/core.Cleartext/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HoardServer).Get(ctx, req.(*Reference))
+		return srv.(CleartextServer).Get(ctx, req.(*Reference))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Hoard_Put_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Cleartext_Put_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Plaintext)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HoardServer).Put(ctx, in)
+		return srv.(CleartextServer).Put(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/core.Hoard/Put",
+		FullMethod: "/core.Cleartext/Put",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HoardServer).Put(ctx, req.(*Plaintext))
+		return srv.(CleartextServer).Put(ctx, req.(*Plaintext))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Hoard_Ref_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Plaintext)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HoardServer).Ref(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/core.Hoard/Ref",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HoardServer).Ref(ctx, req.(*Plaintext))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Hoard_Stat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Address)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HoardServer).Stat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/core.Hoard/Stat",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HoardServer).Stat(ctx, req.(*Address))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Hoard_Cat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Address)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HoardServer).Cat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/core.Hoard/Cat",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HoardServer).Cat(ctx, req.(*Address))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _Hoard_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "core.Hoard",
-	HandlerType: (*HoardServer)(nil),
+var _Cleartext_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "core.Cleartext",
+	HandlerType: (*CleartextServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Get",
-			Handler:    _Hoard_Get_Handler,
+			Handler:    _Cleartext_Get_Handler,
 		},
 		{
 			MethodName: "Put",
-			Handler:    _Hoard_Put_Handler,
+			Handler:    _Cleartext_Put_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "hoard.proto",
+}
+
+// Client API for Encryption service
+
+type EncryptionClient interface {
+	// Encrypt some data and get its deterministically generated
+	// secret reference including its address without storing the data.
+	Encrypt(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*ReferenceAndCiphertext, error)
+	// Decrypt the provided data by supplying it alongside its secret
+	// reference. The address is not used for decryption and may be omitted.
+	Decrypt(ctx context.Context, in *ReferenceAndCiphertext, opts ...grpc.CallOption) (*Plaintext, error)
+}
+
+type encryptionClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewEncryptionClient(cc *grpc.ClientConn) EncryptionClient {
+	return &encryptionClient{cc}
+}
+
+func (c *encryptionClient) Encrypt(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*ReferenceAndCiphertext, error) {
+	out := new(ReferenceAndCiphertext)
+	err := grpc.Invoke(ctx, "/core.Encryption/Encrypt", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encryptionClient) Decrypt(ctx context.Context, in *ReferenceAndCiphertext, opts ...grpc.CallOption) (*Plaintext, error) {
+	out := new(Plaintext)
+	err := grpc.Invoke(ctx, "/core.Encryption/Decrypt", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for Encryption service
+
+type EncryptionServer interface {
+	// Encrypt some data and get its deterministically generated
+	// secret reference including its address without storing the data.
+	Encrypt(context.Context, *Plaintext) (*ReferenceAndCiphertext, error)
+	// Decrypt the provided data by supplying it alongside its secret
+	// reference. The address is not used for decryption and may be omitted.
+	Decrypt(context.Context, *ReferenceAndCiphertext) (*Plaintext, error)
+}
+
+func RegisterEncryptionServer(s *grpc.Server, srv EncryptionServer) {
+	s.RegisterService(&_Encryption_serviceDesc, srv)
+}
+
+func _Encryption_Encrypt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Plaintext)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncryptionServer).Encrypt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Encryption/Encrypt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncryptionServer).Encrypt(ctx, req.(*Plaintext))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encryption_Decrypt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReferenceAndCiphertext)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncryptionServer).Decrypt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Encryption/Decrypt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncryptionServer).Decrypt(ctx, req.(*ReferenceAndCiphertext))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Encryption_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "core.Encryption",
+	HandlerType: (*EncryptionServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Encrypt",
+			Handler:    _Encryption_Encrypt_Handler,
 		},
 		{
-			MethodName: "Ref",
-			Handler:    _Hoard_Ref_Handler,
+			MethodName: "Decrypt",
+			Handler:    _Encryption_Decrypt_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "hoard.proto",
+}
+
+// Client API for Storage service
+
+type StorageClient interface {
+	// Retrieve the (presumably) encrypted data stored at address.
+	Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error)
+	// Insert the (presumably) encrypted data provided and get the its address.
+	Push(ctx context.Context, in *Ciphertext, opts ...grpc.CallOption) (*Address, error)
+	// Get some information about the encrypted blob stored at an address,
+	// including whether it exists.
+	Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*StatInfo, error)
+}
+
+type storageClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewStorageClient(cc *grpc.ClientConn) StorageClient {
+	return &storageClient{cc}
+}
+
+func (c *storageClient) Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error) {
+	out := new(Ciphertext)
+	err := grpc.Invoke(ctx, "/core.Storage/Pull", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageClient) Push(ctx context.Context, in *Ciphertext, opts ...grpc.CallOption) (*Address, error) {
+	out := new(Address)
+	err := grpc.Invoke(ctx, "/core.Storage/Push", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageClient) Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*StatInfo, error) {
+	out := new(StatInfo)
+	err := grpc.Invoke(ctx, "/core.Storage/Stat", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for Storage service
+
+type StorageServer interface {
+	// Retrieve the (presumably) encrypted data stored at address.
+	Pull(context.Context, *Address) (*Ciphertext, error)
+	// Insert the (presumably) encrypted data provided and get the its address.
+	Push(context.Context, *Ciphertext) (*Address, error)
+	// Get some information about the encrypted blob stored at an address,
+	// including whether it exists.
+	Stat(context.Context, *Address) (*StatInfo, error)
+}
+
+func RegisterStorageServer(s *grpc.Server, srv StorageServer) {
+	s.RegisterService(&_Storage_serviceDesc, srv)
+}
+
+func _Storage_Pull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Address)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).Pull(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Storage/Pull",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).Pull(ctx, req.(*Address))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_Push_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ciphertext)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).Push(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Storage/Push",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).Push(ctx, req.(*Ciphertext))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_Stat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Address)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).Stat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Storage/Stat",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).Stat(ctx, req.(*Address))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Storage_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "core.Storage",
+	HandlerType: (*StorageServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Pull",
+			Handler:    _Storage_Pull_Handler,
+		},
+		{
+			MethodName: "Push",
+			Handler:    _Storage_Push_Handler,
 		},
 		{
 			MethodName: "Stat",
-			Handler:    _Hoard_Stat_Handler,
-		},
-		{
-			MethodName: "Cat",
-			Handler:    _Hoard_Cat_Handler,
+			Handler:    _Storage_Stat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -404,24 +564,30 @@ var _Hoard_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("hoard.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 304 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0xcd, 0x4a, 0xf3, 0x40,
-	0x14, 0x25, 0x4d, 0xbe, 0x36, 0xb9, 0x9f, 0x55, 0x99, 0x85, 0x84, 0xe0, 0xa2, 0xc4, 0x9f, 0x76,
-	0x95, 0x45, 0xfb, 0x04, 0x52, 0x41, 0xc5, 0x4d, 0x19, 0x17, 0xae, 0xc7, 0xe4, 0x86, 0x06, 0x42,
-	0x26, 0xcc, 0x5c, 0xa1, 0xf5, 0x2d, 0x7d, 0x23, 0xc9, 0x64, 0x9c, 0xf8, 0x83, 0xe2, 0xee, 0x9e,
-	0x73, 0xcf, 0x09, 0xe7, 0x9e, 0x0c, 0xfc, 0xdf, 0x4a, 0xa1, 0x8a, 0xac, 0x55, 0x92, 0x24, 0x0b,
-	0x72, 0xa9, 0x30, 0x7d, 0x84, 0x88, 0x63, 0x89, 0x0a, 0x9b, 0x1c, 0x59, 0x0c, 0x13, 0x51, 0x14,
-	0x0a, 0xb5, 0x8e, 0xbd, 0x99, 0xb7, 0x38, 0xe0, 0xef, 0x90, 0x9d, 0x42, 0xa4, 0x31, 0x57, 0x48,
-	0xf7, 0xb8, 0x8f, 0x47, 0x66, 0x37, 0x10, 0x8c, 0x41, 0xa0, 0x45, 0x4d, 0xb1, 0x6f, 0x16, 0x66,
-	0x4e, 0x57, 0x10, 0x6d, 0x6a, 0x51, 0x35, 0x84, 0x3b, 0xea, 0x04, 0x85, 0x20, 0x61, 0xbf, 0x6a,
-	0x66, 0x67, 0x1a, 0x7d, 0x30, 0x2d, 0x01, 0xd6, 0x55, 0xbb, 0x45, 0x65, 0x5c, 0xe7, 0x30, 0xc5,
-	0x26, 0x57, 0xfb, 0x96, 0xb0, 0xb8, 0x1e, 0xec, 0x9f, 0xc9, 0xf4, 0x0c, 0x26, 0x57, 0x36, 0xe5,
-	0x8f, 0xf9, 0xd3, 0x1a, 0xc2, 0x07, 0x12, 0x74, 0xd7, 0x94, 0xf2, 0x97, 0x2b, 0x4f, 0x60, 0x8c,
-	0xbb, 0x4a, 0x93, 0x36, 0xa1, 0x42, 0x6e, 0x91, 0x89, 0x5a, 0xbd, 0xa0, 0xb9, 0x2f, 0xe0, 0x66,
-	0x66, 0x09, 0x84, 0xb5, 0xcc, 0x05, 0x55, 0xb2, 0x89, 0x83, 0x99, 0xb7, 0x88, 0xb8, 0xc3, 0xcb,
-	0x57, 0x0f, 0xfe, 0xdd, 0x76, 0x55, 0xb3, 0x39, 0xf8, 0x37, 0x48, 0xec, 0x28, 0xeb, 0xca, 0xce,
-	0x5c, 0xd3, 0x89, 0x25, 0x86, 0x86, 0xe6, 0xe0, 0x6f, 0x9e, 0x9d, 0xd0, 0xf1, 0xc9, 0x57, 0x67,
-	0x27, 0xe4, 0x58, 0xfe, 0x41, 0x78, 0x01, 0x41, 0x77, 0x32, 0x9b, 0xf6, 0x0b, 0xdb, 0x51, 0x72,
-	0xd8, 0x43, 0xd7, 0xc6, 0x25, 0xf8, 0xeb, 0xef, 0xaa, 0xe3, 0x1e, 0x0e, 0x3f, 0xe3, 0x69, 0x6c,
-	0x5e, 0xcd, 0xea, 0x2d, 0x00, 0x00, 0xff, 0xff, 0xd6, 0xa5, 0x01, 0x67, 0x44, 0x02, 0x00, 0x00,
+	// 387 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x93, 0xc1, 0x6b, 0xea, 0x40,
+	0x10, 0xc6, 0x89, 0x06, 0x63, 0xc6, 0xe7, 0x7b, 0x8f, 0x3d, 0x48, 0x08, 0x1e, 0x24, 0x6d, 0xd1,
+	0x4b, 0xa5, 0xc4, 0x8b, 0x57, 0xd1, 0x52, 0x4a, 0x2f, 0x12, 0x0f, 0x3d, 0xf5, 0xb0, 0x4d, 0xc6,
+	0x1a, 0x08, 0x59, 0xd9, 0x5d, 0x41, 0x7b, 0x2a, 0xfd, 0xcb, 0x8b, 0xbb, 0x71, 0xa3, 0x09, 0xf5,
+	0xb6, 0x33, 0xf3, 0xfd, 0x36, 0x3b, 0xdf, 0x47, 0xa0, 0xb3, 0x61, 0x94, 0x27, 0xe3, 0x2d, 0x67,
+	0x92, 0x11, 0x3b, 0x66, 0x1c, 0x83, 0x57, 0x70, 0x23, 0x5c, 0x23, 0xc7, 0x3c, 0x46, 0xe2, 0x81,
+	0x43, 0x93, 0x84, 0xa3, 0x10, 0x9e, 0x35, 0xb0, 0x46, 0x7f, 0xa2, 0x53, 0x49, 0xfa, 0xe0, 0x0a,
+	0x8c, 0x39, 0xca, 0x17, 0x3c, 0x78, 0x0d, 0x35, 0x2b, 0x1b, 0x84, 0x80, 0x2d, 0x68, 0x26, 0xbd,
+	0xa6, 0x1a, 0xa8, 0x73, 0x30, 0x01, 0x77, 0x99, 0xd1, 0x34, 0x97, 0xb8, 0x97, 0x47, 0x41, 0x42,
+	0x25, 0x2d, 0x6e, 0x55, 0x67, 0x03, 0x35, 0xce, 0xa0, 0x10, 0x60, 0x9e, 0x6e, 0x37, 0xc8, 0x15,
+	0x75, 0x0b, 0x5d, 0xcc, 0x63, 0x7e, 0xd8, 0x4a, 0x4c, 0x16, 0x25, 0x7e, 0xd9, 0x0c, 0x0e, 0xd0,
+	0x33, 0x1b, 0xcc, 0xf2, 0xe4, 0x8c, 0xbf, 0x07, 0x97, 0x9f, 0x26, 0x8a, 0xed, 0x84, 0xff, 0xc6,
+	0xc7, 0xad, 0xc7, 0x06, 0x88, 0x4a, 0x05, 0x79, 0x00, 0x88, 0x0d, 0xac, 0x9e, 0xd5, 0x09, 0xff,
+	0x6b, 0x7d, 0x79, 0x69, 0x74, 0xa6, 0x09, 0x6e, 0xc0, 0x99, 0x15, 0x06, 0xfd, 0x6a, 0x5d, 0x90,
+	0x41, 0x7b, 0x25, 0xa9, 0x7c, 0xce, 0xd7, 0xec, 0x8a, 0xc1, 0x3d, 0x68, 0xe1, 0x3e, 0x15, 0x52,
+	0xa8, 0x0f, 0xb7, 0xa3, 0xa2, 0x52, 0x2e, 0xa5, 0x9f, 0xa8, 0xac, 0xb5, 0x23, 0x75, 0x26, 0x3e,
+	0xb4, 0x33, 0x16, 0x53, 0x99, 0xb2, 0xdc, 0xb3, 0x07, 0xd6, 0xc8, 0x8d, 0x4c, 0x1d, 0xbe, 0x81,
+	0x3b, 0xcf, 0x90, 0x6a, 0x03, 0x86, 0xd0, 0x7c, 0x42, 0x49, 0xaa, 0x4b, 0xfb, 0x45, 0xa3, 0xcc,
+	0x67, 0x08, 0xcd, 0xe5, 0xce, 0x08, 0x4d, 0xdf, 0xaf, 0x92, 0xe1, 0x97, 0x05, 0xf0, 0xa8, 0xed,
+	0x4f, 0x59, 0x4e, 0xa6, 0xe0, 0x14, 0x55, 0x9d, 0xed, 0x57, 0xd8, 0xcb, 0x6c, 0xa6, 0xe0, 0x2c,
+	0x50, 0x93, 0x57, 0x85, 0xb5, 0xb7, 0x86, 0xdf, 0x16, 0x38, 0x2b, 0xc9, 0x38, 0xfd, 0x40, 0x32,
+	0x04, 0x7b, 0xb9, 0xcb, 0x32, 0xd2, 0xd5, 0xa2, 0x22, 0x0c, 0xbf, 0x96, 0x9a, 0x16, 0x8a, 0x0d,
+	0xa9, 0x4d, 0xfc, 0x4b, 0x94, 0xdc, 0x81, 0x7d, 0x4c, 0xab, 0x7a, 0xe3, 0x5f, 0x5d, 0x9e, 0x82,
+	0x7c, 0x6f, 0xa9, 0x7f, 0x68, 0xf2, 0x13, 0x00, 0x00, 0xff, 0xff, 0xd8, 0x6a, 0xd7, 0x0f, 0x52,
+	0x03, 0x00, 0x00,
 }

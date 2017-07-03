@@ -20,12 +20,18 @@ func main() {
 		"local address for hoard to listen on encoded as a URL with the "+
 			"network protocol as the scheme, for example 'tcp://localhost:54192' "+
 			"or 'unix:///tmp/hoard.sock'")
+
+	logging := hoardApp.BoolOpt("l logging", false,
+		"Whether to emit any operational logging")
 	// This string spec is parsed by mow.cli and has actual semantic significance
 	// around optionality and ordering of options and arguments
-	hoardApp.Spec = "[-a]"
+	hoardApp.Spec = "[--address=<address to listen on>] [--logging]"
 
 	hoardApp.Action = func() {
-		logger := log.NewLogfmtLogger(os.Stderr)
+		var logger log.Logger
+		if *logging {
+			logger = log.NewLogfmtLogger(os.Stderr)
+		}
 		serv := server.New(*listenURL, logger)
 		// Catch interrupt etc
 		signalCh := make(chan os.Signal, 1)

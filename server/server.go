@@ -38,7 +38,9 @@ func (serv *server) Serve() error {
 	hoardServer := core.NewHoardServer(core.NewHoard(storage.NewMemoryStore(),
 		serv.logger))
 
-	core.RegisterHoardServer(serv.grpcServer, hoardServer)
+	core.RegisterCleartextServer(serv.grpcServer, hoardServer)
+	core.RegisterEncryptionServer(serv.grpcServer, hoardServer)
+	core.RegisterStorageServer(serv.grpcServer, hoardServer)
 	// Register reflection service on gRPC server.
 	reflection.Register(serv.grpcServer)
 	err = serv.grpcServer.Serve(listener)

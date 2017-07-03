@@ -35,7 +35,9 @@ func main() {
 			"or 'unix:///tmp/hoard.sock'")
 
 	// Scope a few variables to this lexical scope
-	var grpcClient core.HoardClient
+	var cleartextClient core.CleartextClient
+	var encryptionClient core.EncryptionClient
+	var storageClient core.StorageClient
 	var conn *grpc.ClientConn
 
 	hoarctlApp.Before = func() {
@@ -51,7 +53,9 @@ func main() {
 		if err != nil {
 			fatalf("Could not dial hoard server on %s: %v", *dialURL, err)
 		}
-		grpcClient = core.NewHoardClient(conn)
+		cleartextClient = core.NewCleartextClient(conn)
+		encryptionClient = core.NewEncryptionClient(conn)
+		storageClient = core.NewStorageClient(conn)
 	}
 
 	hoarctlApp.Command("put",
@@ -64,36 +68,13 @@ func main() {
 				if err != nil {
 					fatalf("Could read bytes from STDIN to store: %v", err)
 				}
-				ref, err := grpcClient.Put(context.Background(),
+				ref, err := cleartextClient.Put(context.Background(),
 					&core.Plaintext{
 						Data: data,
 						Salt: parseSalt(*saltString),
 					})
 				if err != nil {
 					fatalf("Error storing data: %v", err)
-				}
-				fmt.Printf("%s\n", jsonString(ref))
-			}
-		})
-
-	hoarctlApp.Command("ref",
-		"Get a reference some data read from STDIN",
-		func(cmd *cli.Cmd) {
-
-			saltString := saltOpt(cmd)
-
-			cmd.Action = func() {
-				data, err := ioutil.ReadAll(os.Stdin)
-				if err != nil {
-					fatalf("Could read bytes from STDIN to store: %v", err)
-				}
-				ref, err := grpcClient.Ref(context.Background(),
-					&core.Plaintext{
-						Data: data,
-						Salt: parseSalt(*saltString),
-					})
-				if err != nil {
-					fatalf("Error generating reference: %v", err)
 				}
 				fmt.Printf("%s\n", jsonString(ref))
 			}
@@ -120,19 +101,9 @@ func main() {
 					if secretKey == nil || *secretKey == "" {
 						fatalf("A secret key must be provided in order to decrypt.")
 					}
-					addressBytes, err := base64.StdEncoding.DecodeString(*address)
-					if err != nil {
-						fatalf("Could not decode address '%s' as base64-encoded "+
-							"string", *address)
-					}
-					secretKeyBytes, err := base64.StdEncoding.DecodeString(*secretKey)
-					if err != nil {
-						fatalf("Could not decode secret key '%s' as base64-encoded "+
-							"string", *secretKey)
-					}
 					ref = &core.Reference{
-						Address:   addressBytes,
-						SecretKey: secretKeyBytes,
+						Address:   readBase64(*address),
+						SecretKey: readBase64(*secretKey),
 						Salt:      parseSalt(*saltString),
 					}
 				} else {
@@ -142,9 +113,88 @@ func main() {
 						fatalf("Could read reference from STDIN to retrieve: %v", err)
 					}
 				}
-				plaintext, err := grpcClient.Get(context.Background(), ref)
+				plaintext, err := cleartextClient.Get(context.Background(), ref)
 				if err != nil {
 					fatalf("Error retrieving data: %v", err)
+				}
+				os.Stdout.Write(plaintext.Data)
+			}
+		})
+
+	hoarctlApp.Command("ref",
+		"Encrypt data from STDIN and return its reference",
+		func(cmd *cli.Cmd) {
+
+			saltString := saltOpt(cmd)
+
+			cmd.Action = func() {
+				data, err := ioutil.ReadAll(os.Stdin)
+				if err != nil {
+					fatalf("Could read bytes from STDIN to store: %v", err)
+				}
+				refAndCiphertext, err := encryptionClient.Encrypt(context.Background(),
+					&core.Plaintext{
+						Data: data,
+						Salt: parseSalt(*saltString),
+					})
+				if err != nil {
+					fatalf("Error generating reference: %v", err)
+				}
+				fmt.Printf("%s\n", jsonString(refAndCiphertext.Reference))
+			}
+		})
+
+	hoarctlApp.Command("encrypt",
+		"Encrypt data from STDIN and output encrypted data on STDOUT",
+		func(cmd *cli.Cmd) {
+
+			saltString := saltOpt(cmd)
+
+			cmd.Action = func() {
+				data, err := ioutil.ReadAll(os.Stdin)
+				if err != nil {
+					fatalf("Could read bytes from STDIN to store: %v", err)
+				}
+				refAndCiphertext, err := encryptionClient.Encrypt(context.Background(),
+					&core.Plaintext{
+						Data: data,
+						Salt: parseSalt(*saltString),
+					})
+				if err != nil {
+					fatalf("Error encrypting: %v", err)
+				}
+				os.Stdout.Write(refAndCiphertext.Ciphertext.EncryptedData)
+			}
+		})
+
+	hoarctlApp.Command("decrypt",
+		"Decrypt data from STDIN and output decrypted data on STDOUT",
+		func(cmd *cli.Cmd) {
+
+			secretKey := cmd.StringOpt("k key", "",
+				"The secret key to decrypt the data with as base64-encoded string")
+
+			cmd.Spec = "--key=<secret key>"
+
+			saltString := saltOpt(cmd)
+
+			cmd.Action = func() {
+				encryptedData, err := ioutil.ReadAll(os.Stdin)
+				if err != nil {
+					fatalf("Could read bytes from STDIN to store: %v", err)
+				}
+				plaintext, err := encryptionClient.Decrypt(context.Background(),
+					&core.ReferenceAndCiphertext{
+						Reference: &core.Reference{
+							SecretKey: readBase64(*secretKey),
+							Salt:      parseSalt(*saltString),
+						},
+						Ciphertext: &core.Ciphertext{
+							EncryptedData: encryptedData,
+						},
+					})
+				if err != nil {
+					fatalf("Error decrypting: %v", err)
 				}
 				os.Stdout.Write(plaintext.Data)
 			}
@@ -156,7 +206,6 @@ func main() {
 			"as a base64 encoded string",
 		func(cmd *cli.Cmd) {
 			var addressBytes []byte
-			var err error
 
 			address := cmd.StringArg("ADDRESS", "",
 				"The address of the data to retrieve as base64-encoded string")
@@ -166,11 +215,7 @@ func main() {
 			cmd.Action = func() {
 				// If given address use it
 				if address != nil && *address != "" {
-					addressBytes, err = base64.StdEncoding.DecodeString(*address)
-					if err != nil {
-						fatalf("Could not decode address '%s' as base64-encoded "+
-							"string", *address)
-					}
+					addressBytes = readBase64(*address)
 				} else {
 					ref, err := parseReference(os.Stdin)
 					if err != nil {
@@ -178,12 +223,31 @@ func main() {
 					}
 					addressBytes = ref.Address
 				}
-				statInfo, err := grpcClient.Stat(context.Background(),
+				statInfo, err := storageClient.Stat(context.Background(),
 					&core.Address{Address: addressBytes})
 				if err != nil {
 					fatalf("Error querying data: %v", err)
 				}
 				fmt.Printf("%s\n", jsonString(statInfo))
+			}
+		})
+
+	hoarctlApp.Command("insert",
+		"Insert encrypted (presumably) data on STDIN directly into store at "+
+			"its address which is written to STDOUT.",
+		func(cmd *cli.Cmd) {
+			cmd.Action = func() {
+				data, err := ioutil.ReadAll(os.Stdin)
+				if err != nil {
+					fatalf("Could read bytes from STDIN to store: %v", err)
+				}
+				// If given address use it
+				address, err := storageClient.Push(context.Background(),
+					&core.Ciphertext{EncryptedData: data})
+				if err != nil {
+					fatalf("Error querying data: %v", err)
+				}
+				fmt.Printf("%s\n", jsonString(address))
 			}
 		})
 
@@ -215,7 +279,7 @@ func main() {
 					}
 					addressBytes = ref.Address
 				}
-				ciphertext, err := grpcClient.Cat(context.Background(),
+				ciphertext, err := storageClient.Pull(context.Background(),
 					&core.Address{Address: addressBytes})
 				if err != nil {
 					fatalf("Error querying data: %v", err)
@@ -269,6 +333,14 @@ func parseReference(r io.Reader) (*core.Reference, error) {
 		return nil, err
 	}
 	return ref, nil
+}
+
+func readBase64(base64String string) []byte {
+	secretKeyBytes, err := base64.StdEncoding.DecodeString(base64String)
+	if err != nil {
+		fatalf("Could not decode '%s' as base64-encoded string", base64String)
+	}
+	return secretKeyBytes
 }
 
 func printf(format string, args ...interface{}) {
