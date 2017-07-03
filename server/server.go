@@ -14,13 +14,15 @@ import (
 
 type server struct {
 	listenURL  string
+	store      storage.Store
 	grpcServer *grpc.Server
 	logger     log.Logger
 }
 
-func New(listenURL string, logger log.Logger) *server {
+func New(listenURL string, store storage.Store, logger log.Logger) *server {
 	return &server{
 		listenURL: listenURL,
+		store:     store,
 		logger:    logger,
 	}
 }
@@ -35,8 +37,7 @@ func (serv *server) Serve() error {
 		return fmt.Errorf("Failed to create listener: %v", err)
 	}
 	serv.grpcServer = grpc.NewServer()
-	hoardServer := core.NewHoardServer(core.NewHoard(storage.NewMemoryStore(),
-		serv.logger))
+	hoardServer := core.NewHoardServer(core.NewHoard(serv.store, serv.logger))
 
 	core.RegisterCleartextServer(serv.grpcServer, hoardServer)
 	core.RegisterEncryptionServer(serv.grpcServer, hoardServer)

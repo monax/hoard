@@ -12,3 +12,5 @@ import:
   - log
 - package: github.com/go-logfmt/logfmt
   version: v0.3.0
+- package: github.com/BurntSushi/toml
+  version: v0.3.0
