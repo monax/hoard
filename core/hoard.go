@@ -46,9 +46,13 @@ var _ DeterministicEncryptedStore = (*hoard)(nil)
 var _ DeterministicEncryptor = (*hoard)(nil)
 
 func NewHoard(store storage.Store, logger log.Logger) DeterministicEncryptedStore {
+	if logger == nil {
+		logger = log.NewNopLogger()
+	}
 	return &hoard{
-		store:  storage.NewContentAddressedStore(makeAddresser(sha256.New()), store),
-		logger: logger,
+		store: storage.NewContentAddressedStore(makeAddresser(sha256.New()),
+			storage.NewLoggingStore(store, logger)),
+		logger: log.With(logger, "scope", "NewHoard"),
 	}
 }
 
