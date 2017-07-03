@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"code.monax.io/platform/hoard/core"
+	"code.monax.io/platform/hoard/core/logging"
+	"code.monax.io/platform/hoard/core/logging/loggers"
 	"code.monax.io/platform/hoard/core/storage"
 	"github.com/go-kit/kit/log"
 	"google.golang.org/grpc"
@@ -37,6 +39,15 @@ func (serv *server) Serve() error {
 		return fmt.Errorf("Failed to create listener: %v", err)
 	}
 	serv.grpcServer = grpc.NewServer()
+	if serv.logger == nil {
+		serv.logger = log.NewNopLogger()
+	} else {
+		serv.logger = loggers.Compose(loggers.NonBlockingLogger,
+			logging.WithMetadata, loggers.VectorValuedLogger)(serv.logger)
+	}
+
+	logging.InfoMsg(serv.logger, "Initialising Hoard server",
+		"store_name", serv.store.Name())
 	hoardServer := core.NewHoardServer(core.NewHoard(serv.store, serv.logger))
 
 	core.RegisterCleartextServer(serv.grpcServer, hoardServer)

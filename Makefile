@@ -21,9 +21,12 @@
 GOFILES_NOVENDOR := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GOPACKAGES_NOVENDOR := $(shell go list ./... | grep -v /vendor/)
 
-# Install dependencies
+# Install dependencies and also clear out vendor (we should do this in CI)
+# to make sure we are not depending on any local changes to dependencies in
+# vendor/
 .PHONY: deps
 deps:
+	@rm -rf vendor
 	@go get -u github.com/golang/protobuf/protoc-gen-go
 	@go get -u github.com/Masterminds/glide
 	@glide install
