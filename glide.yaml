@@ -14,3 +14,11 @@ import:
   version: v0.3.0
 - package: github.com/BurntSushi/toml
   version: v0.3.0
+- package: github.com/aws/aws-sdk-go
+  version: deleteListIteratorPanic
+  repo: git@github.com:silasdavis/aws-sdk-go.git
+- package: github.com/OneOfOne/xxhash
+  version: v1.2
+- package: github.com/eapache/channels
+  version: v1.1.0
+- package: github.com/cep21/xdgbasedir
