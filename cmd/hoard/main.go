@@ -69,7 +69,8 @@ func main() {
 			os.Exit(0)
 		}(signalCh)
 
-		printf("Starting hoard daemon on %s...", *listenAddressOpt)
+		printf("Starting hoard daemon on %s with %s...", *listenAddressOpt,
+			store.Name())
 		err = serv.Serve()
 		if err != nil {
 			fatalf("Could not start hoard server: %s", err)
@@ -158,8 +159,9 @@ func hoardConfig(configFilePath string) (*config.HoardConfig, error) {
 				configFilePath, err)
 		}
 
-		printf("Using config at '%s'", configFilePath)
-		return config.HoardConfigFromString(string(bs))
+		printf("Loading config from '%s'", configFilePath)
+		tomlString := string(bs)
+		return config.HoardConfigFromString(tomlString)
 	} else {
 		// Look for config in standard XDG specified locations
 		file, err := xdgbasedir.GetConfigFileLocation(config.DefaultFileName)
