@@ -13,6 +13,8 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
+var DefaultConfig = NewMemoryConfig(DefaultAddressEncodingName)
+
 type StorageType string
 
 const (

@@ -9,6 +9,14 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const (
+	DefaultFileName      = "hoard.toml"
+	DefaultListenAddress = "tcp://localhost:53431"
+)
+
+var DefaultHoardConfig = NewHoardConfig(DefaultListenAddress,
+	storage.DefaultConfig, logging.DefaultConfig)
+
 type HoardConfig struct {
 	ListenAddress string
 	Storage       *storage.StorageConfig
@@ -30,9 +38,6 @@ func HoardConfigFromString(tomlString string) (*HoardConfig, error) {
 	_, err := toml.Decode(tomlString, hoardConfig)
 	if err != nil {
 		return nil, err
-	}
-	if hoardConfig.ListenAddress == "" {
-		hoardConfig.ListenAddress = DefaultListenAddress
 	}
 	return hoardConfig, nil
 }

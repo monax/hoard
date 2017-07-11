@@ -42,8 +42,8 @@ func (serv *server) Serve() error {
 	if serv.logger == nil {
 		serv.logger = log.NewNopLogger()
 	} else {
-		serv.logger = loggers.Compose(loggers.NonBlockingLogger,
-			logging.WithMetadata, loggers.VectorValuedLogger)(serv.logger)
+		serv.logger = loggers.Compose(logging.WithMetadata, loggers.NonBlockingLogger,
+			loggers.VectorValuedLogger)(serv.logger)
 	}
 
 	logging.InfoMsg(serv.logger, "Initialising Hoard server",

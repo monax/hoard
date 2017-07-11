@@ -46,7 +46,7 @@ func main() {
 		var logger log.Logger
 
 		if *loggingOpt {
-			logger, err = logging.LoggerFromLoggingConfig(conf.Logging)
+			logger, err = logging.LoggerFromLoggingConfig(conf.Logging, os.Stderr)
 			if err != nil {
 				fatalf("Could not create logging form logging config: %s", err)
 			}
@@ -95,7 +95,7 @@ func main() {
 				"storage backend.",
 				func(s3Cmd *cli.Cmd) {
 					s3Cmd.Action = func() {
-						conf.Storage = config.DefaultMemoryConfig()
+						conf.Storage = storage.DefaultMemoryConfig()
 					}
 				})
 
@@ -103,7 +103,7 @@ func main() {
 				"filesystem storage backend.",
 				func(s3Cmd *cli.Cmd) {
 					s3Cmd.Action = func() {
-						conf.Storage = config.DefaultFileSystemConfig()
+						conf.Storage = storage.DefaultFileSystemConfig()
 					}
 				})
 
@@ -111,7 +111,7 @@ func main() {
 				"backend.",
 				func(s3Cmd *cli.Cmd) {
 					s3Cmd.Action = func() {
-						conf.Storage = config.DefaultS3Config()
+						conf.Storage = storage.DefaultS3Config()
 					}
 				})
 
@@ -121,7 +121,7 @@ func main() {
 				} else {
 					if *outputOpt == "" {
 						configFileName, err := xdgbasedir.GetConfigFileLocation(
-							config.DefaultHoardConfigFileName)
+							config.DefaultFileName)
 						if err != nil {
 							fatalf("Error getting config file location: %s", err)
 						}
@@ -162,7 +162,7 @@ func hoardConfig(configFilePath string) (*config.HoardConfig, error) {
 		return config.HoardConfigFromString(string(bs))
 	} else {
 		// Look for config in standard XDG specified locations
-		file, err := xdgbasedir.GetConfigFileLocation(config.DefaultHoardConfigFileName)
+		file, err := xdgbasedir.GetConfigFileLocation(config.DefaultFileName)
 		if err != nil {
 			return nil, err
 		}
