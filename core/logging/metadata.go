@@ -23,12 +23,8 @@ import (
 )
 
 const (
-	// To get the Caller information correct on the log, we need to count the
-	// number of calls from a log call in the code to the time it hits a kitlog
-	// context: [log call site (5), Info/Trace (4), MultipleChannelLogger.Log (3),
-	// kitlog.Context.Log (2), kitlog.bindValues (1) (binding occurs),
-	// kitlog.Caller (0), stack.caller]
-	infoTraceLoggerCallDepth = 5
+	traceLength = 5
+	traceOffset = 2
 )
 
 var defaultTimestampUTCValuer log.Valuer = func() interface{} {
@@ -37,10 +33,13 @@ var defaultTimestampUTCValuer log.Valuer = func() interface{} {
 
 func WithMetadata(logger log.Logger) log.Logger {
 	return log.With(logger, structure.TimeKey, log.DefaultTimestampUTC,
-		structure.CallerKey, log.Caller(infoTraceLoggerCallDepth),
 		structure.StackTraceKey, TraceValuer())
 }
 
 func TraceValuer() log.Valuer {
-	return func() interface{} { return stack.Trace().TrimBelow(stack.Caller(infoTraceLoggerCallDepth - 1)) }
+	return func() interface{} {
+		return stack.Trace().
+			TrimBelow(stack.Caller(traceOffset)).
+			TrimAbove(stack.Caller(traceLength + 1))
+	}
 }

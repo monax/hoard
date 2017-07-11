@@ -1,9 +1,8 @@
-package config
+package storage
 
 import (
 	"testing"
 
-	"code.monax.io/platform/hoard/config/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,9 +20,9 @@ func TestDefaultStorageConfig(t *testing.T) {
 }
 
 func assertStorageConfigSerialisation(t *testing.T,
-	storageConfig *storage.StorageConfig) {
+	storageConfig *StorageConfig) {
 
-	storageConfigOut, err := storage.ConfigFromString(storageConfig.TOMLString())
+	storageConfigOut, err := ConfigFromString(storageConfig.TOMLString())
 	assert.NoError(t, err)
 	tomlString := storageConfig.TOMLString()
 	assert.NotEmpty(t, tomlString)

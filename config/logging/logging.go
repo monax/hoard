@@ -5,9 +5,6 @@ import (
 
 	"fmt"
 
-	"os"
-
-	"code.monax.io/platform/hoard/core/logging"
 	"code.monax.io/platform/hoard/core/logging/loggers"
 	"code.monax.io/platform/hoard/core/logging/structure"
 	"github.com/go-kit/kit/log"
@@ -15,6 +12,9 @@ import (
 )
 
 type LoggingType string
+
+var DefaultConfig = NewLoggingConfig(Logfmt, structure.InfoChannel,
+	structure.TraceChannel)
 
 const (
 	Logfmt LoggingType = "logfmt"
@@ -37,8 +37,9 @@ func NewLoggingConfig(loggingType LoggingType,
 	}
 }
 
-func LoggerFromLoggingConfig(loggingConfig *LoggingConfig) (log.Logger, error) {
-	terminalLogger, err := TerminalLogger(loggingConfig.LoggingType, os.Stderr)
+func LoggerFromLoggingConfig(loggingConfig *LoggingConfig,
+	writer io.Writer) (log.Logger, error) {
+	terminalLogger, err := NewTerminalLogger(loggingConfig.LoggingType, writer)
 	if err != nil {
 		return nil, err
 	}
@@ -46,28 +47,29 @@ func LoggerFromLoggingConfig(loggingConfig *LoggingConfig) (log.Logger, error) {
 		excludeChannelsNotIn(loggingConfig.Channels)), nil
 }
 
-func TerminalLogger(loggingType LoggingType, writer io.Writer) (log.Logger, error) {
+func NewTerminalLogger(loggingType LoggingType, writer io.Writer) (log.Logger, error) {
 	loggerMaker, err := OutputLoggerMaker(loggingType)
 	if err != nil {
 		return nil, err
 	}
-	return term.NewLogger(writer, loggerMaker, logging.Colors), nil
+	return term.NewLogger(writer, loggerMaker, channelColours), nil
 }
 
 func OutputLoggerMaker(loggingType LoggingType) (func(writer io.Writer) log.Logger, error) {
+	var logger func(io.Writer) log.Logger
 	switch loggingType {
 	case Logfmt:
-		return func(writer io.Writer) log.Logger {
-			return log.NewLogfmtLogger(writer)
-		}, nil
+		logger = log.NewLogfmtLogger
 	case Json:
-		return func(writer io.Writer) log.Logger {
-			return log.NewJSONLogger(writer)
-		}, nil
+		logger = log.NewJSONLogger
 	default:
 		return nil, fmt.Errorf("Could not create logger with logging "+
 			"type '%s'.", loggingType)
 	}
+
+	return func(writer io.Writer) log.Logger {
+		return logger(writer)
+	}, nil
 }
 
 func excludeChannelsNotIn(includeChannels []structure.Channel) func(keyvals []interface{}) bool {
@@ -75,7 +77,7 @@ func excludeChannelsNotIn(includeChannels []structure.Channel) func(keyvals []in
 		channel := structure.Value(keyvals, structure.ChannelKey)
 
 		if channel != nil {
-			for includeChannel := range includeChannels {
+			for _, includeChannel := range includeChannels {
 				if channel == includeChannel {
 					// Do NOT filter
 					return false
@@ -84,5 +86,17 @@ func excludeChannelsNotIn(includeChannels []structure.Channel) func(keyvals []in
 		}
 		// Filter
 		return true
+	}
+}
+
+func channelColours(keyvals ...interface{}) term.FgBgColor {
+	channel := structure.Value(keyvals, structure.ChannelKey)
+	switch channel {
+	case structure.TraceChannel:
+		return term.FgBgColor{Fg: term.DarkBlue}
+	case structure.InfoChannel:
+		return term.FgBgColor{Fg: term.DarkGreen}
+	default:
+		return term.FgBgColor{}
 	}
 }
