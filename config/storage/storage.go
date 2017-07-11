@@ -13,6 +13,8 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
+const DefaultAddressEncodingName = "base64"
+
 var DefaultConfig = NewMemoryConfig(DefaultAddressEncodingName)
 
 type StorageType string
@@ -74,7 +76,7 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 				"the S3 storage backend")
 		}
 
-		creds, err := AWSCredentialsFromConfig(s3c.CredentialsProviderChain)
+		creds, err := AWSCredentialsFromChain(s3c.CredentialsProviderChain)
 		if err != nil {
 			return nil, fmt.Errorf("Could not create credentials: %s", err)
 		}

@@ -29,6 +29,9 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	// (no IV, but 16-byte authentication tag)
 	assert.Equal(t, uint64(len(bunsIn))+16, statInfo.Size)
 
+	loc := hrd.Store().Location(ref.Address)
+	assert.Equal(t, "memfs://2768b87bc22a7f0f20eb268937a00d682bc5dc21a62badf1d24c78633436a1b7", loc)
+
 	// flip LSB of first byte of address to get an non-existent address
 	ref.Address[0] = ref.Address[0] ^ 1
 	statInfo, err = hrd.Store().Stat(ref.Address)

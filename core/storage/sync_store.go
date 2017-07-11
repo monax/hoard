@@ -52,7 +52,7 @@ func (ss *syncStore) Put(address, data []byte) error {
 }
 
 func (ss *syncStore) Location(address []byte) string {
-	return ss.Location(address)
+	return ss.store.Location(address)
 }
 
 func (ss *syncStore) Name() string {

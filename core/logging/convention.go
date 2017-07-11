@@ -21,10 +21,10 @@ import (
 )
 
 func InfoLogger(logger log.Logger) log.Logger {
-	return log.With(logger, structure.ChannelKey, structure.InfoChannel)
+	return log.WithPrefix(logger, structure.ChannelKey, structure.InfoChannel)
 }
 func TraceLogger(logger log.Logger) log.Logger {
-	return log.With(logger, structure.ChannelKey, structure.TraceChannel)
+	return log.WithPrefix(logger, structure.ChannelKey, structure.TraceChannel)
 }
 
 func InfoMsg(logger log.Logger, message string, keyvals ...interface{}) {
