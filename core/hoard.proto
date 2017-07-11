@@ -2,14 +2,33 @@ syntax = "proto3";
 
 package core;
 
+service Grants {
+    // Seal a Reference to create a Grant
+    rpc Seal (ReferenceAndGrantSpec) returns (Grant);
+
+    // Unseal a Grant to recover the Reference
+    rpc Unseal (Grant) returns (Reference);
+
+    // Convert one grant to another grant to reshare with another party or just
+    // to change grant type
+    rpc Reseal (GrantAndGrantSpec) returns (Grant);
+
+    // Put a Plaintext and returned the sealed Reference as a Grant
+    rpc PutSealed (PlaintextAndGrantSpec) returns (Grant);
+
+    // Unseal a Grant and follow the Reference to return a Plaintext
+    rpc GetUnsealed (Grant) returns (Plaintext);
+}
+
 // Provide plaintext and get plaintext back
 service Cleartext {
-    // Provide a secret reference to an encrypted blob and get the plaintext
-    // data back.
-    rpc Get (Reference) returns (Plaintext);
     // Push some plaintext data into storage and get its deterministically
     // generated secret reference.
     rpc Put (Plaintext) returns (Reference);
+
+    // Provide a secret reference to an encrypted blob and get the plaintext
+    // data back.
+    rpc Get (Reference) returns (Plaintext);
 }
 
 // Deterministic encryption
@@ -17,6 +36,7 @@ service Encryption {
     // Encrypt some data and get its deterministically generated
     // secret reference including its address without storing the data.
     rpc Encrypt (Plaintext) returns (ReferenceAndCiphertext);
+
     // Decrypt the provided data by supplying it alongside its secret
     // reference. The address is not used for decryption and may be omitted.
     rpc Decrypt (ReferenceAndCiphertext) returns (Plaintext);
@@ -24,13 +44,52 @@ service Encryption {
 
 // Interact directly with storage backend
 service Storage {
-    // Retrieve the (presumably) encrypted data stored at address.
-    rpc Pull (Address) returns (Ciphertext);
     // Insert the (presumably) encrypted data provided and get the its address.
     rpc Push (Ciphertext) returns (Address);
+
+    // Retrieve the (presumably) encrypted data stored at address.
+    rpc Pull (Address) returns (Ciphertext);
+
     // Get some information about the encrypted blob stored at an address,
     // including whether it exists.
     rpc Stat (Address) returns (StatInfo);
+}
+
+message Grant {
+    GrantSpec grantSpec = 1;
+    bytes data = 2;
+}
+
+message GrantSpec {
+    enum GrantType {
+        PLAINTEXT = 0;
+        OPENPGP = 1;
+    }
+    GrantType grantType = 1;
+    oneof grantData {
+        OpenPGPGrant openPGPGrant = 2;
+    }
+}
+
+message OpenPGPGrant {
+}
+
+message GrantAndGrantSpec {
+    Grant grant = 1;
+    // The type of grant to output
+    GrantSpec grantSpec = 2;
+}
+
+message PlaintextAndGrantSpec {
+    Plaintext plaintext = 1;
+    // The type of grant to output
+    GrantSpec grantSpec = 2;
+}
+
+message ReferenceAndGrantSpec {
+    Reference reference = 1;
+    // The type of grant to output
+    GrantSpec grantSpec = 2;
 }
 
 message Reference {

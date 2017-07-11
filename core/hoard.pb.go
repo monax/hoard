@@ -8,6 +8,12 @@ It is generated from these files:
 	hoard.proto
 
 It has these top-level messages:
+	Grant
+	GrantSpec
+	OpenPGPGrant
+	GrantAndGrantSpec
+	PlaintextAndGrantSpec
+	ReferenceAndGrantSpec
 	Reference
 	Plaintext
 	Ciphertext
@@ -37,6 +43,232 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+type GrantSpec_GrantType int32
+
+const (
+	GrantSpec_PLAINTEXT GrantSpec_GrantType = 0
+	GrantSpec_OPENPGP   GrantSpec_GrantType = 1
+)
+
+var GrantSpec_GrantType_name = map[int32]string{
+	0: "PLAINTEXT",
+	1: "OPENPGP",
+}
+var GrantSpec_GrantType_value = map[string]int32{
+	"PLAINTEXT": 0,
+	"OPENPGP":   1,
+}
+
+func (x GrantSpec_GrantType) String() string {
+	return proto.EnumName(GrantSpec_GrantType_name, int32(x))
+}
+func (GrantSpec_GrantType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1, 0} }
+
+type Grant struct {
+	GrantSpec *GrantSpec `protobuf:"bytes,1,opt,name=grantSpec" json:"grantSpec,omitempty"`
+	Data      []byte     `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+}
+
+func (m *Grant) Reset()                    { *m = Grant{} }
+func (m *Grant) String() string            { return proto.CompactTextString(m) }
+func (*Grant) ProtoMessage()               {}
+func (*Grant) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+func (m *Grant) GetGrantSpec() *GrantSpec {
+	if m != nil {
+		return m.GrantSpec
+	}
+	return nil
+}
+
+func (m *Grant) GetData() []byte {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+type GrantSpec struct {
+	GrantType GrantSpec_GrantType `protobuf:"varint,1,opt,name=grantType,enum=core.GrantSpec_GrantType" json:"grantType,omitempty"`
+	// Types that are valid to be assigned to GrantData:
+	//	*GrantSpec_OpenPGPGrant
+	GrantData isGrantSpec_GrantData `protobuf_oneof:"grantData"`
+}
+
+func (m *GrantSpec) Reset()                    { *m = GrantSpec{} }
+func (m *GrantSpec) String() string            { return proto.CompactTextString(m) }
+func (*GrantSpec) ProtoMessage()               {}
+func (*GrantSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+type isGrantSpec_GrantData interface {
+	isGrantSpec_GrantData()
+}
+
+type GrantSpec_OpenPGPGrant struct {
+	OpenPGPGrant *OpenPGPGrant `protobuf:"bytes,2,opt,name=openPGPGrant,oneof"`
+}
+
+func (*GrantSpec_OpenPGPGrant) isGrantSpec_GrantData() {}
+
+func (m *GrantSpec) GetGrantData() isGrantSpec_GrantData {
+	if m != nil {
+		return m.GrantData
+	}
+	return nil
+}
+
+func (m *GrantSpec) GetGrantType() GrantSpec_GrantType {
+	if m != nil {
+		return m.GrantType
+	}
+	return GrantSpec_PLAINTEXT
+}
+
+func (m *GrantSpec) GetOpenPGPGrant() *OpenPGPGrant {
+	if x, ok := m.GetGrantData().(*GrantSpec_OpenPGPGrant); ok {
+		return x.OpenPGPGrant
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*GrantSpec) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _GrantSpec_OneofMarshaler, _GrantSpec_OneofUnmarshaler, _GrantSpec_OneofSizer, []interface{}{
+		(*GrantSpec_OpenPGPGrant)(nil),
+	}
+}
+
+func _GrantSpec_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*GrantSpec)
+	// grantData
+	switch x := m.GrantData.(type) {
+	case *GrantSpec_OpenPGPGrant:
+		b.EncodeVarint(2<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.OpenPGPGrant); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("GrantSpec.GrantData has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _GrantSpec_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*GrantSpec)
+	switch tag {
+	case 2: // grantData.openPGPGrant
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(OpenPGPGrant)
+		err := b.DecodeMessage(msg)
+		m.GrantData = &GrantSpec_OpenPGPGrant{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _GrantSpec_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*GrantSpec)
+	// grantData
+	switch x := m.GrantData.(type) {
+	case *GrantSpec_OpenPGPGrant:
+		s := proto.Size(x.OpenPGPGrant)
+		n += proto.SizeVarint(2<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
+type OpenPGPGrant struct {
+}
+
+func (m *OpenPGPGrant) Reset()                    { *m = OpenPGPGrant{} }
+func (m *OpenPGPGrant) String() string            { return proto.CompactTextString(m) }
+func (*OpenPGPGrant) ProtoMessage()               {}
+func (*OpenPGPGrant) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+type GrantAndGrantSpec struct {
+	Grant *Grant `protobuf:"bytes,1,opt,name=grant" json:"grant,omitempty"`
+	// The type of grant to output
+	GrantSpec *GrantSpec `protobuf:"bytes,2,opt,name=grantSpec" json:"grantSpec,omitempty"`
+}
+
+func (m *GrantAndGrantSpec) Reset()                    { *m = GrantAndGrantSpec{} }
+func (m *GrantAndGrantSpec) String() string            { return proto.CompactTextString(m) }
+func (*GrantAndGrantSpec) ProtoMessage()               {}
+func (*GrantAndGrantSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *GrantAndGrantSpec) GetGrant() *Grant {
+	if m != nil {
+		return m.Grant
+	}
+	return nil
+}
+
+func (m *GrantAndGrantSpec) GetGrantSpec() *GrantSpec {
+	if m != nil {
+		return m.GrantSpec
+	}
+	return nil
+}
+
+type PlaintextAndGrantSpec struct {
+	Plaintext *Plaintext `protobuf:"bytes,1,opt,name=plaintext" json:"plaintext,omitempty"`
+	// The type of grant to output
+	GrantSpec *GrantSpec `protobuf:"bytes,2,opt,name=grantSpec" json:"grantSpec,omitempty"`
+}
+
+func (m *PlaintextAndGrantSpec) Reset()                    { *m = PlaintextAndGrantSpec{} }
+func (m *PlaintextAndGrantSpec) String() string            { return proto.CompactTextString(m) }
+func (*PlaintextAndGrantSpec) ProtoMessage()               {}
+func (*PlaintextAndGrantSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+
+func (m *PlaintextAndGrantSpec) GetPlaintext() *Plaintext {
+	if m != nil {
+		return m.Plaintext
+	}
+	return nil
+}
+
+func (m *PlaintextAndGrantSpec) GetGrantSpec() *GrantSpec {
+	if m != nil {
+		return m.GrantSpec
+	}
+	return nil
+}
+
+type ReferenceAndGrantSpec struct {
+	Reference *Reference `protobuf:"bytes,1,opt,name=reference" json:"reference,omitempty"`
+	// The type of grant to output
+	GrantSpec *GrantSpec `protobuf:"bytes,2,opt,name=grantSpec" json:"grantSpec,omitempty"`
+}
+
+func (m *ReferenceAndGrantSpec) Reset()                    { *m = ReferenceAndGrantSpec{} }
+func (m *ReferenceAndGrantSpec) String() string            { return proto.CompactTextString(m) }
+func (*ReferenceAndGrantSpec) ProtoMessage()               {}
+func (*ReferenceAndGrantSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+func (m *ReferenceAndGrantSpec) GetReference() *Reference {
+	if m != nil {
+		return m.Reference
+	}
+	return nil
+}
+
+func (m *ReferenceAndGrantSpec) GetGrantSpec() *GrantSpec {
+	if m != nil {
+		return m.GrantSpec
+	}
+	return nil
+}
+
 type Reference struct {
 	Address   []byte `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	SecretKey []byte `protobuf:"bytes,2,opt,name=secretKey,proto3" json:"secretKey,omitempty"`
@@ -46,7 +278,7 @@ type Reference struct {
 func (m *Reference) Reset()                    { *m = Reference{} }
 func (m *Reference) String() string            { return proto.CompactTextString(m) }
 func (*Reference) ProtoMessage()               {}
-func (*Reference) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*Reference) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *Reference) GetAddress() []byte {
 	if m != nil {
@@ -77,7 +309,7 @@ type Plaintext struct {
 func (m *Plaintext) Reset()                    { *m = Plaintext{} }
 func (m *Plaintext) String() string            { return proto.CompactTextString(m) }
 func (*Plaintext) ProtoMessage()               {}
-func (*Plaintext) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*Plaintext) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *Plaintext) GetData() []byte {
 	if m != nil {
@@ -100,7 +332,7 @@ type Ciphertext struct {
 func (m *Ciphertext) Reset()                    { *m = Ciphertext{} }
 func (m *Ciphertext) String() string            { return proto.CompactTextString(m) }
 func (*Ciphertext) ProtoMessage()               {}
-func (*Ciphertext) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*Ciphertext) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 func (m *Ciphertext) GetEncryptedData() []byte {
 	if m != nil {
@@ -117,7 +349,7 @@ type ReferenceAndCiphertext struct {
 func (m *ReferenceAndCiphertext) Reset()                    { *m = ReferenceAndCiphertext{} }
 func (m *ReferenceAndCiphertext) String() string            { return proto.CompactTextString(m) }
 func (*ReferenceAndCiphertext) ProtoMessage()               {}
-func (*ReferenceAndCiphertext) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*ReferenceAndCiphertext) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *ReferenceAndCiphertext) GetReference() *Reference {
 	if m != nil {
@@ -140,7 +372,7 @@ type Address struct {
 func (m *Address) Reset()                    { *m = Address{} }
 func (m *Address) String() string            { return proto.CompactTextString(m) }
 func (*Address) ProtoMessage()               {}
-func (*Address) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*Address) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 func (m *Address) GetAddress() []byte {
 	if m != nil {
@@ -166,7 +398,7 @@ type StatInfo struct {
 func (m *StatInfo) Reset()                    { *m = StatInfo{} }
 func (m *StatInfo) String() string            { return proto.CompactTextString(m) }
 func (*StatInfo) ProtoMessage()               {}
-func (*StatInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*StatInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *StatInfo) GetAddress() []byte {
 	if m != nil {
@@ -197,12 +429,19 @@ func (m *StatInfo) GetLocation() string {
 }
 
 func init() {
+	proto.RegisterType((*Grant)(nil), "core.Grant")
+	proto.RegisterType((*GrantSpec)(nil), "core.GrantSpec")
+	proto.RegisterType((*OpenPGPGrant)(nil), "core.OpenPGPGrant")
+	proto.RegisterType((*GrantAndGrantSpec)(nil), "core.GrantAndGrantSpec")
+	proto.RegisterType((*PlaintextAndGrantSpec)(nil), "core.PlaintextAndGrantSpec")
+	proto.RegisterType((*ReferenceAndGrantSpec)(nil), "core.ReferenceAndGrantSpec")
 	proto.RegisterType((*Reference)(nil), "core.Reference")
 	proto.RegisterType((*Plaintext)(nil), "core.Plaintext")
 	proto.RegisterType((*Ciphertext)(nil), "core.Ciphertext")
 	proto.RegisterType((*ReferenceAndCiphertext)(nil), "core.ReferenceAndCiphertext")
 	proto.RegisterType((*Address)(nil), "core.Address")
 	proto.RegisterType((*StatInfo)(nil), "core.StatInfo")
+	proto.RegisterEnum("core.GrantSpec_GrantType", GrantSpec_GrantType_name, GrantSpec_GrantType_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -213,15 +452,223 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
+// Client API for Grants service
+
+type GrantsClient interface {
+	// Seal a Reference to create a Grant
+	Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*Grant, error)
+	// Unseal a Grant to recover the Reference
+	Unseal(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Reference, error)
+	// Convert one grant to another grant to reshare with another party or just
+	// to change grant type
+	Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*Grant, error)
+	// Put a Plaintext and returned the sealed Reference as a Grant
+	PutSealed(ctx context.Context, in *PlaintextAndGrantSpec, opts ...grpc.CallOption) (*Grant, error)
+	// Unseal a Grant and follow the Reference to return a Plaintext
+	GetUnsealed(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Plaintext, error)
+}
+
+type grantsClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewGrantsClient(cc *grpc.ClientConn) GrantsClient {
+	return &grantsClient{cc}
+}
+
+func (c *grantsClient) Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*Grant, error) {
+	out := new(Grant)
+	err := grpc.Invoke(ctx, "/core.Grants/Seal", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *grantsClient) Unseal(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Reference, error) {
+	out := new(Reference)
+	err := grpc.Invoke(ctx, "/core.Grants/Unseal", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *grantsClient) Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*Grant, error) {
+	out := new(Grant)
+	err := grpc.Invoke(ctx, "/core.Grants/Reseal", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *grantsClient) PutSealed(ctx context.Context, in *PlaintextAndGrantSpec, opts ...grpc.CallOption) (*Grant, error) {
+	out := new(Grant)
+	err := grpc.Invoke(ctx, "/core.Grants/PutSealed", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *grantsClient) GetUnsealed(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Plaintext, error) {
+	out := new(Plaintext)
+	err := grpc.Invoke(ctx, "/core.Grants/GetUnsealed", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for Grants service
+
+type GrantsServer interface {
+	// Seal a Reference to create a Grant
+	Seal(context.Context, *ReferenceAndGrantSpec) (*Grant, error)
+	// Unseal a Grant to recover the Reference
+	Unseal(context.Context, *Grant) (*Reference, error)
+	// Convert one grant to another grant to reshare with another party or just
+	// to change grant type
+	Reseal(context.Context, *GrantAndGrantSpec) (*Grant, error)
+	// Put a Plaintext and returned the sealed Reference as a Grant
+	PutSealed(context.Context, *PlaintextAndGrantSpec) (*Grant, error)
+	// Unseal a Grant and follow the Reference to return a Plaintext
+	GetUnsealed(context.Context, *Grant) (*Plaintext, error)
+}
+
+func RegisterGrantsServer(s *grpc.Server, srv GrantsServer) {
+	s.RegisterService(&_Grants_serviceDesc, srv)
+}
+
+func _Grants_Seal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReferenceAndGrantSpec)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GrantsServer).Seal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Grants/Seal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GrantsServer).Seal(ctx, req.(*ReferenceAndGrantSpec))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Grants_Unseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Grant)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GrantsServer).Unseal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Grants/Unseal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GrantsServer).Unseal(ctx, req.(*Grant))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Grants_Reseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GrantAndGrantSpec)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GrantsServer).Reseal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Grants/Reseal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GrantsServer).Reseal(ctx, req.(*GrantAndGrantSpec))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Grants_PutSealed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaintextAndGrantSpec)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GrantsServer).PutSealed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Grants/PutSealed",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GrantsServer).PutSealed(ctx, req.(*PlaintextAndGrantSpec))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Grants_GetUnsealed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Grant)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GrantsServer).GetUnsealed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Grants/GetUnsealed",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GrantsServer).GetUnsealed(ctx, req.(*Grant))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Grants_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "core.Grants",
+	HandlerType: (*GrantsServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Seal",
+			Handler:    _Grants_Seal_Handler,
+		},
+		{
+			MethodName: "Unseal",
+			Handler:    _Grants_Unseal_Handler,
+		},
+		{
+			MethodName: "Reseal",
+			Handler:    _Grants_Reseal_Handler,
+		},
+		{
+			MethodName: "PutSealed",
+			Handler:    _Grants_PutSealed_Handler,
+		},
+		{
+			MethodName: "GetUnsealed",
+			Handler:    _Grants_GetUnsealed_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "hoard.proto",
+}
+
 // Client API for Cleartext service
 
 type CleartextClient interface {
-	// Provide a secret reference to an encrypted blob and get the plaintext
-	// data back.
-	Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error)
 	// Push some plaintext data into storage and get its deterministically
 	// generated secret reference.
 	Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error)
+	// Provide a secret reference to an encrypted blob and get the plaintext
+	// data back.
+	Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error)
 }
 
 type cleartextClient struct {
@@ -230,15 +677,6 @@ type cleartextClient struct {
 
 func NewCleartextClient(cc *grpc.ClientConn) CleartextClient {
 	return &cleartextClient{cc}
-}
-
-func (c *cleartextClient) Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error) {
-	out := new(Plaintext)
-	err := grpc.Invoke(ctx, "/core.Cleartext/Get", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *cleartextClient) Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error) {
@@ -250,37 +688,28 @@ func (c *cleartextClient) Put(ctx context.Context, in *Plaintext, opts ...grpc.C
 	return out, nil
 }
 
+func (c *cleartextClient) Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error) {
+	out := new(Plaintext)
+	err := grpc.Invoke(ctx, "/core.Cleartext/Get", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Cleartext service
 
 type CleartextServer interface {
-	// Provide a secret reference to an encrypted blob and get the plaintext
-	// data back.
-	Get(context.Context, *Reference) (*Plaintext, error)
 	// Push some plaintext data into storage and get its deterministically
 	// generated secret reference.
 	Put(context.Context, *Plaintext) (*Reference, error)
+	// Provide a secret reference to an encrypted blob and get the plaintext
+	// data back.
+	Get(context.Context, *Reference) (*Plaintext, error)
 }
 
 func RegisterCleartextServer(s *grpc.Server, srv CleartextServer) {
 	s.RegisterService(&_Cleartext_serviceDesc, srv)
-}
-
-func _Cleartext_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Reference)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CleartextServer).Get(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/core.Cleartext/Get",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CleartextServer).Get(ctx, req.(*Reference))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Cleartext_Put_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -301,17 +730,35 @@ func _Cleartext_Put_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Cleartext_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Reference)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CleartextServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Cleartext/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CleartextServer).Get(ctx, req.(*Reference))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Cleartext_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "core.Cleartext",
 	HandlerType: (*CleartextServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Get",
-			Handler:    _Cleartext_Get_Handler,
-		},
-		{
 			MethodName: "Put",
 			Handler:    _Cleartext_Put_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _Cleartext_Get_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -426,10 +873,10 @@ var _Encryption_serviceDesc = grpc.ServiceDesc{
 // Client API for Storage service
 
 type StorageClient interface {
-	// Retrieve the (presumably) encrypted data stored at address.
-	Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error)
 	// Insert the (presumably) encrypted data provided and get the its address.
 	Push(ctx context.Context, in *Ciphertext, opts ...grpc.CallOption) (*Address, error)
+	// Retrieve the (presumably) encrypted data stored at address.
+	Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error)
 	// Get some information about the encrypted blob stored at an address,
 	// including whether it exists.
 	Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*StatInfo, error)
@@ -443,18 +890,18 @@ func NewStorageClient(cc *grpc.ClientConn) StorageClient {
 	return &storageClient{cc}
 }
 
-func (c *storageClient) Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error) {
-	out := new(Ciphertext)
-	err := grpc.Invoke(ctx, "/core.Storage/Pull", in, out, c.cc, opts...)
+func (c *storageClient) Push(ctx context.Context, in *Ciphertext, opts ...grpc.CallOption) (*Address, error) {
+	out := new(Address)
+	err := grpc.Invoke(ctx, "/core.Storage/Push", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storageClient) Push(ctx context.Context, in *Ciphertext, opts ...grpc.CallOption) (*Address, error) {
-	out := new(Address)
-	err := grpc.Invoke(ctx, "/core.Storage/Push", in, out, c.cc, opts...)
+func (c *storageClient) Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error) {
+	out := new(Ciphertext)
+	err := grpc.Invoke(ctx, "/core.Storage/Pull", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -473,10 +920,10 @@ func (c *storageClient) Stat(ctx context.Context, in *Address, opts ...grpc.Call
 // Server API for Storage service
 
 type StorageServer interface {
-	// Retrieve the (presumably) encrypted data stored at address.
-	Pull(context.Context, *Address) (*Ciphertext, error)
 	// Insert the (presumably) encrypted data provided and get the its address.
 	Push(context.Context, *Ciphertext) (*Address, error)
+	// Retrieve the (presumably) encrypted data stored at address.
+	Pull(context.Context, *Address) (*Ciphertext, error)
 	// Get some information about the encrypted blob stored at an address,
 	// including whether it exists.
 	Stat(context.Context, *Address) (*StatInfo, error)
@@ -484,24 +931,6 @@ type StorageServer interface {
 
 func RegisterStorageServer(s *grpc.Server, srv StorageServer) {
 	s.RegisterService(&_Storage_serviceDesc, srv)
-}
-
-func _Storage_Pull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Address)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(StorageServer).Pull(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/core.Storage/Pull",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StorageServer).Pull(ctx, req.(*Address))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Storage_Push_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -518,6 +947,24 @@ func _Storage_Push_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StorageServer).Push(ctx, req.(*Ciphertext))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_Pull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Address)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).Pull(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.Storage/Pull",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).Pull(ctx, req.(*Address))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -545,12 +992,12 @@ var _Storage_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*StorageServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Pull",
-			Handler:    _Storage_Pull_Handler,
-		},
-		{
 			MethodName: "Push",
 			Handler:    _Storage_Push_Handler,
+		},
+		{
+			MethodName: "Pull",
+			Handler:    _Storage_Pull_Handler,
 		},
 		{
 			MethodName: "Stat",
@@ -564,30 +1011,45 @@ var _Storage_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("hoard.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 387 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x93, 0xc1, 0x6b, 0xea, 0x40,
-	0x10, 0xc6, 0x89, 0x06, 0x63, 0xc6, 0xe7, 0x7b, 0x8f, 0x3d, 0x48, 0x08, 0x1e, 0x24, 0x6d, 0xd1,
-	0x4b, 0xa5, 0xc4, 0x8b, 0x57, 0xd1, 0x52, 0x4a, 0x2f, 0x12, 0x0f, 0x3d, 0xf5, 0xb0, 0x4d, 0xc6,
-	0x1a, 0x08, 0x59, 0xd9, 0x5d, 0x41, 0x7b, 0x2a, 0xfd, 0xcb, 0x8b, 0xbb, 0x71, 0xa3, 0x09, 0xf5,
-	0xb6, 0x33, 0xf3, 0xfd, 0x36, 0x3b, 0xdf, 0x47, 0xa0, 0xb3, 0x61, 0x94, 0x27, 0xe3, 0x2d, 0x67,
-	0x92, 0x11, 0x3b, 0x66, 0x1c, 0x83, 0x57, 0x70, 0x23, 0x5c, 0x23, 0xc7, 0x3c, 0x46, 0xe2, 0x81,
-	0x43, 0x93, 0x84, 0xa3, 0x10, 0x9e, 0x35, 0xb0, 0x46, 0x7f, 0xa2, 0x53, 0x49, 0xfa, 0xe0, 0x0a,
-	0x8c, 0x39, 0xca, 0x17, 0x3c, 0x78, 0x0d, 0x35, 0x2b, 0x1b, 0x84, 0x80, 0x2d, 0x68, 0x26, 0xbd,
-	0xa6, 0x1a, 0xa8, 0x73, 0x30, 0x01, 0x77, 0x99, 0xd1, 0x34, 0x97, 0xb8, 0x97, 0x47, 0x41, 0x42,
-	0x25, 0x2d, 0x6e, 0x55, 0x67, 0x03, 0x35, 0xce, 0xa0, 0x10, 0x60, 0x9e, 0x6e, 0x37, 0xc8, 0x15,
-	0x75, 0x0b, 0x5d, 0xcc, 0x63, 0x7e, 0xd8, 0x4a, 0x4c, 0x16, 0x25, 0x7e, 0xd9, 0x0c, 0x0e, 0xd0,
-	0x33, 0x1b, 0xcc, 0xf2, 0xe4, 0x8c, 0xbf, 0x07, 0x97, 0x9f, 0x26, 0x8a, 0xed, 0x84, 0xff, 0xc6,
-	0xc7, 0xad, 0xc7, 0x06, 0x88, 0x4a, 0x05, 0x79, 0x00, 0x88, 0x0d, 0xac, 0x9e, 0xd5, 0x09, 0xff,
-	0x6b, 0x7d, 0x79, 0x69, 0x74, 0xa6, 0x09, 0x6e, 0xc0, 0x99, 0x15, 0x06, 0xfd, 0x6a, 0x5d, 0x90,
-	0x41, 0x7b, 0x25, 0xa9, 0x7c, 0xce, 0xd7, 0xec, 0x8a, 0xc1, 0x3d, 0x68, 0xe1, 0x3e, 0x15, 0x52,
-	0xa8, 0x0f, 0xb7, 0xa3, 0xa2, 0x52, 0x2e, 0xa5, 0x9f, 0xa8, 0xac, 0xb5, 0x23, 0x75, 0x26, 0x3e,
-	0xb4, 0x33, 0x16, 0x53, 0x99, 0xb2, 0xdc, 0xb3, 0x07, 0xd6, 0xc8, 0x8d, 0x4c, 0x1d, 0xbe, 0x81,
-	0x3b, 0xcf, 0x90, 0x6a, 0x03, 0x86, 0xd0, 0x7c, 0x42, 0x49, 0xaa, 0x4b, 0xfb, 0x45, 0xa3, 0xcc,
-	0x67, 0x08, 0xcd, 0xe5, 0xce, 0x08, 0x4d, 0xdf, 0xaf, 0x92, 0xe1, 0x97, 0x05, 0xf0, 0xa8, 0xed,
-	0x4f, 0x59, 0x4e, 0xa6, 0xe0, 0x14, 0x55, 0x9d, 0xed, 0x57, 0xd8, 0xcb, 0x6c, 0xa6, 0xe0, 0x2c,
-	0x50, 0x93, 0x57, 0x85, 0xb5, 0xb7, 0x86, 0xdf, 0x16, 0x38, 0x2b, 0xc9, 0x38, 0xfd, 0x40, 0x32,
-	0x04, 0x7b, 0xb9, 0xcb, 0x32, 0xd2, 0xd5, 0xa2, 0x22, 0x0c, 0xbf, 0x96, 0x9a, 0x16, 0x8a, 0x0d,
-	0xa9, 0x4d, 0xfc, 0x4b, 0x94, 0xdc, 0x81, 0x7d, 0x4c, 0xab, 0x7a, 0xe3, 0x5f, 0x5d, 0x9e, 0x82,
-	0x7c, 0x6f, 0xa9, 0x7f, 0x68, 0xf2, 0x13, 0x00, 0x00, 0xff, 0xff, 0xd8, 0x6a, 0xd7, 0x0f, 0x52,
-	0x03, 0x00, 0x00,
+	// 635 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x55, 0xdf, 0x4f, 0xd4, 0x40,
+	0x10, 0xa6, 0x50, 0xee, 0xe8, 0xf4, 0x40, 0xdc, 0x44, 0x3c, 0x4f, 0x1e, 0xb0, 0xfe, 0x80, 0xc4,
+	0x70, 0x21, 0x25, 0x46, 0x5e, 0x11, 0x48, 0x45, 0x0d, 0x34, 0x7b, 0x18, 0x7d, 0xf1, 0x61, 0x6d,
+	0x07, 0xae, 0x49, 0xd3, 0x36, 0xed, 0x5e, 0xc2, 0xf9, 0x64, 0xfc, 0x9b, 0xfc, 0xdb, 0x7c, 0x36,
+	0xdd, 0xb6, 0xdb, 0x6d, 0x0b, 0x18, 0x7c, 0x9b, 0x9d, 0xf9, 0xbe, 0x99, 0xd9, 0x6f, 0xbf, 0xa6,
+	0x60, 0x4e, 0x63, 0x96, 0xfa, 0xe3, 0x24, 0x8d, 0x79, 0x4c, 0x74, 0x2f, 0x4e, 0xd1, 0xfa, 0x00,
+	0xcb, 0x4e, 0xca, 0x22, 0x4e, 0x76, 0xc1, 0xb8, 0xca, 0x83, 0x49, 0x82, 0xde, 0x50, 0xdb, 0xd2,
+	0x76, 0x4c, 0xfb, 0xc1, 0x38, 0x87, 0x8c, 0x9d, 0x2a, 0x4d, 0x6b, 0x04, 0x21, 0xa0, 0xfb, 0x8c,
+	0xb3, 0xe1, 0xe2, 0x96, 0xb6, 0x33, 0xa0, 0x22, 0xb6, 0x7e, 0x6b, 0x60, 0x48, 0x30, 0x79, 0x5b,
+	0x36, 0xbc, 0x98, 0x27, 0x28, 0x1a, 0xae, 0xd9, 0x4f, 0x5a, 0x0d, 0x8b, 0x28, 0x07, 0xd0, 0x1a,
+	0x4b, 0x0e, 0x60, 0x10, 0x27, 0x18, 0xb9, 0x8e, 0x2b, 0xca, 0x62, 0x84, 0x69, 0x93, 0x82, 0x7b,
+	0xae, 0x54, 0xde, 0x2f, 0xd0, 0x06, 0xd2, 0xda, 0x2e, 0xe7, 0x8b, 0x36, 0xab, 0x60, 0xb8, 0x9f,
+	0x0e, 0x4f, 0xcf, 0x2e, 0x4e, 0xbe, 0x5e, 0xac, 0x2f, 0x10, 0x13, 0xfa, 0xe7, 0xee, 0xc9, 0x99,
+	0xeb, 0xb8, 0xeb, 0xda, 0x3b, 0xb3, 0xdc, 0xed, 0x38, 0x5f, 0x7b, 0x0d, 0x06, 0x6a, 0x57, 0x0b,
+	0xe1, 0xa1, 0x08, 0x0e, 0x23, 0xbf, 0xbe, 0xcd, 0x33, 0x58, 0x16, 0x8c, 0x52, 0x1a, 0x53, 0xb9,
+	0x09, 0x2d, 0x2a, 0x4d, 0x05, 0x17, 0xff, 0xa5, 0xa0, 0x35, 0x83, 0x47, 0x6e, 0xc8, 0x82, 0x88,
+	0xe3, 0x75, 0x73, 0xd4, 0x2e, 0x18, 0x49, 0x55, 0x68, 0xbe, 0x84, 0xc4, 0xd3, 0x1a, 0xf1, 0x1f,
+	0x63, 0x29, 0x5e, 0x62, 0x8a, 0x91, 0x87, 0xed, 0xb1, 0x69, 0x55, 0x68, 0x8e, 0x95, 0x78, 0x5a,
+	0x23, 0xee, 0x3b, 0xf6, 0x0b, 0x18, 0xb2, 0x0d, 0x19, 0x42, 0x9f, 0xf9, 0x7e, 0x8a, 0x59, 0x26,
+	0x06, 0x0d, 0x68, 0x75, 0x24, 0x9b, 0x60, 0x64, 0xe8, 0xa5, 0xc8, 0x3f, 0xe2, 0xbc, 0xf4, 0x56,
+	0x9d, 0xc8, 0x4d, 0x97, 0xb1, 0x90, 0x0f, 0x97, 0x0a, 0xd3, 0xe5, 0xb1, 0xb5, 0x0f, 0x86, 0x94,
+	0x45, 0xba, 0x52, 0xab, 0x5d, 0x29, 0x49, 0x8b, 0x0a, 0xc9, 0x06, 0x38, 0x0a, 0x92, 0x29, 0xa6,
+	0x82, 0xf5, 0x02, 0x56, 0x31, 0xf2, 0xd2, 0x79, 0xc2, 0xd1, 0x3f, 0xae, 0xe9, 0xcd, 0xa4, 0x35,
+	0x87, 0x0d, 0x55, 0x38, 0x85, 0x7f, 0x4f, 0xe5, 0xf6, 0x00, 0x3c, 0x49, 0x2e, 0xa5, 0x5b, 0x2f,
+	0xf0, 0x75, 0x53, 0xaa, 0x60, 0xac, 0xe7, 0xd0, 0x3f, 0x2c, 0x05, 0xba, 0x55, 0x3a, 0x2b, 0x84,
+	0x95, 0x09, 0x67, 0xfc, 0x34, 0xba, 0x8c, 0xef, 0x10, 0x78, 0x03, 0x7a, 0x78, 0x1d, 0x64, 0x3c,
+	0x13, 0x83, 0x57, 0x68, 0x79, 0x12, 0x2a, 0x05, 0x3f, 0x50, 0x48, 0xab, 0x53, 0x11, 0x93, 0x11,
+	0xac, 0x84, 0xb1, 0xc7, 0x78, 0x10, 0x47, 0x43, 0x7d, 0x4b, 0xdb, 0x31, 0xa8, 0x3c, 0xdb, 0x7f,
+	0x34, 0xe8, 0x89, 0x87, 0xce, 0xc8, 0x1e, 0xe8, 0x13, 0x64, 0x21, 0x79, 0xda, 0xba, 0xb3, 0xea,
+	0xae, 0x91, 0xfa, 0xc1, 0x90, 0x57, 0xd0, 0xfb, 0x1c, 0x65, 0x39, 0x47, 0x4d, 0x8f, 0xda, 0xa2,
+	0x91, 0x31, 0xf4, 0x28, 0x0a, 0xdc, 0x63, 0x05, 0x77, 0x7b, 0xdf, 0x37, 0x60, 0xb8, 0x33, 0x9e,
+	0x2f, 0x83, 0x7e, 0xb5, 0xce, 0x8d, 0xdf, 0x58, 0x93, 0xf6, 0x1a, 0x4c, 0x07, 0x79, 0xb1, 0x11,
+	0xfa, 0x37, 0xee, 0x24, 0xbb, 0xd8, 0xdf, 0xc0, 0x38, 0x0a, 0x91, 0x15, 0x2f, 0xbf, 0x0d, 0x4b,
+	0xee, 0x8c, 0x93, 0x36, 0xa8, 0x7b, 0x93, 0x6d, 0x58, 0x72, 0x50, 0x02, 0x65, 0xbe, 0xdb, 0xfe,
+	0xa7, 0x06, 0x70, 0x52, 0xf8, 0x2e, 0x88, 0x23, 0x72, 0x00, 0xfd, 0xf2, 0xd4, 0x1d, 0xb2, 0xd9,
+	0xd5, 0x5b, 0x31, 0xe5, 0x01, 0xf4, 0x8f, 0xb1, 0x60, 0xde, 0x09, 0xec, 0xae, 0xf0, 0x4b, 0x83,
+	0xfe, 0x84, 0xc7, 0x29, 0xbb, 0xca, 0xf7, 0xd6, 0xdd, 0x59, 0x36, 0x25, 0x1d, 0x7f, 0x8e, 0x56,
+	0x8b, 0x4c, 0xe5, 0x4b, 0x01, 0x0c, 0x43, 0xd2, 0x4c, 0x8f, 0x3a, 0x3c, 0xf2, 0x12, 0xf4, 0xdc,
+	0xa6, 0x6d, 0xe0, 0x5a, 0x71, 0xac, 0x1c, 0xfc, 0xbd, 0x27, 0x7e, 0x52, 0xfb, 0x7f, 0x03, 0x00,
+	0x00, 0xff, 0xff, 0x20, 0x9b, 0xea, 0xde, 0xb3, 0x06, 0x00, 0x00,
 }
