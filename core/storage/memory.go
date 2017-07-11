@@ -1,28 +1,39 @@
 package storage
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type memoryStore struct {
 	memory map[string][]byte
+	mtx    *sync.RWMutex
 }
 
 func NewMemoryStore() Store {
 	return &memoryStore{
 		memory: make(map[string][]byte),
+		mtx:    new(sync.RWMutex),
 	}
 }
 
 func (ms *memoryStore) Put(address, data []byte) error {
+	ms.mtx.Lock()
 	ms.memory[string(address)] = data
+	ms.mtx.Unlock()
 	return nil
 }
 
 func (ms *memoryStore) Get(address []byte) ([]byte, error) {
-	return ms.memory[string(address)], nil
+	data, exists := ms.get(address)
+	if !exists {
+		return nil, ErrorAddressNotFound(address)
+	}
+	return data, nil
 }
 
 func (ms *memoryStore) Stat(address []byte) (*StatInfo, error) {
-	data, exists := ms.memory[string(address)]
+	data, exists := ms.get(address)
 	return &StatInfo{
 		Exists: exists,
 		Size:   uint64(len(data)),
@@ -31,4 +42,15 @@ func (ms *memoryStore) Stat(address []byte) (*StatInfo, error) {
 
 func (ms *memoryStore) Location(address []byte) string {
 	return fmt.Sprintf("memfs://%x", address)
+}
+
+func (ms *memoryStore) Name() string {
+	return "memoryStore"
+}
+
+func (ms *memoryStore) get(address []byte) ([]byte, bool) {
+	ms.mtx.RLock()
+	data, exists := ms.memory[string(address)]
+	ms.mtx.RUnlock()
+	return data, exists
 }

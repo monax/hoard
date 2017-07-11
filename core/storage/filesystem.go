@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -8,38 +9,16 @@ import (
 )
 
 type fileSystemStore struct {
-	rootDirectory    string
-	addressSegmenter AddressSegmenter
-}
-
-// Address splitter is used to create a directory hierarchy by splitting
-// addresses into segments, the mapping should be bijective and the segments will
-// be joined to form the path to file system
-type AddressSegmenter interface {
-	Segment(address []byte) (segments []string)
-	Combine(segments []string) (address []byte)
+	rootDirectory   string
+	addressEncoding AddressEncoding
 }
 
 func NewFileSystemStore(rootDirectory string,
-	addressSegmenter AddressSegmenter) Store {
+	addressEncoding AddressEncoding) Store {
 	return &fileSystemStore{
-		rootDirectory:    rootDirectory,
-		addressSegmenter: addressSegmenter,
+		rootDirectory:   rootDirectory,
+		addressEncoding: addressEncoding,
 	}
-}
-
-func NewFlatAddressSegmenter() AddressSegmenter {
-	return &flatAddressSegmenter{}
-}
-
-type flatAddressSegmenter struct{}
-
-func (fas *flatAddressSegmenter) Segment(address []byte) []string {
-	return []string{string(address)}
-}
-
-func (fas *flatAddressSegmenter) Combine(segments []string) []byte {
-	return ([]byte)(segments[0])
 }
 
 func (fss *fileSystemStore) Put(address, data []byte) error {
@@ -76,5 +55,9 @@ func (fss *fileSystemStore) Location(address []byte) string {
 
 func (fss *fileSystemStore) Path(address []byte) string {
 	return path.Join(fss.rootDirectory,
-		path.Join(fss.addressSegmenter.Segment(address)...))
+		fss.addressEncoding.EncodeToString(address))
+}
+
+func (fss *fileSystemStore) Name() string {
+	return fmt.Sprintf("fileSystemStore[root=%s]", fss.rootDirectory)
 }

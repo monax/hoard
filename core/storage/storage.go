@@ -1,5 +1,17 @@
 package storage
 
+import (
+	"encoding/base64"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+func ErrorAddressNotFound(address []byte) error {
+	return status.Errorf(codes.NotFound, "No data stored at address %s",
+		base64.StdEncoding.EncodeToString(address))
+}
+
 type Locator interface {
 	// Provides a canonical external location for some data, typically a URI
 	Location(address []byte) string
@@ -23,6 +35,8 @@ type WriteStore interface {
 }
 
 type Store interface {
+	// Human readable name describing the Store
+	Name() string
 	ReadStore
 	WriteStore
 	Locator

@@ -3,8 +3,9 @@ package storage
 import (
 	"encoding/base64"
 
-	"reflect"
+	"fmt"
 
+	"code.monax.io/platform/hoard/core/logging"
 	"github.com/go-kit/kit/log"
 )
 
@@ -15,11 +16,12 @@ type loggingStore struct {
 
 // Decorates a Store with some simple logging of method/address pairs
 func NewLoggingStore(store Store, logger log.Logger) *loggingStore {
-	return &loggingStore{
-		store: store,
-		logger: log.With(logger, "module", "storage",
-			"store", storeType(store)),
+	ls := &loggingStore{
+		store:  store,
+		logger: logging.TraceLogger(log.With(logger, "module", "storage")),
 	}
+	ls.logger = log.With(ls.logger, "store", ls.Name())
+	return ls
 }
 
 var _ Store = (*loggingStore)(nil)
@@ -44,17 +46,10 @@ func (ls *loggingStore) Location(address []byte) string {
 	return ls.store.Location(address)
 }
 
-func formatAddress(address []byte) string {
-	return base64.StdEncoding.EncodeToString(address)
+func (ls *loggingStore) Name() string {
+	return fmt.Sprintf("loggingStore<%s>", ls.store.Name())
 }
 
-func storeType(store Store) string {
-	storeType := reflect.TypeOf(store)
-	var storeTypeName string
-	if storeType.Kind() == reflect.Ptr {
-		storeTypeName = storeType.Elem().String()
-	} else {
-		storeTypeName = storeType.String()
-	}
-	return storeTypeName
+func formatAddress(address []byte) string {
+	return base64.StdEncoding.EncodeToString(address)
 }
