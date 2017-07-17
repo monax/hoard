@@ -14,15 +14,15 @@ Planned storage backends are:
 - BigchainDB (and IPDB)
 - Tendermint
 
-It encrypts deterministically (or convergently) because it encrypts an object using the object's hash (sha256) as the secret key (which can than be shared as a 'grant').
+It encrypts deterministically (convergently) because it encrypts an object using the object's hash (SHA256) as the secret key (which can than be shared as a 'grant').
 
-It is content-addressed because encrypted objects are stored at an address determined by the encrypted object's hash (sha256 again).
+It is content-addressed because encrypted objects are stored at an address determined by the encrypted object's hash (SHA256 again).
 
 ![hoarding marmot](docs/images/hoard.jpg)
 
 ## Encryption scheme
 
-Hoard implements an encryption scheme based off the SHA256 hash and AES256-GCM (an authenticated mode of AES). It is an example of envelope encryption where an object is encrypted with a specific one-time key and where that secret key can itself be shared by encrypting it (asymmetrically or otherwise) and publishing it to a recipient. It is motivated by and possesses the following features:
+Hoard implements an encryption scheme based off the SHA256 cryptographic hash function and the symmetric block cipher AES256-GCM (Galois Counter Mode is an authenticated mode of AES). It is an example of envelope encryption where an object is encrypted with a specific one-time key and where that secret key can itself be shared by encrypting it (asymmetrically or otherwise) and publishing it to a recipient. It is motivated by and possesses the following features:
 
 - Usable on a publicly-accessible storage backend (strongly encrypted by AES256-GCM)
 - Addressable by the hash of the ciphertext (the bytes of encrypted object) so can be ciphertext can de-duplicated and object existence can be queried without the secret key
@@ -48,17 +48,17 @@ Given an encrypted object, secret key, and salt the decryption proceeds as follo
 
 By design this scheme is trivially vulnerable to known-plaintext attacks (if you know the plaintext you can find the key).
 
-It is also vulnerable to a ciphertext-only attack where a rainbow table of ciphertext may be computed where the space of different variation for a set of plaintexts is small. This can either be because the plaintexts or short or if the plaintexts are mostly identical template with a small amount of variation (an 8-digit account number for example). This is only a problem if revealing that an object has been stored at all leaks sensitive information.
+It is also vulnerable to a ciphertext-only attack where a rainbow table of ciphertexts may be computed where the space of variation in a set of plaintexts is small. This occurs when the plaintexts are short or when the plaintexts are mostly identical template with a small amount of variation (an 8-digit account number for example). This is only a problem if revealing that an object has been stored at all leaks sensitive information.
 
-The scheme should not be vulnerable to general chosen-ciphertext attacks (CCA) through the use of Galois Counter Mode with AES that is secure against CCA.
+The scheme should not be vulnerable to general chosen-ciphertext attacks (CCA) through the use of Galois Counter Mode with AES that is CCA-secure.
 
 If you want known-plaintext or ciphertext-only security you can provide a salt. The salt can be of any length and can be used a number of ways. If you are encrypting short plaintexts you can agree a sufficiently long salt to be pre-shared amongst a set of parties that adds entropy to the encryption so that a rainbow table of possible values cannot be feasibly built (semantic security of SHA256 means the salt will induce an unpredictable variation of ciphertexts). In this case amongst the parties in possession of the salt the advantages of deterministic encryption are preserved. Alternatively a random hash can be used for the salt, this will induce a different secret key and address each time you encrypt the same bytes. It is effectively the same as using a random key.
 
-The encryption is furthermore vulnerable to the same timing and length attacks that to which AES is susceptible, but for most purposes these attacks are not usually considered too much of an issue.
+The encryption is furthermore vulnerable to the same timing and length attacks that to which AES is susceptible, but for most purposes these attacks are not usually considered an issue.
 
 ### Maturity
 
-Hoard is still pre-release, the cryptographic libraries used are standard Go libraries (and Go's NACL implementation) so should be of a reliable quality being widely deployed. The encryption scheme is straight-forward and has an isolated implementation. However there may be bugs in the implementation.
+Hoard is still pre-release, the cryptographic libraries used are standard Go libraries (and Go's NACL implementation) so should be of reasonable quality and are widely deployed. The encryption scheme is straight-forward and has an isolated implementation. However there may be bugs in the implementation.
 
 ## Installing
 
