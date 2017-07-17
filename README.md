@@ -75,7 +75,8 @@ go get github.com/monax/hoard/cmd/hoarctl
 
 Hoard runs as a daemon providing a GRPC service to other clients including the command line client `hoarctl`. The purpose of the daemon is to read local secrets (such as PGP or other keys) and to configure itself to use a particular storage backend. You can run the daemon with:
 
-```
+```shell
+# Run the daemon
 hoard
 
 # or with logging
@@ -140,6 +141,13 @@ The default directory is `$HOME/.config/hoard.toml` or you can pass the file wit
 
 See [hoard.proto](./core/hoard.proto) for the protobuf3 definition of the API. Also see `hoarctl <CMD> -h` for full help on each sub-command.
 
+## Clients
+
+Hoard uses [GRPC](https://grpc.io/) for its API for which there is a wide range of client libraries available. You should be able to set up a client in any GRPC supported language with relative ease.
+
+### Javascript
+
+A Javascript client library can be found here: [hoard-js](https://github.com/monax/hoard-js).
 
 ## Building
 
