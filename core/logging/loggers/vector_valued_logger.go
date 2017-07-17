@@ -15,8 +15,8 @@
 package loggers
 
 import (
-	"code.monax.io/platform/hoard/core/logging/structure"
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/core/logging/structure"
 )
 
 // Treat duplicate key-values as consecutive entries in a vector-valued lookup

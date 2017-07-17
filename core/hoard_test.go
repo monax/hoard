@@ -3,9 +3,9 @@ package core
 import (
 	"testing"
 
-	"code.monax.io/platform/hoard/core/reference"
-	"code.monax.io/platform/hoard/core/storage"
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/core/reference"
+	"github.com/monax/hoard/core/storage"
 	"github.com/stretchr/testify/assert"
 )
 

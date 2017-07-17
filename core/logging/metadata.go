@@ -17,9 +17,9 @@ package logging
 import (
 	"time"
 
-	"code.monax.io/platform/hoard/core/logging/structure"
 	"github.com/go-kit/kit/log"
 	"github.com/go-stack/stack"
+	"github.com/monax/hoard/core/logging/structure"
 )
 
 const (

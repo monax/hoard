@@ -15,9 +15,9 @@
 package logging
 
 import (
-	"code.monax.io/platform/hoard/core/logging/slice"
-	"code.monax.io/platform/hoard/core/logging/structure"
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/core/logging/slice"
+	"github.com/monax/hoard/core/logging/structure"
 )
 
 func InfoLogger(logger log.Logger) log.Logger {

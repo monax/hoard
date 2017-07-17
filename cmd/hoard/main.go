@@ -9,13 +9,13 @@ import (
 
 	"io/ioutil"
 
-	"code.monax.io/platform/hoard/config"
-	"code.monax.io/platform/hoard/config/logging"
-	"code.monax.io/platform/hoard/config/storage"
-	"code.monax.io/platform/hoard/server"
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
 	"github.com/jawher/mow.cli"
+	"github.com/monax/hoard/config"
+	"github.com/monax/hoard/config/logging"
+	"github.com/monax/hoard/config/storage"
+	"github.com/monax/hoard/server"
 )
 
 func main() {

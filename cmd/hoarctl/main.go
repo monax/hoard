@@ -17,10 +17,10 @@ import (
 
 	"encoding/base64"
 
-	"code.monax.io/platform/hoard/config"
-	"code.monax.io/platform/hoard/core"
-	"code.monax.io/platform/hoard/server"
 	"github.com/jawher/mow.cli"
+	"github.com/monax/hoard/config"
+	"github.com/monax/hoard/core"
+	"github.com/monax/hoard/server"
 	"google.golang.org/grpc"
 )
 

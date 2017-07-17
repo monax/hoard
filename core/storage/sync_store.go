@@ -3,7 +3,7 @@ package storage
 import (
 	"fmt"
 
-	"code.monax.io/platform/hoard/core/sync"
+	"github.com/monax/hoard/core/sync"
 )
 
 // The number of mutexes that will be available for all possible addresses.

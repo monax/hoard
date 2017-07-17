@@ -5,11 +5,11 @@ import (
 	"net"
 	"strings"
 
-	"code.monax.io/platform/hoard/core"
-	"code.monax.io/platform/hoard/core/logging"
-	"code.monax.io/platform/hoard/core/logging/loggers"
-	"code.monax.io/platform/hoard/core/storage"
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/core"
+	"github.com/monax/hoard/core/logging"
+	"github.com/monax/hoard/core/logging/loggers"
+	"github.com/monax/hoard/core/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

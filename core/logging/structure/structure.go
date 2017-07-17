@@ -14,7 +14,7 @@
 
 package structure
 
-import . "code.monax.io/platform/hoard/core/logging/slice"
+import . "github.com/monax/hoard/core/logging/slice"
 
 type Channel string
 

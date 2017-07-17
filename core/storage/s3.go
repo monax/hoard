@@ -5,14 +5,14 @@ import (
 
 	"bytes"
 
-	"code.monax.io/platform/hoard/core/logging"
-	"code.monax.io/platform/hoard/core/logging/structure"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/core/logging"
+	"github.com/monax/hoard/core/logging/structure"
 )
 
 type s3Store struct {

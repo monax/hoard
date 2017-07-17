@@ -7,10 +7,10 @@ import (
 
 	"errors"
 
-	"code.monax.io/platform/hoard/core/storage"
 	"github.com/BurntSushi/toml"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/core/storage"
 )
 
 const DefaultAddressEncodingName = "base64"

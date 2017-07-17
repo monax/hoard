@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"code.monax.io/platform/hoard/core/reference"
+	"github.com/monax/hoard/core/reference"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )

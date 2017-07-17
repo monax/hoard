@@ -1,7 +1,7 @@
 package grants
 
 import (
-	"code.monax.io/platform/hoard/core/reference"
+	"github.com/monax/hoard/core/reference"
 )
 
 func PlaintextGrant(ref *reference.Ref) string {

@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"code.monax.io/platform/hoard/core/encryption"
-	"code.monax.io/platform/hoard/core/reference"
-	"code.monax.io/platform/hoard/core/storage"
+	"github.com/monax/hoard/core/encryption"
+	"github.com/monax/hoard/core/reference"
+	"github.com/monax/hoard/core/storage"
 )
 
 // This is our top level API object providing library acting as a deterministic

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.monax.io/platform/hoard/core/reference"
+	"github.com/monax/hoard/core/reference"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/openpgp"
 )

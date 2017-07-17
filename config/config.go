@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"code.monax.io/platform/hoard/config/logging"
-	"code.monax.io/platform/hoard/config/storage"
 	"github.com/BurntSushi/toml"
+	"github.com/monax/hoard/config/logging"
+	"github.com/monax/hoard/config/storage"
 )
 
 const (

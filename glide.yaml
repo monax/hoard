@@ -1,4 +1,4 @@
-package: code.monax.io/platform/hoard
+package: github.com/monax/hoard
 import:
 - package: github.com/jawher/mow.cli
   version: 8327d12beb75e6471b7f045588acc318d1147146

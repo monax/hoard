@@ -17,7 +17,7 @@ package loggers
 import (
 	"testing"
 
-	. "code.monax.io/platform/hoard/core/logging/slice"
+	. "github.com/monax/hoard/core/logging/slice"
 	"github.com/stretchr/testify/assert"
 )
 

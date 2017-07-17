@@ -1,8 +1,8 @@
 package core
 
 import (
-	"code.monax.io/platform/hoard/core/reference"
-	"code.monax.io/platform/hoard/core/storage"
+	"github.com/monax/hoard/core/reference"
+	"github.com/monax/hoard/core/storage"
 	"golang.org/x/net/context"
 )
 
