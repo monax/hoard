@@ -18,18 +18,26 @@
 # See http://www.grpc.io/docs/quickstart/go.html to get started.
 #
 
+SHELL := /bin/bash
 GOFILES_NOVENDOR := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GOPACKAGES_NOVENDOR := $(shell go list ./... | grep -v /vendor/)
 
 # Install dependencies and also clear out vendor (we should do this in CI)
+
+# to make sure we are not depending on any local changes to dependencies in
+# vendor/
+.PHONY: ensure_vendor
+ensure_vendor:
+	@rm -rf vendor
+	@glide install
+
 # to make sure we are not depending on any local changes to dependencies in
 # vendor/
 .PHONY: deps
-deps:
-	@rm -rf vendor
+deps: ensure_vendor
+	@go get golang.org/x/tools/cmd/goimports
 	@go get -u github.com/golang/protobuf/protoc-gen-go
 	@go get -u github.com/Masterminds/glide
-	@glide install
 
 # Print version
 .PHONY: version
@@ -70,7 +78,7 @@ build_bin:	build_hoard build_hoarctl
 
 # Run tests
 .PHONY:	test
-test: build_protobuf
+test: check build_protobuf
 	@go test ${GOPACKAGES_NOVENDOR}
 
 # Run tests for developing (noisy)
@@ -80,4 +88,8 @@ test_dev: build_protobuf
 
 # Build all the things
 .PHONY: build
-build:	check test build_protobuf build_bin
+build:	build_protobuf build_bin
+
+# Do all available tests and checks then build
+.PHONY: build_ci
+build_ci: ensure_vendor check test build

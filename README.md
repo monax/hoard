@@ -135,7 +135,9 @@ The encryption is furthermore vulnerable to the same timing and length attacks t
 
 ### Maturity
 
-Hoard is still pre-release, the cryptographic libraries used are standard Go libraries (and Go's NACL implementation) so should be of reasonable quality and are widely deployed. The encryption scheme is straight-forward and has an isolated implementation. However there may be bugs in the implementation.
+Hoard is still pre-release and pre-version, there may be breaking changes to the API at any time. Before version tag v1.0.0 changes minor version number changes may break the hoard.proto or hoarctl APIs (e.g. 0.3.4 -> 0.4.0) but patch number changes should leave it intact (e.g. 0.3.4 -> 0.3.5).
+ 
+The cryptographic libraries used are standard Go libraries (and Go's NACL implementation) so should be of reasonable quality and are widely deployed. The encryption scheme is straight-forward and has an isolated implementation. However there may be bugs in the implementation.
 
 ## Specification
 

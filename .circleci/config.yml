@@ -1,0 +1,10 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/monax/hoard
+    docker:
+      - image: silasdavis/hoard:build
+
+    steps:
+      - checkout
+      - run: make build_ci
