@@ -7,3 +7,5 @@ RUN rm -rf protobuf protoc-*
 RUN go get -u golang.org/x/tools/cmd/goimports
 RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN go get -u github.com/Masterminds/glide
+RUN go get -u github.com/mitchellh/gox
+RUN go get -u github.com/tcnksm/ghr

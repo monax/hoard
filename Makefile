@@ -21,6 +21,8 @@
 SHELL := /bin/bash
 GOFILES_NOVENDOR := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GOPACKAGES_NOVENDOR := $(shell go list ./... | grep -v /vendor/)
+OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
+GOX_OUTPUT := "bin/{{.Dir}}_{{.OS}}_{{.Arch}}"
 
 # Install dependencies and also clear out vendor (we should do this in CI)
 
@@ -38,6 +40,7 @@ deps: ensure_vendor
 	@go get golang.org/x/tools/cmd/goimports
 	@go get -u github.com/golang/protobuf/protoc-gen-go
 	@go get -u github.com/Masterminds/glide
+	@go get -u github.com/mitchellh/gox
 
 # Print version
 .PHONY: version
@@ -65,12 +68,12 @@ build_protobuf:
 # Build the hoard binary
 .PHONY: build_hoard
 build_hoard:
-	@go build -o bin/hoard ./cmd/hoard
+	@gox -output=${GOX_OUTPUT} -osarch=${OS_ARCHS} ./cmd/hoard
 
 # Build the hoard binary
 .PHONY: build_hoarctl
 build_hoarctl:
-	@go build -o bin/hoarctl ./cmd/hoarctl
+	@gox -output=${GOX_OUTPUT} -osarch=${OS_ARCHS} ./cmd/hoarctl
 
 # Build the hoard binaries
 .PHONY: build_bin
