@@ -23,6 +23,7 @@ GOFILES_NOVENDOR := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GOPACKAGES_NOVENDOR := $(shell go list ./... | grep -v /vendor/)
 OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
 GOX_OUTPUT := "bin/{{.Dir}}_{{.OS}}_{{.Arch}}"
+BUILD_IMAGE := "silasdavis/hoard:build"
 
 # Install dependencies and also clear out vendor (we should do this in CI)
 
@@ -36,11 +37,19 @@ ensure_vendor:
 # to make sure we are not depending on any local changes to dependencies in
 # vendor/
 .PHONY: deps
-deps: ensure_vendor
+deps:
 	@go get golang.org/x/tools/cmd/goimports
 	@go get -u github.com/golang/protobuf/protoc-gen-go
 	@go get -u github.com/Masterminds/glide
 	@go get -u github.com/mitchellh/gox
+	@go get -u github.com/tcnksm/ghr
+
+# Update the build image by building the Dockerfile at the project root
+# and pushing it to docker
+.PHONY: update_build_image
+update_build_image:
+	@docker build . -t ${BUILD_IMAGE}
+	@docker push ${BUILD_IMAGE}
 
 # Print version
 .PHONY: version
@@ -89,6 +98,11 @@ test: check build_protobuf
 test_dev: build_protobuf
 	@go test -v ${GOPACKAGES_NOVENDOR}
 
+# Run tests including integration tests
+.PHONY:	test_integration
+test_integration: check build_protobuf
+	@go test -tags integration ${GOPACKAGES_NOVENDOR}
+
 # Build all the things
 .PHONY: build
 build:	build_protobuf build_bin
@@ -96,3 +110,8 @@ build:	build_protobuf build_bin
 # Do all available tests and checks then build
 .PHONY: build_ci
 build_ci: ensure_vendor check test build
+
+# If the checked out commit is tagged with a version then release to github
+.PHONY: release
+release:
+	@scripts/release.sh

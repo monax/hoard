@@ -8,3 +8,5 @@ jobs:
     steps:
       - checkout
       - run: make build_ci
+      - run: "[[ ${CIRCLE_BRANCH} = 'master' ]] && make release"
+

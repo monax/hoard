@@ -1,9 +1,8 @@
-hash: 48f0b4a4748475ee9f01e5420f568ded8620b26c7835854bd57dc499084538f7
-updated: 2017-07-08T00:13:21.255892462+01:00
+hash: d494078c7b8553c90307de9a6b5132d95c8149a8b740cb176ada22ba8cab7eb5
+updated: 2017-07-19T21:19:51.100467229+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 5277f9dfd2dd27378387ab6e97a4b4ae895fec4d
-  repo: git@github.com:silasdavis/aws-sdk-go.git
+  version: 8da51c33f6001c4dda06a2561c2234be4cece1ed
   subpackages:
   - aws
   - aws/awserr
@@ -46,6 +45,7 @@ imports:
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
   - log
+  - log/term
 - name: github.com/go-logfmt/logfmt
   version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
 - name: github.com/go-stack/stack
