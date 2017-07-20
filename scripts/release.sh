@@ -15,7 +15,7 @@ if [[ $1 ]]; then
 else
     export tag=$(git tag --points-at HEAD)
     # Only release from master unless being run as override
-    if [[ $(git symbolic-ref HEAD) != "/refs/heads/master" ]]; then
+    if [[ $(git symbolic-ref HEAD) != "refs/heads/master" ]]; then
         echo "Branch is not master so not releasing."
         exit 0
     fi

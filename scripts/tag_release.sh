@@ -2,6 +2,8 @@
 # uncomment to use the local changes
 # vcmd="go run ./cmd/hoarctl/main.go version"
 
+set -e
+
 # Don't tag if there is a dirty working dir
 if ! git diff-index --quiet HEAD  ; then
     echo "There are uncommitted changes in the working directory."
@@ -19,4 +21,5 @@ echo "$changes"
 echo ""
 echo "$changes" | git tag -a ${version} -F-
 
+git push origin ${version}
 
