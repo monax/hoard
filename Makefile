@@ -22,7 +22,8 @@ SHELL := /bin/bash
 GOFILES_NOVENDOR := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GOPACKAGES_NOVENDOR := $(shell go list ./... | grep -v /vendor/)
 OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
-GOX_OUTPUT := "bin/{{.Dir}}_{{.OS}}_{{.Arch}}"
+DIST := "dist"
+GOX_OUTPUT := "$DIST/{{.Dir}}_{{.OS}}_{{.Arch}}"
 BUILD_IMAGE := "silasdavis/hoard:build"
 
 # Install dependencies and also clear out vendor (we should do this in CI)
@@ -41,8 +42,7 @@ deps:
 	@go get golang.org/x/tools/cmd/goimports
 	@go get -u github.com/golang/protobuf/protoc-gen-go
 	@go get -u github.com/Masterminds/glide
-	@go get -u github.com/mitchellh/gox
-	@go get -u github.com/tcnksm/ghr
+	@go get -u github.com/goreleaser/goreleaser
 
 # Update the build image by building the Dockerfile at the project root
 # and pushing it to docker
@@ -77,12 +77,12 @@ build_protobuf:
 # Build the hoard binary
 .PHONY: build_hoard
 build_hoard:
-	@gox -output=${GOX_OUTPUT} -osarch=${OS_ARCHS} ./cmd/hoard
+	@go build -o bin/hoard ./cmd/hoard
 
 # Build the hoard binary
 .PHONY: build_hoarctl
 build_hoarctl:
-	@gox -output=${GOX_OUTPUT} -osarch=${OS_ARCHS} ./cmd/hoarctl
+	@go build -o bin/hoarctl ./cmd/hoarctl
 
 # Build the hoard binaries
 .PHONY: build_bin
@@ -107,9 +107,20 @@ test_integration: check build_protobuf
 .PHONY: build
 build:	build_protobuf build_bin
 
+# Build binaries for all architectures
+.PHONY: build_dist
+build_dist:	build_protobuf
+	@goreleaser --rm-dist --skip-publish --skip-validate
+
 # Do all available tests and checks then build
 .PHONY: build_ci
 build_ci: ensure_vendor check test build
+
+# Tag the current HEAD commit with the current release defined in
+# ./release/release.go
+.PHONY: tag_release
+tag_release: test check build_bin
+	@scripts/tag_release.sh
 
 # If the checked out commit is tagged with a version then release to github
 .PHONY: release

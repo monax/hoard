@@ -1,14 +1,10 @@
-package version
+package release
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 )
-
-// This is the single authoritative version. Should be in semantic version form.
-const version = "0.0.1"
 
 const (
 	// Base of minor, major, and patch version numbers
@@ -21,15 +17,15 @@ var major, minor, patch uint8
 
 func init() {
 	var err error
-	major, minor, patch, err = ParseVersion(version)
+	major, minor, patch, err = ParseVersion(Version())
 
 	if err != nil {
-		panic(fmt.Errorf("Could not parse version: '%s'", version))
+		panic(fmt.Errorf("Could not parse version: '%s'", Version()))
 	}
 }
 
-func String() string {
-	return version
+func Version() string {
+	return hoardReleases[0].Version
 }
 
 func Major() uint8 {
@@ -48,7 +44,8 @@ func ParseVersion(ver string) (uint8, uint8, uint8, error) {
 	parts := strings.Split(ver, ".")
 	if len(parts) != 3 {
 		return 0, 0, 0,
-			errors.New("Version string must have three '.' separated parts")
+			fmt.Errorf("Version string must have three '.' separated parts "+
+				"but '%s' does not.", ver)
 	}
 	maj, err := strconv.ParseUint(parts[0], numberBase, uintBits)
 	if err != nil {

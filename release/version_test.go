@@ -1,4 +1,4 @@
-package version
+package release
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 func TestVersion(t *testing.T) {
 	// Check parsed version numbers match the version string
-	assert.Equal(t, String(), fmt.Sprintf("%d.%d.%d",
+	assert.Equal(t, Version(), fmt.Sprintf("%d.%d.%d",
 		Major(), Minor(), Patch()))
 }
 

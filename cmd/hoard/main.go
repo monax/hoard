@@ -12,6 +12,7 @@ import (
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
 	"github.com/jawher/mow.cli"
+	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
 	"github.com/monax/hoard/config/logging"
 	"github.com/monax/hoard/config/storage"
@@ -36,6 +37,8 @@ func main() {
 	// around optionality and ordering of options and arguments
 	hoardApp.Spec = "[--config=<path to config file>] " +
 		"[--address=<address to listen on>] [--logging]"
+
+	cmd.AddVersionCommand(hoardApp)
 
 	hoardApp.Action = func() {
 		conf, err := hoardConfig(*configFileOpt)

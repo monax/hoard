@@ -18,6 +18,7 @@ import (
 	"encoding/base64"
 
 	"github.com/jawher/mow.cli"
+	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
 	"github.com/monax/hoard/core"
 	"github.com/monax/hoard/server"
@@ -57,6 +58,8 @@ func main() {
 		encryptionClient = core.NewEncryptionClient(conn)
 		storageClient = core.NewStorageClient(conn)
 	}
+
+	cmd.AddVersionCommand(hoarctlApp)
 
 	hoarctlApp.Command("put",
 		"Put some data read from STDIN into encrypted data store and return a reference",
@@ -341,10 +344,6 @@ func readBase64(base64String string) []byte {
 		fatalf("Could not decode '%s' as base64-encoded string", base64String)
 	}
 	return secretKeyBytes
-}
-
-func printf(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
 }
 
 func fatalf(format string, args ...interface{}) {
