@@ -112,6 +112,9 @@ build:	build_protobuf build_bin
 build_dist:	build_protobuf
 	@goreleaser --rm-dist --skip-publish --skip-validate
 
+changelog.md: ./release/release.go
+	@go run ./cmd/hoarctl/main.go version changelog > changelog.md
+
 # Do all available tests and checks then build
 .PHONY: build_ci
 build_ci: ensure_vendor check test build
@@ -119,7 +122,7 @@ build_ci: ensure_vendor check test build
 # Tag the current HEAD commit with the current release defined in
 # ./release/release.go
 .PHONY: tag_release
-tag_release: test check build_bin
+tag_release: test check changelog.md build_bin
 	@scripts/tag_release.sh
 
 # If the checked out commit is tagged with a version then release to github
