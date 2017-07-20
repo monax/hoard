@@ -11,15 +11,15 @@ func TestChangelogForReleases(t *testing.T) {
 		[]Release{
 			{
 				Version: "0.1.0",
-				Changes: `Everything broken`,
+				Notes:   `Everything broken`,
 			},
 			{
 				Version: "0.0.2",
-				Changes: `Wonderful things were achieved`,
+				Notes:   `Wonderful things were achieved`,
 			},
 			{
 				Version: "0.0.1",
-				Changes: `Marvelous advances were made`,
+				Notes:   `Marvelous advances were made`,
 			},
 		})
 	assert.NoError(t, err)

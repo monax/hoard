@@ -15,19 +15,19 @@ func TestAssertReleasesUniqueAndMonotonic(t *testing.T) {
 	releases := []Release{
 		{
 			Version: "2.1.1",
-			Changes: `Everything fixed`,
+			Notes:   `Everything fixed`,
 		},
 		{
 			Version: "2.1.0",
-			Changes: `Everything broken`,
+			Notes:   `Everything broken`,
 		},
 		{
 			Version: "0.0.2",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.1",
-			Changes: `Marvelous advances were made`,
+			Notes:   `Marvelous advances were made`,
 		},
 	}
 	err := AssertReleasesUniqueAndMonotonic(releases)
@@ -36,27 +36,27 @@ func TestAssertReleasesUniqueAndMonotonic(t *testing.T) {
 	releases = []Release{
 		{
 			Version: "2.1.1",
-			Changes: `Everything fixed`,
+			Notes:   `Everything fixed`,
 		},
 		{
 			Version: "2.1.0",
-			Changes: `Everything broken`,
+			Notes:   `Everything broken`,
 		},
 		{
 			Version: "2.0.0",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "1.0.0",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.2",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.1",
-			Changes: `Marvelous advances were made`,
+			Notes:   `Marvelous advances were made`,
 		},
 	}
 	err = AssertReleasesUniqueAndMonotonic(releases)
@@ -65,15 +65,15 @@ func TestAssertReleasesUniqueAndMonotonic(t *testing.T) {
 	releases = []Release{
 		{
 			Version: "1.0.3",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.2",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.1",
-			Changes: `Marvelous advances were made`,
+			Notes:   `Marvelous advances were made`,
 		},
 	}
 	err = AssertReleasesUniqueAndMonotonic(releases)
@@ -82,15 +82,15 @@ func TestAssertReleasesUniqueAndMonotonic(t *testing.T) {
 	releases = []Release{
 		{
 			Version: "0.1.3",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.2",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.1",
-			Changes: `Marvelous advances were made`,
+			Notes:   `Marvelous advances were made`,
 		},
 	}
 	err = AssertReleasesUniqueAndMonotonic(releases)
@@ -99,15 +99,15 @@ func TestAssertReleasesUniqueAndMonotonic(t *testing.T) {
 	releases = []Release{
 		{
 			Version: "0.0.3",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.2",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.1",
-			Changes: `Marvelous advances were made`,
+			Notes:   `Marvelous advances were made`,
 		},
 	}
 	err = AssertReleasesUniqueAndMonotonic(releases)
@@ -116,15 +116,15 @@ func TestAssertReleasesUniqueAndMonotonic(t *testing.T) {
 	releases = []Release{
 		{
 			Version: "0.0.2",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.3",
-			Changes: `Wonderful things were achieved`,
+			Notes:   `Wonderful things were achieved`,
 		},
 		{
 			Version: "0.0.1",
-			Changes: `Marvelous advances were made`,
+			Notes:   `Marvelous advances were made`,
 		},
 	}
 	err = AssertReleasesUniqueAndMonotonic(releases)
