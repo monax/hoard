@@ -8,12 +8,8 @@ import (
 var changeLogTemplate = template.Must(template.New("changelog_template").
 	Parse(`# Hoard Changelog{{ range . }}
 ## Version {{ .Version }}
-{{ .Changes }}
+{{ .Notes }}
 {{ end }}`))
-
-func Changes() string {
-	return hoardReleases[0].Changes
-}
 
 func Changelog() string {
 	completeChangeLog, err := changelogForReleases(hoardReleases)

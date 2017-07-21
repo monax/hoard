@@ -3,7 +3,7 @@ package release
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
+	"errors"
 )
 
 // The purpose of this package is to capture version changes and change logs
@@ -12,7 +12,7 @@ import (
 
 type Release struct {
 	Version string
-	Changes string
+	Notes   string
 }
 
 // The releases described by version string and changes, newest release first.
@@ -24,7 +24,7 @@ type Release struct {
 var hoardReleases = []Release{
 	{
 		Version: "0.0.1",
-		Changes: `This is the first Hoard open source release and includes:
+		Notes: `This is the first Hoard open source release and includes:
 - Deterministic encryption scheme
 - GRPC API for encryption, storage, and cleartext
 - Memory, Filesystem, and S3 storage backends
@@ -33,6 +33,14 @@ var hoardReleases = []Release{
 - Hoar-Control hoarctl CLI
 `,
 	},
+}
+
+func Version() string {
+	return hoardReleases[0].Version
+}
+
+func Notes() string {
+	return hoardReleases[0].Notes
 }
 
 // Checks that a sequence of releases are monotonically decreasing with each

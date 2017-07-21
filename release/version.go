@@ -24,10 +24,6 @@ func init() {
 	}
 }
 
-func Version() string {
-	return hoardReleases[0].Version
-}
-
 func Major() uint8 {
 	return major
 }

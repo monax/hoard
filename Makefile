@@ -112,8 +112,13 @@ build:	build_protobuf build_bin
 build_dist:	build_protobuf
 	@goreleaser --rm-dist --skip-publish --skip-validate
 
+# Generate full changelog of all release notes
 changelog.md: ./release/release.go
 	@go run ./cmd/hoarctl/main.go version changelog > changelog.md
+
+# Generated release notes for this version
+notes.md: ./release/release.go
+	@go run ./cmd/hoarctl/main.go version notes > notes.md
 
 # Do all available tests and checks then build
 .PHONY: build_ci
@@ -127,5 +132,5 @@ tag_release: test check changelog.md build_bin
 
 # If the checked out commit is tagged with a version then release to github
 .PHONY: release
-release:
+release: notes.md
 	@scripts/release.sh

@@ -14,10 +14,10 @@ func AddVersionCommand(cmd *cli.Cli) {
 				fmt.Println(release.Version())
 			}
 
-			versionCmd.Command("changes", "Get changes in this version",
+			versionCmd.Command("notes", "Get release notes for this version",
 				func(changesCmd *cli.Cmd) {
 					changesCmd.Action = func() {
-						fmt.Println(release.Changes())
+						fmt.Println(release.Notes())
 					}
 				})
 
