@@ -13,13 +13,13 @@ if [[ $1 ]]; then
     # Override mode, try to release this tag
     export tag=$1
 else
+    echo "Getting tag from HEAD which is $(git rev-parse HEAD)"
     export tag=$(git tag --points-at HEAD)
     # Only release from master unless being run as override
     if [[ $(git symbolic-ref HEAD) != "refs/heads/master" ]]; then
         echo "Branch is not master so not releasing."
         exit 0
     fi
-
 fi
 
 if [[ ! ${tag} ]]; then

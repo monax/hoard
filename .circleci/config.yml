@@ -1,6 +1,8 @@
 version: 2
 jobs:
   build:
+    trigger_tag:
+      tag: /.*/
     working_directory: /go/src/github.com/monax/hoard
     docker:
       - image: silasdavis/hoard:build
