@@ -4,6 +4,9 @@
 
 set -e
 
+# Wait a second so we don't see ephemeral file changes
+sleep 1
+
 # Don't tag if there is a dirty working dir
 if ! git diff-index --quiet HEAD  ; then
     echo "Warning there appears to be uncommitted changes in the working directory:"

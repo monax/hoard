@@ -69,10 +69,13 @@ check:
 fix:
 	@goimports -l -w ${GOFILES_NOVENDOR}
 
-# Compile hoard.proto interface defition
-.PHONY: build_protobuf
-build_protobuf:
+# Compile hoard.proto interface definition
+./core/hoard.pb.go: ./core/hoard.proto
 	@protoc -I ./core core/hoard.proto --go_out=plugins=grpc:core
+
+.PHONY: build_protobuf
+build_protobuf: ./core/hoard.pb.go
+
 
 # Build the hoard binary
 .PHONY: build_hoard
