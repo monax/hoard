@@ -23,6 +23,13 @@ type Release struct {
 // release tagging script: ./scripts/tag_release.sh
 var hoardReleases = []Release{
 	{
+		Version: "0.0.2",
+		Notes: `Bug fix release for FileSystemStorage:
+- Switch to URL and filesystem compliant base64 alphabet so some addresses do not target non-existent directories
+- Create root directory for FileSystemStorage if it does not exist
+`,
+	},
+	{
 		Version: "0.0.1",
 		Notes: `This is the first Hoard open source release and includes:
 - Deterministic encryption scheme
