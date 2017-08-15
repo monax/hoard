@@ -85,7 +85,7 @@ ListenAddress = "tcp://localhost:53431"
 
 [Storage]
   StorageType = "filesystem"
-  # One of: base64, base32, or base16 ('hex' also an alias)
+  # One of: base64, base32, or hex (base 16)
   AddressEncoding = "base64"
   RootDirectory = "/home/silas/.local/share/hoard"
 

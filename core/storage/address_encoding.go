@@ -7,6 +7,12 @@ import (
 	"fmt"
 )
 
+const (
+	Base64EncodingName = "base64"
+	Base32EncodingName = "base32"
+	HexEncodingName    = "hex"
+)
+
 type AddressEncoding interface {
 	EncodeToString(address []byte) (addressString string)
 	DecodeString(addressString string) (address []byte, err error)
@@ -14,11 +20,11 @@ type AddressEncoding interface {
 
 func GetAddressEncoding(name string) (AddressEncoding, error) {
 	switch name {
-	case "base64", "":
-		return base64.StdEncoding, nil
-	case "base32":
+	case Base64EncodingName, "":
+		return base64.URLEncoding, nil
+	case Base32EncodingName:
 		return base32.StdEncoding, nil
-	case "base16", "hex":
+	case HexEncodingName:
 		return NewAddressEncoding(hex.EncodeToString, hex.DecodeString), nil
 	}
 	return nil, fmt.Errorf("Could not find an address encoding named '%s'",

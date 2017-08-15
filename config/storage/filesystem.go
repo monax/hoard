@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/cep21/xdgbasedir"
+	"github.com/monax/hoard/core/storage"
 )
 
 type FileSystemConfig struct {
@@ -26,6 +27,7 @@ func DefaultFileSystemConfig() *StorageConfig {
 	if err != nil {
 		panic(fmt.Errorf("Could not get XDG data dir: %s", err))
 	}
-	return NewFileSystemConfig(DefaultAddressEncodingName,
+	// Avoid '/' character for filesystem storage
+	return NewFileSystemConfig(storage.Base32EncodingName,
 		path.Join(dataDir, "hoard"))
 }

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"encoding/base32"
+	"encoding/base64"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -20,5 +20,8 @@ func TestFileSystemStore(t *testing.T) {
 	}()
 	assert.NoError(t, err)
 
-	testStore(t, NewFileSystemStore(tempDir, base32.StdEncoding))
+	fss, err := NewFileSystemStore(tempDir, base64.URLEncoding)
+
+	assert.NoError(t, err)
+	testStore(t, fss)
 }

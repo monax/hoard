@@ -14,11 +14,15 @@ type fileSystemStore struct {
 }
 
 func NewFileSystemStore(rootDirectory string,
-	addressEncoding AddressEncoding) Store {
+	addressEncoding AddressEncoding) (Store, error) {
+	err := os.MkdirAll(rootDirectory, 0700)
+	if err != nil {
+		return nil, err
+	}
 	return &fileSystemStore{
 		rootDirectory:   rootDirectory,
 		addressEncoding: addressEncoding,
-	}
+	}, nil
 }
 
 func (fss *fileSystemStore) Put(address, data []byte) error {

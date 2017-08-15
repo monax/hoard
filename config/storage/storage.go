@@ -13,7 +13,7 @@ import (
 	"github.com/monax/hoard/core/storage"
 )
 
-const DefaultAddressEncodingName = "base64"
+const DefaultAddressEncodingName = storage.Base64EncodingName
 
 var DefaultConfig = NewMemoryConfig(DefaultAddressEncodingName)
 
@@ -68,7 +68,7 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 			return nil, errors.New("RootDirectory key must be non-empty in " +
 				"filesystem storage config.")
 		}
-		return storage.NewFileSystemStore(fsc.RootDirectory, addressEncoding), nil
+		return storage.NewFileSystemStore(fsc.RootDirectory, addressEncoding)
 	case S3:
 		s3c := storageConfig.S3Config
 		if s3c == nil {
