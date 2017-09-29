@@ -5,6 +5,8 @@ version_regex="^v[0-9]+\.[0-9]+\.[0-9]+$"
 function release {
     echo "Building and releasing $tag..."
     [[ -e notes.md ]] && goreleaser --release-notes notes.md || goreleaser
+    docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} quay.io
+    docker build -t quay.io/monax/hoard:${tag#v}
 }
 
 

@@ -5,7 +5,7 @@ jobs:
       tag: /.*/
     working_directory: /go/src/github.com/monax/hoard
     docker:
-      - image: silasdavis/hoard:build
+      - image: quay.io/monax/hoard:build
     steps:
       - checkout
       - run: make build_ci

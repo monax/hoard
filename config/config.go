@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"fmt"
 
+	"encoding/json"
+
 	"github.com/BurntSushi/toml"
 	"github.com/monax/hoard/config/logging"
 	"github.com/monax/hoard/config/storage"
 )
 
-const (
-	DefaultFileName      = "hoard.toml"
-	DefaultListenAddress = "tcp://localhost:53431"
-)
+const DefaultListenAddress = "tcp://:53431"
 
 var DefaultHoardConfig = NewHoardConfig(DefaultListenAddress,
 	storage.DefaultConfig, logging.DefaultConfig)
@@ -33,7 +32,18 @@ func NewHoardConfig(listenAddress string, storageConfig *storage.StorageConfig,
 	}
 }
 
-func HoardConfigFromString(tomlString string) (*HoardConfig, error) {
+func HoardConfigFromJSONString(jsonString string) (*HoardConfig, error) {
+	hoardConfig := new(HoardConfig)
+	buf := bytes.NewBufferString(jsonString)
+	decoder := json.NewDecoder(buf)
+	err := decoder.Decode(hoardConfig)
+	if err != nil {
+		return nil, err
+	}
+	return hoardConfig, nil
+}
+
+func HoardConfigFromTOMLString(tomlString string) (*HoardConfig, error) {
 	hoardConfig := new(HoardConfig)
 	_, err := toml.Decode(tomlString, hoardConfig)
 	if err != nil {
@@ -45,6 +55,16 @@ func HoardConfigFromString(tomlString string) (*HoardConfig, error) {
 func (hoardConfig *HoardConfig) TOMLString() string {
 	buf := new(bytes.Buffer)
 	encoder := toml.NewEncoder(buf)
+	err := encoder.Encode(hoardConfig)
+	if err != nil {
+		return fmt.Sprintf("<Could not serialise HoardConfig>")
+	}
+	return buf.String()
+}
+
+func (hoardConfig *HoardConfig) JSONString() string {
+	buf := new(bytes.Buffer)
+	encoder := json.NewEncoder(buf)
 	err := encoder.Encode(hoardConfig)
 	if err != nil {
 		return fmt.Sprintf("<Could not serialise HoardConfig>")

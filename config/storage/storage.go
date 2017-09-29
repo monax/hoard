@@ -61,12 +61,12 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 	case Filesystem:
 		fsc := storageConfig.FileSystemConfig
 		if fsc == nil {
-			return nil, errors.New("Filesystem storage configuration must be " +
+			return nil, errors.New("filesystem storage configuration must be " +
 				"supplied to use the filesystem storage backend")
 		}
 		if fsc.RootDirectory == "" {
-			return nil, errors.New("RootDirectory key must be non-empty in " +
-				"filesystem storage config.")
+			return nil, errors.New("rootDirectory key must be non-empty in " +
+				"filesystem storage config")
 		}
 		return storage.NewFileSystemStore(fsc.RootDirectory, addressEncoding)
 	case S3:
@@ -97,7 +97,7 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 		return storage.NewS3Store(s3c.Bucket, s3c.Prefix, addressEncoding,
 			awsConfig, logger)
 	default:
-		return nil, fmt.Errorf("Did not recognise storage type '%s'",
+		return nil, fmt.Errorf("did not recognise storage type '%s'",
 			storageConfig.StorageType)
 	}
 }

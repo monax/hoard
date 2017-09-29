@@ -24,7 +24,7 @@ GOPACKAGES_NOVENDOR := $(shell go list ./... | grep -v /vendor/)
 OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
 DIST := "dist"
 GOX_OUTPUT := "$DIST/{{.Dir}}_{{.OS}}_{{.Arch}}"
-BUILD_IMAGE := "silasdavis/hoard:build"
+BUILD_IMAGE := "quay.io/monax/hoard:build"
 
 # Install dependencies and also clear out vendor (we should do this in CI)
 
@@ -33,7 +33,7 @@ BUILD_IMAGE := "silasdavis/hoard:build"
 .PHONY: ensure_vendor
 ensure_vendor:
 	@rm -rf vendor
-	@glide install
+	@dep ensure -v
 
 # to make sure we are not depending on any local changes to dependencies in
 # vendor/
@@ -48,7 +48,7 @@ deps:
 # and pushing it to docker
 .PHONY: update_build_image
 update_build_image:
-	@docker build . -t ${BUILD_IMAGE}
+	@docker build ./docker/ci -t ${BUILD_IMAGE}
 	@docker push ${BUILD_IMAGE}
 
 # Print version
@@ -75,7 +75,6 @@ fix:
 
 .PHONY: build_protobuf
 build_protobuf: ./core/hoard.pb.go
-
 
 # Build the hoard binary
 .PHONY: build_hoard

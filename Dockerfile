@@ -1,13 +1,26 @@
-FROM circleci/golang:1.8
+# We use a multistage build to avoid bloating our deployment image with build dependencies
+FROM golang:1.9.0-alpine3.6 as builder
+MAINTAINER Monax <support@monax.io>
 
-# This Dockerfile is to generate the docker build image for CI services
-# See the update_docker_image Make target
+RUN apk add --no-cache --update git
 
-RUN curl -OL https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip
-RUN unzip protoc-3.3.0-linux-x86_64.zip -d protobuf
-RUN sudo cp protobuf/bin/protoc /usr/bin/protoc
-RUN rm -rf protobuf protoc-*
-RUN go get -u golang.org/x/tools/cmd/goimports
-RUN go get -u github.com/golang/protobuf/protoc-gen-go
-RUN go get -u github.com/Masterminds/glide
-RUN go get -u github.com/goreleaser/goreleaser
+ARG REPO=$GOPATH/src/github.com/monax/hoard
+COPY . $REPO
+WORKDIR $REPO
+
+# Build purely static binaries
+RUN go build --ldflags '-extldflags "-static"' -o bin/hoard ./cmd/hoard
+
+# This will be our base container image
+FROM alpine:3.6
+
+ARG REPO=/go/src/github.com/monax/hoard
+
+# Copy binaries built in previous stage
+COPY --from=builder $REPO/bin/* /usr/local/bin/
+
+EXPOSE 53431
+
+ENV HOARD_JSON_CONFIG '{"ListenAddress":"tcp://:53431","Storage":{"StorageType":"memory","AddressEncoding":"base64"},"Logging":{"LoggingType":"logfmt","Channels":["info","trace"]}}'
+
+CMD [ "hoard", "-e", "-l" ]

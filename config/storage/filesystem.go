@@ -25,7 +25,7 @@ func NewFileSystemConfig(addressEncoding, rootDirectory string) *StorageConfig {
 func DefaultFileSystemConfig() *StorageConfig {
 	dataDir, err := xdgbasedir.DataHomeDirectory()
 	if err != nil {
-		panic(fmt.Errorf("Could not get XDG data dir: %s", err))
+		panic(fmt.Errorf("could not get XDG data dir: %s", err))
 	}
 	// Avoid '/' character for filesystem storage
 	return NewFileSystemConfig(storage.Base32EncodingName,
