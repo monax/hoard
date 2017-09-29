@@ -7,15 +7,28 @@ import (
 )
 
 func TestDefaultHoardConfig(t *testing.T) {
-	assertHoardConfigSerialisation(t, DefaultHoardConfig)
+	assertHoardConfigSerialisation(t,
+		func(conf *HoardConfig) string {
+			return conf.TOMLString()
+		},
+		HoardConfigFromTOMLString,
+		DefaultHoardConfig)
+	assertHoardConfigSerialisation(t,
+		func(conf *HoardConfig) string {
+			return conf.JSONString()
+		},
+		HoardConfigFromJSONString,
+		DefaultHoardConfig)
 }
 
 func assertHoardConfigSerialisation(t *testing.T,
+	serialise func(*HoardConfig) string,
+	deserialise func(string) (*HoardConfig, error),
 	hoardConfig *HoardConfig) {
 
-	storageConfigOut, err := HoardConfigFromString(hoardConfig.TOMLString())
+	hoardConfigRoundTrip, err := deserialise(serialise(hoardConfig))
 	assert.NoError(t, err)
-	tomlString := hoardConfig.TOMLString()
-	assert.NotEmpty(t, tomlString)
-	assert.Equal(t, tomlString, storageConfigOut.TOMLString())
+	hoardConfigString := serialise(hoardConfig)
+	assert.NotEmpty(t, hoardConfigString)
+	assert.Equal(t, hoardConfigString, serialise(hoardConfigRoundTrip))
 }

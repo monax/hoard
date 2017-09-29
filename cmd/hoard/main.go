@@ -15,6 +15,7 @@ import (
 	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
 	"github.com/monax/hoard/config/logging"
+	"github.com/monax/hoard/config/source"
 	"github.com/monax/hoard/config/storage"
 	"github.com/monax/hoard/server"
 )
@@ -22,7 +23,8 @@ import (
 func main() {
 	hoardApp := cli.App("hoard",
 		"A content-addressed deterministically encrypted blob storage system")
-	listenAddressOpt := hoardApp.StringOpt("a address", config.DefaultListenAddress,
+
+	listenAddressOpt := hoardApp.StringOpt("a address", "",
 		"local address for hoard to listen on encoded as a URL with the "+
 			"network protocol as the scheme, for example 'tcp://localhost:54192' "+
 			"or 'unix:///tmp/hoard.sock'")
@@ -33,15 +35,18 @@ func main() {
 	configFileOpt := hoardApp.StringOpt("c config", "", "Path to "+
 		"config file. If omitted default config is used.")
 
+	environmentOpt := hoardApp.BoolOpt("e env", false,
+		fmt.Sprintf("Parse the contents of the enironment variable %s as a complete JSON config",
+			source.DefaultJSONConfigEnvironmentVariable))
+
 	// This string spec is parsed by mow.cli and has actual semantic significance
 	// around optionality and ordering of options and arguments
-	hoardApp.Spec = "[--config=<path to config file>] " +
-		"[--address=<address to listen on>] [--logging]"
+	hoardApp.Spec = "[--config=<path to config file> | --env] [--address=<address to listen on>] [--logging]"
 
 	cmd.AddVersionCommand(hoardApp)
 
 	hoardApp.Action = func() {
-		conf, err := hoardConfig(*configFileOpt)
+		conf, err := hoardConfigCascade(*environmentOpt, *configFileOpt).Get(nil)
 		if err != nil {
 			fatalf("Could not get Hoard config: %s", err)
 		}
@@ -59,8 +64,10 @@ func main() {
 		if err != nil {
 			fatalf("Could not configure store from storage config: %s", err)
 		}
-
-		serv := server.New(*listenAddressOpt, store, logger)
+		if *listenAddressOpt != "" {
+			conf.ListenAddress = *listenAddressOpt
+		}
+		serv := server.New(conf.ListenAddress, store, logger)
 		// Catch interrupt etc
 		signalCh := make(chan os.Signal, 1)
 		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
@@ -72,7 +79,7 @@ func main() {
 			os.Exit(0)
 		}(signalCh)
 
-		printf("Starting hoard daemon on %s with %s...", *listenAddressOpt,
+		printf("Starting hoard daemon on %s with %s...", conf.ListenAddress,
 			store.Name())
 		err = serv.Serve()
 		if err != nil {
@@ -93,7 +100,13 @@ func main() {
 			overwriteOpt := initCmd.BoolOpt("f force", false,
 				"Overwrite config file if it exists.")
 
-			initCmd.Spec = "[--output=<output file or '-' for STDOUT>] [--force]"
+			jsonOpt := initCmd.BoolOpt("j json", false,
+				"Output as JSON (suitable for environment variable parsing)")
+
+			initCmd.BoolOpt("t toml", false,
+				"Output as TOML (the default)")
+
+			initCmd.Spec = "[--output=<output file or '-' for STDOUT>] [--json | --toml] [--force]"
 
 			initCmd.Command("mem", "Emit initial config with memory "+
 				"storage backend.",
@@ -120,19 +133,23 @@ func main() {
 				})
 
 			initCmd.After = func() {
+				configString := conf.TOMLString()
+				if *jsonOpt {
+					configString = conf.JSONString()
+				}
 				if *outputOpt == "-" {
-					fmt.Print(conf.TOMLString())
+					fmt.Print(configString)
 				} else {
 					if *outputOpt == "" {
 						configFileName, err := xdgbasedir.GetConfigFileLocation(
-							config.DefaultFileName)
+							source.DefaultHoardConfigFileName)
 						if err != nil {
 							fatalf("Error getting config file location: %s", err)
 						}
 						outputOpt = &configFileName
 					}
 					printf("Writing to config file '%s'", *outputOpt)
-					err := writeFile(*outputOpt, ([]byte)(conf.TOMLString()), *overwriteOpt)
+					err := writeFile(*outputOpt, ([]byte)(configString), *overwriteOpt)
 					if err != nil {
 						fatalf("Error writing config file: %s", err)
 					}
@@ -153,38 +170,17 @@ func fatalf(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func hoardConfig(configFilePath string) (*config.HoardConfig, error) {
-	// First try to read any provided config
-	if configFilePath != "" {
-		bs, err := ioutil.ReadFile(configFilePath)
-		if err != nil {
-			return nil, fmt.Errorf("Could not read config file '%s': %s",
-				configFilePath, err)
-		}
-
-		printf("Loading config from '%s'", configFilePath)
-		tomlString := string(bs)
-		return config.HoardConfigFromString(tomlString)
-	} else {
-		// Look for config in standard XDG specified locations
-		file, err := xdgbasedir.GetConfigFileLocation(config.DefaultFileName)
-		if err != nil {
-			return nil, err
-		}
-
-		// If config exists at default location try to read it
-		if _, err := os.Stat(file); !os.IsNotExist(err) {
-			return hoardConfig(file)
-		}
-	}
-	// Fallback to default config
-	printf("Using default config")
-	return config.DefaultHoardConfig, nil
+func hoardConfigCascade(env bool, configFile string) source.ConfigProvider {
+	return source.Cascade(os.Stderr, true,
+		source.Environment(source.DefaultJSONConfigEnvironmentVariable).SetSkip(!env),
+		source.File(configFile).SetSkip(configFile == ""),
+		source.XDGBaseDir(),
+		source.Default())
 }
 
 func writeFile(filename string, data []byte, overwrite bool) error {
 	if _, err := os.Stat(filename); overwrite || os.IsNotExist(err) {
 		return ioutil.WriteFile(filename, data, 0666)
 	}
-	return fmt.Errorf("File '%s' already exists.", filename)
+	return fmt.Errorf("file '%s' already exists", filename)
 }

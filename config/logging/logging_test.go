@@ -19,7 +19,7 @@ func TestTerminalLogger(t *testing.T) {
 
 func TestLoggerFromLoggingConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	logger, err := LoggerFromLoggingConfig(DefaultConfig, buf)
+	logger, err := LoggerFromLoggingConfig(NewLoggingConfig(Logfmt, structure.TraceChannel), buf)
 	assert.NoError(t, err)
 	logger.Log(structure.ChannelKey, structure.TraceChannel, "foo", "bar")
 	assert.Equal(t, "channel=trace foo=bar\n", buf.String())

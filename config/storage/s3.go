@@ -39,8 +39,8 @@ type StaticProviderConfig struct {
 
 func (spc *StaticProviderConfig) Provider() (credentials.Provider, error) {
 	if spc == nil {
-		return nil, fmt.Errorf("Must include static provider config in " +
-			"order to form static provider.")
+		return nil, fmt.Errorf("must include static provider config in " +
+			"order to form static provider")
 	}
 	return &credentials.StaticProvider{
 		Value: credentials.Value{
@@ -58,8 +58,8 @@ type SharedCredentialsProviderConfig struct {
 
 func (scpc *SharedCredentialsProviderConfig) Provider() (credentials.Provider, error) {
 	if scpc == nil {
-		return nil, fmt.Errorf("Must include shared credentials provider " +
-			"config in order to form shared credentials provider.")
+		return nil, fmt.Errorf("must include shared credentials provider " +
+			"config in order to form shared credentials provider")
 	}
 	return &credentials.SharedCredentialsProvider{
 		Filename: scpc.Filename,
@@ -104,7 +104,7 @@ func AWSCredentialsFromChain(cpcs []*CredentialsProviderConfig) (*credentials.Cr
 		case StaticProviderName:
 			provider, err = cpc.StaticProviderConfig.Provider()
 		default:
-			err = fmt.Errorf("Credential provider named '%s' could not "+
+			err = fmt.Errorf("credential provider named '%s' could not "+
 				"be found", cpc.Provider)
 		}
 
@@ -147,14 +147,14 @@ func ProviderConfig(provider credentials.Provider) (*CredentialsProviderConfig, 
 			},
 		}, nil
 	default:
-		return nil, fmt.Errorf("Credential provide %s is not recognised", p)
+		return nil, fmt.Errorf("credential provide %s is not recognised", p)
 	}
 }
 
 func DefaultS3Config() *StorageConfig {
 	usr, err := user.Current()
 	if err != nil {
-		panic(fmt.Errorf("Could not get home directory: %s", err))
+		panic(fmt.Errorf("could not get home directory: %s", err))
 	}
 	s3c, err := NewS3Config(DefaultAddressEncodingName,
 		"monax-hoard-test",
@@ -174,7 +174,7 @@ func DefaultS3Config() *StorageConfig {
 		},
 	)
 	if err != nil {
-		panic(fmt.Errorf("Could not generate example config: %s", err))
+		panic(fmt.Errorf("could not generate example config: %s", err))
 	}
 	return s3c
 }

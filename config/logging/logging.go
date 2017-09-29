@@ -13,7 +13,7 @@ import (
 
 type LoggingType string
 
-var DefaultConfig = NewLoggingConfig(Logfmt, structure.InfoChannel,
+var DefaultConfig = NewLoggingConfig(Json, structure.InfoChannel,
 	structure.TraceChannel)
 
 const (
