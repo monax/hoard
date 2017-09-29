@@ -41,5 +41,30 @@ archive:
   - README*
   - changelog*
   - CHANGELOG*
+snapcraft:
+  summary: stateless, deterministically encrypted, content-addressed object store
+  description: |
+    It is stateless in the sense of relying on storage backends for the actual
+    persistence of objects. Currently supported backends are:
+
+    * Memory
+    * Filesystem
+    * S3
+
+    Planned storage backends are:
+
+    * IPFS
+    * BigchainDB (and IPDB)
+    * Tendermint
+
+  grade: devel
+  confinement: strict
+
+  apps:
+    hoard:
+      plugs: [home, network, network-bind]
+    hoarctl:
+      plugs: [home, network]
+
 snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
