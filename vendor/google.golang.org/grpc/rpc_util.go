@@ -1,33 +1,18 @@
 /*
  *
- * Copyright 2014, Google Inc.
- * All rights reserved.
+ * Copyright 2014 gRPC authors.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following disclaimer
- * in the documentation and/or other materials provided with the
- * distribution.
- *     * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
@@ -78,6 +63,7 @@ func NewGZIPCompressor() Compressor {
 
 func (c *gzipCompressor) Do(w io.Writer, p []byte) error {
 	z := c.pool.Get().(*gzip.Writer)
+	defer c.pool.Put(z)
 	z.Reset(w)
 	if _, err := z.Write(p); err != nil {
 		return err
@@ -259,7 +245,7 @@ type parser struct {
 	r io.Reader
 
 	// The header of a gRPC message. Find more detail
-	// at http://www.grpc.io/docs/guides/wire.html.
+	// at https://grpc.io/docs/guides/wire.html.
 	header [5]byte
 }
 
@@ -302,19 +288,20 @@ func (p *parser) recvMsg(maxReceiveMessageSize int) (pf payloadFormat, msg []byt
 	return pf, msg, nil
 }
 
-// encode serializes msg and prepends the message header. If msg is nil, it
-// generates the message header of 0 message length.
-func encode(c Codec, msg interface{}, cp Compressor, cbuf *bytes.Buffer, outPayload *stats.OutPayload) ([]byte, error) {
-	var (
-		b      []byte
-		length uint
+// encode serializes msg and returns a buffer of message header and a buffer of msg.
+// If msg is nil, it generates the message header and an empty msg buffer.
+func encode(c Codec, msg interface{}, cp Compressor, cbuf *bytes.Buffer, outPayload *stats.OutPayload) ([]byte, []byte, error) {
+	var b []byte
+	const (
+		payloadLen = 1
+		sizeLen    = 4
 	)
+
 	if msg != nil {
 		var err error
-		// TODO(zhaoq): optimize to reduce memory alloc and copying.
 		b, err = c.Marshal(msg)
 		if err != nil {
-			return nil, Errorf(codes.Internal, "grpc: error while marshaling: %v", err.Error())
+			return nil, nil, Errorf(codes.Internal, "grpc: error while marshaling: %v", err.Error())
 		}
 		if outPayload != nil {
 			outPayload.Payload = msg
@@ -324,39 +311,28 @@ func encode(c Codec, msg interface{}, cp Compressor, cbuf *bytes.Buffer, outPayl
 		}
 		if cp != nil {
 			if err := cp.Do(cbuf, b); err != nil {
-				return nil, Errorf(codes.Internal, "grpc: error while compressing: %v", err.Error())
+				return nil, nil, Errorf(codes.Internal, "grpc: error while compressing: %v", err.Error())
 			}
 			b = cbuf.Bytes()
 		}
-		length = uint(len(b))
-	}
-	if length > math.MaxUint32 {
-		return nil, Errorf(codes.ResourceExhausted, "grpc: message too large (%d bytes)", length)
 	}
 
-	const (
-		payloadLen = 1
-		sizeLen    = 4
-	)
+	if uint(len(b)) > math.MaxUint32 {
+		return nil, nil, Errorf(codes.ResourceExhausted, "grpc: message too large (%d bytes)", len(b))
+	}
 
-	var buf = make([]byte, payloadLen+sizeLen+len(b))
-
-	// Write payload format
+	bufHeader := make([]byte, payloadLen+sizeLen)
 	if cp == nil {
-		buf[0] = byte(compressionNone)
+		bufHeader[0] = byte(compressionNone)
 	} else {
-		buf[0] = byte(compressionMade)
+		bufHeader[0] = byte(compressionMade)
 	}
 	// Write length of b into buf
-	binary.BigEndian.PutUint32(buf[1:], uint32(length))
-	// Copy encoded msg to buf
-	copy(buf[5:], b)
-
+	binary.BigEndian.PutUint32(bufHeader[payloadLen:], uint32(len(b)))
 	if outPayload != nil {
-		outPayload.WireLength = len(buf)
+		outPayload.WireLength = payloadLen + sizeLen + len(b)
 	}
-
-	return buf, nil
+	return bufHeader, b, nil
 }
 
 func checkRecvPayload(pf payloadFormat, recvCompress string, dc Decompressor) error {
@@ -519,6 +495,12 @@ func getMaxSize(mcMax, doptMax *int, defaultVal int) *int {
 	return doptMax
 }
 
+// SupportPackageIsVersion3 is referenced from generated protocol buffer files.
+// The latest support package version is 4.
+// SupportPackageIsVersion3 is kept for compability. It will be removed in the
+// next support package version update.
+const SupportPackageIsVersion3 = true
+
 // SupportPackageIsVersion4 is referenced from generated protocol buffer files
 // to assert that that code is compatible with this version of the grpc package.
 //
@@ -528,6 +510,6 @@ func getMaxSize(mcMax, doptMax *int, defaultVal int) *int {
 const SupportPackageIsVersion4 = true
 
 // Version is the current grpc version.
-const Version = "1.4.1"
+const Version = "1.6.0"
 
 const grpcUA = "grpc-go/" + Version
