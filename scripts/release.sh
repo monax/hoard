@@ -6,7 +6,8 @@ function release {
     echo "Building and releasing $tag..."
     [[ -e notes.md ]] && goreleaser --release-notes notes.md || goreleaser
     docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} quay.io
-    docker build -t quay.io/monax/hoard:${tag#v}
+    docker build -t quay.io/monax/hoard:${tag#v} .
+    docker push quay.io/monax/hoard:${tag#v}
 }
 
 
@@ -17,11 +18,6 @@ if [[ $1 ]]; then
 else
     echo "Getting tag from HEAD which is $(git rev-parse HEAD)"
     export tag=$(git tag --points-at HEAD)
-    # Only release from master unless being run as override
-    if [[ $(git symbolic-ref HEAD) != "refs/heads/master" ]]; then
-        echo "Branch is not master so not releasing."
-        exit 0
-    fi
 fi
 
 if [[ ! ${tag} ]]; then

@@ -9,4 +9,15 @@ jobs:
     steps:
       - checkout
       - run: make build_ci
+      - setup_remote_docker:
+          version: 17.06.1-ce
       - run: make release
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
