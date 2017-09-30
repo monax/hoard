@@ -1,4 +1,7 @@
 # Hoard Changelog
+## Version 0.1.1
+Include hoarctl in Docker image
+
 ## Version 0.1.0
 Release adding environment config and docker image
 - Adds --env flag to read JSON config from HOARD_JSON_CONFIG

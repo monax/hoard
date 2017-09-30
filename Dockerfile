@@ -10,6 +10,7 @@ WORKDIR $REPO
 
 # Build purely static binaries
 RUN go build --ldflags '-extldflags "-static"' -o bin/hoard ./cmd/hoard
+RUN go build --ldflags '-extldflags "-static"' -o bin/hoarctl ./cmd/hoarctl
 
 # This will be our base container image
 FROM alpine:3.6
