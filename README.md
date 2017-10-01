@@ -79,7 +79,7 @@ You can chop off segments of the final command to see the output of each interme
 ## Config 
 Using the filesystem storage backend as an example (generated with `hoard init -o- fs`) you can configure Hoard with a file like:
 
-```
+```toml
 # The listen address, also supported is "unix:///tmp/hoard.socket" for a unix domain socket
 ListenAddress = "tcp://localhost:53431"
 
