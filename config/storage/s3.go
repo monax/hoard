@@ -7,6 +7,9 @@ import (
 	"path"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/credentials/endpointcreds"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 )
 
 type ProviderName string
@@ -15,6 +18,7 @@ const (
 	EnvProviderName               = "env"
 	SharedCredentialsProviderName = "shared"
 	StaticProviderName            = "static"
+	RemoteProviderName            = "remote"
 )
 
 type S3Config struct {
@@ -103,6 +107,9 @@ func AWSCredentialsFromChain(cpcs []*CredentialsProviderConfig) (*credentials.Cr
 			provider, err = cpc.SharedCredentialsProviderConfig.Provider()
 		case StaticProviderName:
 			provider, err = cpc.StaticProviderConfig.Provider()
+		case RemoteProviderName:
+			ds := defaults.Get()
+			provider = defaults.RemoteCredProvider(*ds.Config, ds.Handlers)
 		default:
 			err = fmt.Errorf("credential provider named '%s' could not "+
 				"be found", cpc.Provider)
@@ -146,8 +153,12 @@ func ProviderConfig(provider credentials.Provider) (*CredentialsProviderConfig, 
 				SessionToken:    p.SessionToken,
 			},
 		}, nil
+	case *ec2rolecreds.EC2RoleProvider, *endpointcreds.Provider:
+		return &CredentialsProviderConfig{
+			Provider: RemoteProviderName,
+		}, nil
 	default:
-		return nil, fmt.Errorf("credential provide %s is not recognised", p)
+		return nil, fmt.Errorf("credential provider %s is not recognised", p)
 	}
 }
 
@@ -172,6 +183,7 @@ func DefaultS3Config() *StorageConfig {
 				SessionToken:    "",
 			},
 		},
+		&ec2rolecreds.EC2RoleProvider{},
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not generate example config: %s", err))

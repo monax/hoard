@@ -72,13 +72,13 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 	case S3:
 		s3c := storageConfig.S3Config
 		if s3c == nil {
-			return nil, errors.New("S3 configuration must be supplied to use " +
+			return nil, errors.New("s3 configuration must be supplied to use " +
 				"the S3 storage backend")
 		}
 
 		creds, err := AWSCredentialsFromChain(s3c.CredentialsProviderChain)
 		if err != nil {
-			return nil, fmt.Errorf("Could not create credentials: %s", err)
+			return nil, fmt.Errorf("could not create credentials: %s", err)
 		}
 
 		var region *string

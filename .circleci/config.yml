@@ -1,8 +1,6 @@
 version: 2
 jobs:
   build:
-    trigger_tag:
-      tag: /.*/
     working_directory: /go/src/github.com/monax/hoard
     docker:
       - image: quay.io/monax/hoard:build
@@ -11,8 +9,12 @@ jobs:
       - run: make build_ci
       - setup_remote_docker:
           version: 17.06.1-ce
+      # Note: will only actually release images and binaries if we are on a version tag (enforced in script)
       - run: make release
 
+# We are forced to use a workflow to trigger builds on tag pushes. Note that despite this being
+# an 'only' filter, it does not mean we only build on version tags.
+# all branch pushes and PRs are included by default, only tags need a specific filter
 workflows:
   version: 2
   build:

@@ -2,7 +2,7 @@ package release
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 )
 
 var changeLogTemplate = template.Must(template.New("changelog_template").

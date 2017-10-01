@@ -23,6 +23,13 @@ type Release struct {
 // release tagging script: ./scripts/tag_release.sh
 var hoardReleases = []Release{
 	{
+		Version: "1.0.0",
+		Notes: `Minor breaking change in that 'hoard init' becomes 'hoard config':
+- 'hoard config' adds some niceties for printing JSON config for --env configuration source
+- Added S3 'remote' credentials provider enabling credentials to be sourced from EC2 instance roles (note since [RemoteCredProvider()](https://github.com/aws/aws-sdk-go/blob/5a2026bfb28e86839f9fcc46523850319399006c/aws/defaults/defaults.go#L108) is used it also support ECS configuration via AWS_CONTAINER_CREDENTIALS_RELATIVE_URI and AWS_CONTAINER_CREDENTIALS_FULL_URI)
+`,
+	},
+	{
 		Version: "0.1.1",
 		Notes:   `Include hoarctl in Docker image`,
 	},
@@ -67,7 +74,7 @@ func Notes() string {
 // slice
 func AssertReleasesUniqueAndMonotonic(releases []Release) error {
 	if len(releases) == 0 {
-		return errors.New("At least one release must be defined")
+		return errors.New("at least one release must be defined")
 	}
 	maj, min, pat, err := ParseVersion(releases[0].Version)
 	if err != nil {
@@ -83,7 +90,7 @@ func AssertReleasesUniqueAndMonotonic(releases []Release) error {
 		if maj == lMaj+1 {
 			// Major bump, so minor and patch versions must be reset
 			if min != 0 || pat != 0 {
-				return fmt.Errorf("Minor and patch versions must be reset to "+
+				return fmt.Errorf("minor and patch versions must be reset to "+
 					"0 after a major bump, but they are not in %s -> %s",
 					releases[i].Version, releases[i-1].Version)
 			}
@@ -92,24 +99,24 @@ func AssertReleasesUniqueAndMonotonic(releases []Release) error {
 			if min == lMin+1 {
 				// Minor bump so patch version must be reset
 				if pat != 0 {
-					return fmt.Errorf("Patch version must be reset to "+
+					return fmt.Errorf("patch version must be reset to "+
 						"0 after a minor bump, but they are not in %s -> %s",
 						releases[i].Version, releases[i-1].Version)
 				}
 			} else if min == lMin {
 				// Same minor number so must be patch bump to be valid
 				if pat != lPat+1 {
-					return fmt.Errorf("Consecutive patch versions must be equal "+
+					return fmt.Errorf("consecutive patch versions must be equal "+
 						"or incremented by 1, but they are not in %s -> %s",
 						releases[i].Version, releases[i-1].Version)
 				}
 			} else {
-				return fmt.Errorf("Consecutive minor versions must be equal or "+
+				return fmt.Errorf("consecutive minor versions must be equal or "+
 					"incremented by 1, but they are not in %s -> %s",
 					releases[i].Version, releases[i-1].Version)
 			}
 		} else {
-			return fmt.Errorf("Consecutive major versions must be equal or "+
+			return fmt.Errorf("consecutive major versions must be equal or "+
 				"incremented by 1, but they are not in  %s -> %s",
 				releases[i].Version, releases[i-1].Version)
 		}
