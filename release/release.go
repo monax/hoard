@@ -23,6 +23,10 @@ type Release struct {
 // release tagging script: ./scripts/tag_release.sh
 var hoardReleases = []Release{
 	{
+		Version: "1.0.2",
+		Notes:   `Improve success/failure logging of LoggingStore.`,
+	},
+	{
 		Version: "1.0.1",
 		Notes:   `Add S3 integration test and include ca-certificates to Docker image so TLS (and S3) works.`,
 	},

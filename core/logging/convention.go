@@ -57,7 +57,7 @@ func Msg(logger log.Logger, message string, keyvals ...interface{}) error {
 // or an logging error enclosing the original error if there is a logging error
 func Err(logger log.Logger, err error) error {
 	if err != nil {
-		errLogger := logger.Log(structure.ErrorKey, err)
+		errLogger := logger.Log(structure.MessageKey, "Failure", structure.ErrorKey, err)
 		if errLogger != nil {
 			return fmt.Errorf("failed to log error '%s': %s", errLogger, err)
 		}
