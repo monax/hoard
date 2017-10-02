@@ -36,6 +36,8 @@ const (
 	StackTraceKey = "trace"
 	// Logging channel, Info or Trace
 	ChannelKey = "channel"
+	// Go error value
+	ErrorKey = "error"
 
 	// Channels (can be used for semantic filtering through LoggingConfig)
 	InfoChannel  Channel = "info"

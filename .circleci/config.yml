@@ -1,16 +1,32 @@
+defaults: &defaults
+  working_directory: /go/src/github.com/monax/hoard
+  docker:
+    - image: quay.io/monax/hoard:build
+
+setup_docker: &setup_docker
+  version: 17.06.1-ce
+
 version: 2
 jobs:
   build:
-    working_directory: /go/src/github.com/monax/hoard
-    docker:
-      - image: quay.io/monax/hoard:build
+    <<: *defaults
     steps:
       - checkout
       - run: make build_ci
       - setup_remote_docker:
-          version: 17.06.1-ce
+          <<: *setup_docker
       # Note: will only actually release images and binaries if we are on a version tag (enforced in script)
       - run: make release
+
+  integration_test:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          <<: *setup_docker
+      - run: make test_integration
+
+
 
 # We are forced to use a workflow to trigger builds on tag pushes. Note that despite this being
 # an 'only' filter, it does not mean we only build on version tags.
@@ -23,3 +39,10 @@ workflows:
           filters:
             tags:
               only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+
+      - integration_test:
+          filters:
+            branches:
+              only:
+                - master
+                - develop

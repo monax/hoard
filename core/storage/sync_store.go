@@ -56,6 +56,6 @@ func (ss *syncStore) Location(address []byte) string {
 }
 
 func (ss *syncStore) Name() string {
-	return fmt.Sprintf("syncStore[mutexCount=%v]<%s>", ss.mtx.Size(),
+	return fmt.Sprintf("syncStore[mutexCount=%v](%s)", ss.mtx.Size(),
 		ss.store.Name())
 }

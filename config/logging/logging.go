@@ -63,8 +63,7 @@ func OutputLoggerMaker(loggingType LoggingType) (func(writer io.Writer) log.Logg
 	case Json:
 		logger = log.NewJSONLogger
 	default:
-		return nil, fmt.Errorf("Could not create logger with logging "+
-			"type '%s'.", loggingType)
+		return nil, fmt.Errorf("could not create logger with logging type '%s'", loggingType)
 	}
 
 	return func(writer io.Writer) log.Logger {
