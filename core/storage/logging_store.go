@@ -27,18 +27,23 @@ func NewLoggingStore(store Store, logger log.Logger) *loggingStore {
 var _ Store = (*loggingStore)(nil)
 
 func (ls *loggingStore) Put(address, data []byte) error {
-	ls.logger.Log("method", "Put", "address", formatAddress(address))
-	return ls.store.Put(address, data)
+	logger := log.With(ls.logger, "method", "Put", "address", formatAddress(address))
+	logger.Log()
+	return logging.Err(logger, ls.store.Put(address, data))
 }
 
 func (ls *loggingStore) Get(address []byte) ([]byte, error) {
-	ls.logger.Log("method", "Get", "address", formatAddress(address))
-	return ls.store.Get(address)
+	logger := log.With(ls.logger, "method", "Get", "address", formatAddress(address))
+	logger.Log()
+	data, err := ls.store.Get(address)
+	return data, logging.Err(logger, err)
 }
 
 func (ls *loggingStore) Stat(address []byte) (*StatInfo, error) {
-	ls.logger.Log("method", "Stat", "address", formatAddress(address))
-	return ls.store.Stat(address)
+	logger := log.With(ls.logger, "method", "Stat", "address", formatAddress(address))
+	logger.Log()
+	statInfo, err := ls.store.Stat(address)
+	return statInfo, logging.Err(logger, err)
 }
 
 func (ls *loggingStore) Location(address []byte) string {
@@ -47,7 +52,7 @@ func (ls *loggingStore) Location(address []byte) string {
 }
 
 func (ls *loggingStore) Name() string {
-	return fmt.Sprintf("loggingStore<%s>", ls.store.Name())
+	return fmt.Sprintf("loggingStore(%s)", ls.store.Name())
 }
 
 func formatAddress(address []byte) string {

@@ -104,6 +104,7 @@ test_dev: build_protobuf
 .PHONY:	test_integration
 test_integration: check build_protobuf
 	@go test -tags integration ${GOPACKAGES_NOVENDOR}
+	@integration/test.sh
 
 # Build all the things
 .PHONY: build

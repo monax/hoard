@@ -1,4 +1,7 @@
 # Hoard Changelog
+## Version 1.0.1
+Add S3 integration test and include ca-certificates to Docker image so TLS (and S3) works.
+
 ## Version 1.0.0
 Minor breaking change in that 'hoard init' becomes 'hoard config':
 - 'hoard config' adds some niceties for printing JSON config for --env configuration source

@@ -15,6 +15,8 @@
 package logging
 
 import (
+	"fmt"
+
 	"github.com/go-kit/kit/log"
 	"github.com/monax/hoard/core/logging/slice"
 	"github.com/monax/hoard/core/logging/structure"
@@ -49,4 +51,17 @@ func WithScope(logger log.Logger, scopeName string) log.Logger {
 func Msg(logger log.Logger, message string, keyvals ...interface{}) error {
 	prepended := slice.CopyPrepend(keyvals, structure.MessageKey, message)
 	return logger.Log(prepended...)
+}
+
+// Log an error with consistent error key and metadata and return the error passed in
+// or an logging error enclosing the original error if there is a logging error
+func Err(logger log.Logger, err error) error {
+	if err != nil {
+		errLogger := logger.Log(structure.ErrorKey, err)
+		if errLogger != nil {
+			return fmt.Errorf("failed to log error '%s': %s", errLogger, err)
+		}
+		return err
+	}
+	return nil
 }
