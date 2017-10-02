@@ -22,9 +22,9 @@ func TestAWSCredentialsFromConfig(t *testing.T) {
 		ProviderName:    credentials.EnvProviderName,
 	}
 
-	err := os.Setenv("AWS_ACCESS_KEY", value.AccessKeyID)
+	err := os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
 	assert.NoError(t, err)
-	err = os.Setenv("AWS_SECRET_KEY", value.SecretAccessKey)
+	err = os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)
 	assert.NoError(t, err)
 	creds, err := AWSCredentialsFromChain(chain)
 	assert.NoError(t, err)
