@@ -1,4 +1,7 @@
 # Hoard Changelog
+## Version 1.0.2
+Improve success/failure logging of LoggingStore.
+
 ## Version 1.0.1
 Add S3 integration test and include ca-certificates to Docker image so TLS (and S3) works.
 
