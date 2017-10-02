@@ -27,7 +27,7 @@ func GetAddressEncoding(name string) (AddressEncoding, error) {
 	case HexEncodingName:
 		return NewAddressEncoding(hex.EncodeToString, hex.DecodeString), nil
 	}
-	return nil, fmt.Errorf("Could not find an address encoding named '%s'",
+	return nil, fmt.Errorf("could not find an address encoding named '%s'",
 		name)
 }
 

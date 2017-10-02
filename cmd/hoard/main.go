@@ -87,72 +87,79 @@ func main() {
 		}
 	}
 
-	hoardApp.Command("init", "Initialise Hoard configuration by "+
-		"writing an example configuration file. Most config files emitted are "+
+	hoardApp.Command("config", "Initialise Hoard configuration by "+
+		"printing an example configuration file to STDOUT. Most config files emitted are "+
 		"examples demonstrating some features and need to be edited.",
-		func(initCmd *cli.Cmd) {
+		func(configCmd *cli.Cmd) {
 			conf := config.DefaultHoardConfig
 
-			outputOpt := initCmd.StringOpt("o output", "",
-				"Instead of writing to standard config location, write to the "+
-					"specified file, pass '-' to write the config to STDOUT")
+			outputOpt := configCmd.StringOpt("o output", "",
+				"Instead of writing to STDOUT, write to the specified file")
 
-			overwriteOpt := initCmd.BoolOpt("f force", false,
+			overwriteOpt := configCmd.BoolOpt("f force", false,
 				"Overwrite config file if it exists.")
 
-			jsonOpt := initCmd.BoolOpt("j json", false,
-				"Output as JSON (suitable for environment variable parsing)")
+			jsonOpt := configCmd.BoolOpt("j json", false,
+				"Print config to STDOUT as a single line of JSON (suitable for the --env config source)")
 
-			initCmd.BoolOpt("t toml", false,
-				"Output as TOML (the default)")
+			initOpt := configCmd.BoolOpt("i init", false, "Write file to "+
+				"XDG standard location")
 
-			initCmd.Spec = "[--output=<output file or '-' for STDOUT>] [--json | --toml] [--force]"
+			configCmd.Spec = "[--json] | (([--output=<output file>] |  [--init]) [--force])"
 
-			initCmd.Command("mem", "Emit initial config with memory "+
+			configCmd.Command("mem", "Emit initial config with memory "+
 				"storage backend.",
-				func(s3Cmd *cli.Cmd) {
-					s3Cmd.Action = func() {
+				func(c *cli.Cmd) {
+					c.Action = func() {
 						conf.Storage = storage.DefaultMemoryConfig()
 					}
 				})
 
-			initCmd.Command("fs", "Emit initial config with "+
+			configCmd.Command("fs", "Emit initial config with "+
 				"filesystem storage backend.",
-				func(s3Cmd *cli.Cmd) {
-					s3Cmd.Action = func() {
+				func(c *cli.Cmd) {
+					c.Action = func() {
 						conf.Storage = storage.DefaultFileSystemConfig()
 					}
 				})
 
-			initCmd.Command("s3", "Emit initial config with S3 storage "+
+			configCmd.Command("s3", "Emit initial config with S3 storage "+
 				"backend.",
-				func(s3Cmd *cli.Cmd) {
-					s3Cmd.Action = func() {
+				func(c *cli.Cmd) {
+					c.Action = func() {
 						conf.Storage = storage.DefaultS3Config()
 					}
 				})
 
-			initCmd.After = func() {
+			configCmd.Command("existing", "Emit existing config (useful for checking "+
+				"config source or converting format)",
+				func(c *cli.Cmd) {
+					c.Action = func() {
+						conf.Storage = storage.DefaultS3Config()
+					}
+				})
+
+			configCmd.After = func() {
 				configString := conf.TOMLString()
 				if *jsonOpt {
 					configString = conf.JSONString()
 				}
-				if *outputOpt == "-" {
-					fmt.Print(configString)
-				} else {
-					if *outputOpt == "" {
-						configFileName, err := xdgbasedir.GetConfigFileLocation(
-							source.DefaultHoardConfigFileName)
-						if err != nil {
-							fatalf("Error getting config file location: %s", err)
-						}
-						outputOpt = &configFileName
+				if *initOpt {
+					configFileName, err := xdgbasedir.GetConfigFileLocation(
+						source.DefaultHoardConfigFileName)
+					if err != nil {
+						fatalf("Error getting config file location: %s", err)
 					}
+					outputOpt = &configFileName
+				}
+				if *outputOpt != "" {
 					printf("Writing to config file '%s'", *outputOpt)
 					err := writeFile(*outputOpt, ([]byte)(configString), *overwriteOpt)
 					if err != nil {
 						fatalf("Error writing config file: %s", err)
 					}
+				} else {
+					fmt.Print(configString)
 				}
 			}
 		})
