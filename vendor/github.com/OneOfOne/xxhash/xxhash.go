@@ -1,21 +1,25 @@
 package xxhash
 
-import "hash"
-
 const (
-	debug = true // set to true to debug len/cap errors
+	prime32x1 uint32 = 2654435761
+	prime32x2 uint32 = 2246822519
+	prime32x3 uint32 = 3266489917
+	prime32x4 uint32 = 668265263
+	prime32x5 uint32 = 374761393
 
-	prime32x1 = 2654435761
-	prime32x2 = 2246822519
-	prime32x3 = 3266489917
-	prime32x4 = 668265263
-	prime32x5 = 374761393
+	prime64x1 uint64 = 11400714785074694791
+	prime64x2 uint64 = 14029467366897019727
+	prime64x3 uint64 = 1609587929392839161
+	prime64x4 uint64 = 9650029242287828579
+	prime64x5 uint64 = 2870177450012600261
 
-	prime64x1 = 11400714785074694791
-	prime64x2 = 14029467366897019727
-	prime64x3 = 1609587929392839161
-	prime64x4 = 9650029242287828579
-	prime64x5 = 2870177450012600261
+	maxInt32 int32 = (1<<31 - 1)
+
+	// precomputed zero Vs for seed 0
+	zero64x1 = 0x60ea27eeadc0b5d6
+	zero64x2 = 0xc2b2ae3d27d4eb4f
+	zero64x3 = 0x0
+	zero64x4 = 0x61c8864e7a143579
 )
 
 // Checksum32 returns the checksum of the input data with the seed set to 0.
@@ -34,11 +38,6 @@ type XXHash32 struct {
 	v1, v2, v3, v4 uint32
 	seed           uint32
 }
-
-var _ interface {
-	hash.Hash32
-	WriteString(string) (int, error)
-} = (*XXHash32)(nil)
 
 // Size returns the number of bytes Sum will return.
 func (xx *XXHash32) Size() int {
@@ -75,10 +74,6 @@ func (xx *XXHash32) Reset() {
 	xx.ln, xx.memIdx = 0, 0
 }
 
-func (xx *XXHash32) WriteString(s string) (int, error) {
-	return writeString(xx, s)
-}
-
 // Sum appends the current hash to b and returns the resulting slice.
 // It does not change the underlying hash state.
 func (xx *XXHash32) Sum(in []byte) []byte {
@@ -97,16 +92,12 @@ func ChecksumString64(s string) uint64 {
 }
 
 type XXHash64 struct {
-	mem            [32]byte
 	v1, v2, v3, v4 uint64
 	seed           uint64
-	ln, memIdx     int32
+	ln             uint64
+	mem            [32]byte
+	memIdx         int8
 }
-
-var _ interface {
-	hash.Hash64
-	WriteString(string) (int, error)
-} = (*XXHash64)(nil)
 
 // Size returns the number of bytes Sum will return.
 func (xx *XXHash64) Size() int {
@@ -136,15 +127,8 @@ func New64() *XXHash64 {
 }
 
 func (xx *XXHash64) Reset() {
-	xx.v1 = xx.seed + prime64x1 + prime64x2
-	xx.v2 = xx.seed + prime64x2
-	xx.v3 = xx.seed
-	xx.v4 = xx.seed - prime64x1
 	xx.ln, xx.memIdx = 0, 0
-}
-
-func (xx *XXHash64) WriteString(s string) (int, error) {
-	return writeString(xx, s)
+	xx.v1, xx.v2, xx.v3, xx.v4 = resetVs64(xx.seed)
 }
 
 // Sum appends the current hash to b and returns the resulting slice.
@@ -172,3 +156,34 @@ func rotl64_18(x uint64) uint64 { return (x << 18) | (x >> (64 - 18)) }
 func rotl64_23(x uint64) uint64 { return (x << 23) | (x >> (64 - 23)) }
 func rotl64_27(x uint64) uint64 { return (x << 27) | (x >> (64 - 27)) }
 func rotl64_31(x uint64) uint64 { return (x << 31) | (x >> (64 - 31)) }
+
+func mix64(h uint64) uint64 {
+	h ^= h >> 33
+	h *= prime64x2
+	h ^= h >> 29
+	h *= prime64x3
+	h ^= h >> 32
+	return h
+}
+
+func resetVs64(seed uint64) (v1, v2, v3, v4 uint64) {
+	if seed == 0 {
+		return zero64x1, zero64x2, zero64x3, zero64x4
+	}
+	return (seed + prime64x1 + prime64x2), (seed + prime64x2), (seed), (seed - prime64x1)
+}
+
+// borrowed from cespare
+func round64(h, v uint64) uint64 {
+	h += v * prime64x2
+	h = rotl64_31(h)
+	h *= prime64x1
+	return h
+}
+
+func mergeRound64(h, v uint64) uint64 {
+	v = round64(0, v)
+	h ^= v
+	h = h*prime64x1 + prime64x4
+	return h
+}

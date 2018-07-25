@@ -23,6 +23,10 @@ type Release struct {
 // release tagging script: ./scripts/tag_release.sh
 var hoardReleases = []Release{
 	{
+		Version: "1.1.2",
+		Notes:   `Upgrade all Go dependencies`,
+	},
+	{
 		Version: "1.1.1",
 		Notes:   `Bump docker image Alpine Linux version to 3.8 and Go to 1.10.3`,
 	},
