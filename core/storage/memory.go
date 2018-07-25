@@ -10,7 +10,7 @@ type memoryStore struct {
 	mtx    *sync.RWMutex
 }
 
-func NewMemoryStore() Store {
+func NewMemoryStore() *memoryStore {
 	return &memoryStore{
 		memory: make(map[string][]byte),
 		mtx:    new(sync.RWMutex),

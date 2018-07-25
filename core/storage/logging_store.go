@@ -10,12 +10,12 @@ import (
 )
 
 type loggingStore struct {
-	store  Store
+	store  NamedStore
 	logger log.Logger
 }
 
 // Decorates a Store with some simple logging of method/address pairs
-func NewLoggingStore(store Store, logger log.Logger) *loggingStore {
+func NewLoggingStore(store NamedStore, logger log.Logger) *loggingStore {
 	ls := &loggingStore{
 		store:  store,
 		logger: logging.TraceLogger(log.With(logger, "module", "storage")),
@@ -24,7 +24,7 @@ func NewLoggingStore(store Store, logger log.Logger) *loggingStore {
 	return ls
 }
 
-var _ Store = (*loggingStore)(nil)
+var _ NamedStore = (*loggingStore)(nil)
 
 func (ls *loggingStore) Put(address, data []byte) error {
 	return logErrorOrSuccess(log.With(ls.logger, "method", "Put", "address",

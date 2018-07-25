@@ -48,7 +48,7 @@ func NewStorageConfig(storageType StorageType, addressEncoding string) *StorageC
 }
 
 func StoreFromStorageConfig(storageConfig *StorageConfig,
-	logger log.Logger) (storage.Store, error) {
+	logger log.Logger) (storage.NamedStore, error) {
 
 	addressEncoding, err := storage.GetAddressEncoding(storageConfig.AddressEncoding)
 	if err != nil {

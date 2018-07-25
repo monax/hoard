@@ -1,4 +1,7 @@
 # Hoard Changelog
+## Version 1.1.0
+Fix unsafe concurrent access of hash.Hash function in makeAddresser with sync.Pool
+
 ## Version 1.0.2
 Improve success/failure logging of LoggingStore.
 

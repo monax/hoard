@@ -3,9 +3,17 @@ package storage
 import (
 	"testing"
 
+	"crypto/sha256"
+	"sync"
+
+	"strconv"
+
 	"github.com/stretchr/testify/assert"
 )
 
+const concurrentAccessGoRoutines = 200
+
+// Generic test suite for all Stores
 func testStore(t *testing.T, store Store) {
 	address := bs("address")
 	data := bs("data")
@@ -28,6 +36,23 @@ func testStore(t *testing.T, store Store) {
 
 	// Has a '/' under standard encoding
 	getPutGet(t, store, []byte{0, 0, 63, 0, 0}, bs("bar-data"))
+
+	testConcurrentContentAddressedStore(t, store)
+}
+
+func testConcurrentContentAddressedStore(t *testing.T, store Store) {
+	cas := NewContentAddressedStore(MakeAddresser(sha256.New), store)
+	wg := new(sync.WaitGroup)
+	wg.Add(concurrentAccessGoRoutines)
+	for i := 0; i < concurrentAccessGoRoutines; i++ {
+		n := int64(i)
+		go func() {
+			data := bs("data", strconv.FormatInt(n, 2))
+			putGetCAS(t, cas, data)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }
 
 func getPutGet(t *testing.T, store Store, address, data []byte) {
@@ -45,6 +70,20 @@ func getPutGet(t *testing.T, store Store, address, data []byte) {
 	assert.Equal(t, data, retrieved)
 }
 
-func bs(s string) []byte {
-	return ([]byte)(s)
+func putGetCAS(t *testing.T, store ContentAddressedStore, data []byte) {
+	// Put data at address
+	address, err := store.Put(data)
+	assert.NoError(t, err, "Should be able to Put data at address")
+
+	retrieved, err := store.Get(address)
+	assert.NoError(t, err, "Should be able to Get data from address")
+	assert.Equal(t, data, retrieved)
+}
+
+func bs(strs ...string) []byte {
+	var b []byte
+	for _, s := range strs {
+		b = append(b, []byte(s)...)
+	}
+	return b
 }

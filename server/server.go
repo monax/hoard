@@ -16,12 +16,12 @@ import (
 
 type server struct {
 	listenURL  string
-	store      storage.Store
+	store      storage.NamedStore
 	grpcServer *grpc.Server
 	logger     log.Logger
 }
 
-func New(listenURL string, store storage.Store, logger log.Logger) *server {
+func New(listenURL string, store storage.NamedStore, logger log.Logger) *server {
 	return &server{
 		listenURL: listenURL,
 		store:     store,

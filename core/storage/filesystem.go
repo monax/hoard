@@ -13,8 +13,7 @@ type fileSystemStore struct {
 	addressEncoding AddressEncoding
 }
 
-func NewFileSystemStore(rootDirectory string,
-	addressEncoding AddressEncoding) (Store, error) {
+func NewFileSystemStore(rootDirectory string, addressEncoding AddressEncoding) (*fileSystemStore, error) {
 	err := os.MkdirAll(rootDirectory, 0700)
 	if err != nil {
 		return nil, err

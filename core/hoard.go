@@ -2,7 +2,6 @@ package core
 
 import (
 	"crypto/sha256"
-	"hash"
 
 	"github.com/go-kit/kit/log"
 
@@ -41,13 +40,13 @@ type DeterministicEncryptedStore interface {
 var _ DeterministicEncryptedStore = (*hoard)(nil)
 var _ DeterministicEncryptor = (*hoard)(nil)
 
-func NewHoard(store storage.Store, logger log.Logger) DeterministicEncryptedStore {
+func NewHoard(store storage.NamedStore, logger log.Logger) DeterministicEncryptedStore {
 	if logger == nil {
 		logger = log.NewNopLogger()
 	}
 
 	return &hoard{
-		store: storage.NewContentAddressedStore(makeAddresser(sha256.New()),
+		store: storage.NewContentAddressedStore(storage.MakeAddresser(sha256.New),
 			storage.NewLoggingStore(storage.NewSyncStore(store), logger)),
 		logger: log.With(logger, "scope", "NewHoard"),
 	}
@@ -102,13 +101,4 @@ func (hrd *hoard) Decrypt(ref *reference.Ref, encryptedData []byte) ([]byte, err
 
 func (hrd *hoard) Store() storage.ContentAddressedStore {
 	return hrd.store
-}
-
-// Close in hasher
-func makeAddresser(hasher hash.Hash) func(data []byte) []byte {
-	return func(data []byte) []byte {
-		hasher.Reset()
-		hasher.Write(data)
-		return hasher.Sum(nil)
-	}
 }
