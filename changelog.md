@@ -1,4 +1,7 @@
 # Hoard Changelog
+## Version 1.1.2
+Upgrade all Go dependencies
+
 ## Version 1.1.1
 Bump docker image Alpine Linux version to 3.8 and Go to 1.10.3
 
