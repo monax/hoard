@@ -13,7 +13,7 @@ import (
 const addressMutexCount = 127
 
 type syncStore struct {
-	store Store
+	store NamedStore
 	mtx   *sync.AddressRWMutex
 }
 
@@ -23,7 +23,7 @@ type syncStore struct {
 // readers (Getters, Statters) and writers (Putters) are allowed. Concurrent
 // reads and writes to different addresses are permitted so the underlying store
 // must be goroutine-safe across addresses.
-func NewSyncStore(store Store) *syncStore {
+func NewSyncStore(store NamedStore) *syncStore {
 	return &syncStore{
 		store: store,
 		mtx:   sync.NewAddressRWMutex(addressMutexCount),

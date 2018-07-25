@@ -23,6 +23,10 @@ type Release struct {
 // release tagging script: ./scripts/tag_release.sh
 var hoardReleases = []Release{
 	{
+		Version: "1.1.0",
+		Notes:   `Fix unsafe concurrent access of hash.Hash function in makeAddresser with sync.Pool`,
+	},
+	{
 		Version: "1.0.2",
 		Notes:   `Improve success/failure logging of LoggingStore.`,
 	},

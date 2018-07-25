@@ -3,6 +3,10 @@ package storage
 import (
 	"encoding/base64"
 
+	"hash"
+
+	"sync"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -35,11 +39,15 @@ type WriteStore interface {
 }
 
 type Store interface {
-	// Human readable name describing the Store
-	Name() string
 	ReadStore
 	WriteStore
 	Locator
+}
+
+type NamedStore interface {
+	// Human readable name describing the Store
+	Name() string
+	Store
 }
 
 type ContentAddressedStore interface {
@@ -62,8 +70,7 @@ type contentAddressedStore struct {
 	store Store
 }
 
-func NewContentAddressedStore(addresser func([]byte) []byte,
-	store Store) ContentAddressedStore {
+func NewContentAddressedStore(addresser func([]byte) []byte, store Store) ContentAddressedStore {
 	return &contentAddressedStore{
 		addresser: addresser,
 		store:     store,
@@ -90,4 +97,22 @@ func (cas *contentAddressedStore) Stat(address []byte) (*StatInfo, error) {
 
 func (cas *contentAddressedStore) Location(address []byte) string {
 	return cas.store.Location(address)
+}
+
+// Close in hasher
+func MakeAddresser(hashProvider func() hash.Hash) func(data []byte) []byte {
+	pool := &sync.Pool{
+		New: func() interface{} {
+			return hashProvider()
+		},
+	}
+	return func(data []byte) []byte {
+		hasher := pool.Get().(hash.Hash)
+		defer func() {
+			hasher.Reset()
+			pool.Put(hasher)
+		}()
+		hasher.Write(data)
+		return hasher.Sum(nil)
+	}
 }
