@@ -1,4 +1,7 @@
 # Hoard Changelog
+## Version 1.1.1
+Bump docker image Alpine Linux version to 3.8 and Go to 1.10.3
+
 ## Version 1.1.0
 Fix unsafe concurrent access of hash.Hash function in makeAddresser with sync.Pool
 
