@@ -23,6 +23,10 @@ type Release struct {
 // release tagging script: ./scripts/tag_release.sh
 var hoardReleases = []Release{
 	{
+		Version: "1.1.3",
+		Notes:   `Just create new hasher each call of addresses - we only use SHA256 and this operation is cheap`,
+	},
+	{
 		Version: "1.1.2",
 		Notes:   `Upgrade all Go dependencies`,
 	},

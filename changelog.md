@@ -1,4 +1,7 @@
 # Hoard Changelog
+## Version 1.1.3
+Just create new hasher each call of addresses - we only use SHA256 and this operation is cheap
+
 ## Version 1.1.2
 Upgrade all Go dependencies
 
