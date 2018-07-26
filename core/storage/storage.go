@@ -5,8 +5,6 @@ import (
 
 	"hash"
 
-	"sync"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -101,17 +99,8 @@ func (cas *contentAddressedStore) Location(address []byte) string {
 
 // Close in hasher
 func MakeAddresser(hashProvider func() hash.Hash) func(data []byte) []byte {
-	pool := &sync.Pool{
-		New: func() interface{} {
-			return hashProvider()
-		},
-	}
 	return func(data []byte) []byte {
-		hasher := pool.Get().(hash.Hash)
-		defer func() {
-			hasher.Reset()
-			pool.Put(hasher)
-		}()
+		hasher := hashProvider()
 		hasher.Write(data)
 		return hasher.Sum(nil)
 	}
