@@ -24,6 +24,7 @@ const (
 	Memory      StorageType = "memory"
 	Filesystem  StorageType = "filesystem"
 	S3          StorageType = "s3"
+	GCS         StorageType = "gcs"
 	IPFS        StorageType = "ipfs"
 )
 
@@ -37,6 +38,7 @@ type StorageConfig struct {
 	// omitted from being serialised.
 	*FileSystemConfig
 	*S3Config
+	*GCSConfig
 	*IPFSConfig
 }
 
@@ -94,8 +96,16 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 			}),
 		}
 
-		return storage.NewS3Store(s3c.Bucket, s3c.Prefix, addressEncoding,
+		return storage.NewS3Store(s3c.S3Bucket, s3c.Prefix, addressEncoding,
 			awsConfig, logger)
+	case GCS:
+		gcsc := storageConfig.GCSConfig
+		if gcsc == nil {
+			return nil, errors.New("gpc configuration must be supplied to use " +
+				"the GPC storage backend")
+		}
+
+		return storage.NewGCSStore(gcsc.GCSBucket, addressEncoding, logger)
 	default:
 		return nil, fmt.Errorf("did not recognise storage type '%s'",
 			storageConfig.StorageType)

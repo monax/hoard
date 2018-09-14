@@ -38,6 +38,10 @@
   version = "1.12.1"
 
 [[constraint]]
+  name = "github.com/google/go-cloud"
+  version = "0.2.0"
+
+[[constraint]]
   branch = "master"
   name = "github.com/cep21/xdgbasedir"
 

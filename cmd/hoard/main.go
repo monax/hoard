@@ -11,7 +11,7 @@ import (
 
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
-	"github.com/jawher/mow.cli"
+	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
 	"github.com/monax/hoard/config/logging"
@@ -128,6 +128,14 @@ func main() {
 				func(c *cli.Cmd) {
 					c.Action = func() {
 						conf.Storage = storage.DefaultS3Config()
+					}
+				})
+
+			configCmd.Command("gcs", "Emit initial config with GCS storage "+
+				"backend.",
+				func(c *cli.Cmd) {
+					c.Action = func() {
+						conf.Storage = storage.DefaultGCSConfig()
 					}
 				})
 
