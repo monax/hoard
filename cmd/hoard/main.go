@@ -11,7 +11,7 @@ import (
 
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
-	cli "github.com/jawher/mow.cli"
+	"github.com/jawher/mow.cli"
 	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
 	"github.com/monax/hoard/config/logging"
