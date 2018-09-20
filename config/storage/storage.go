@@ -69,6 +69,24 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 				"filesystem storage config")
 		}
 		return storage.NewFileSystemStore(fsc.RootDirectory, addressEncoding)
+	case IPFS:
+		ipfsc := storageConfig.IPFSConfig
+		if ipfsc == nil {
+			return nil, errors.New("IPFS storage configuration must be " +
+				"supplied to use the filesystem storage backend")
+		}
+		if ipfsc.Protocol == "" {
+			ipfsc.Protocol = "https://"
+		}
+		if ipfsc.Address == "" {
+			return nil, errors.New("http api url must be non-empty in " +
+				"ipfs storage config")
+		}
+		if ipfsc.Port == "" {
+			return nil, errors.New("http api port must be non-empty in " +
+				"ipfs storage config")
+		}
+		return storage.NewIPFSStore(ipfsc.Protocol, ipfsc.Address, ipfsc.Port, addressEncoding)
 	case S3:
 		s3c := storageConfig.S3Config
 		if s3c == nil {
