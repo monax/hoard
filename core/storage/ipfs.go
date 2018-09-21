@@ -109,11 +109,3 @@ func (ipfss *ipfsStore) Location(address []byte) string {
 func (ipfss *ipfsStore) Name() string {
 	return fmt.Sprintf("ipfsStore[api=%s:%s]", ipfss.Address, ipfss.Port)
 }
-
-func (ipfss *ipfsStore) decode(address string) []byte {
-	add, err := ipfss.addressEncoding.DecodeString(address)
-	if err != nil {
-		return nil
-	}
-	return add
-}
