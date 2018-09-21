@@ -131,6 +131,14 @@ func main() {
 					}
 				})
 
+			configCmd.Command("ipfs", "Emit initial config with IPFS storage "+
+				"backend.",
+				func(c *cli.Cmd) {
+					c.Action = func() {
+						conf.Storage = storage.DefaultIPFSConfig()
+					}
+				})
+
 			configCmd.Command("existing", "Emit existing config (useful for checking "+
 				"config source or converting format)",
 				func(c *cli.Cmd) {

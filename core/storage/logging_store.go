@@ -26,9 +26,10 @@ func NewLoggingStore(store NamedStore, logger log.Logger) *loggingStore {
 
 var _ NamedStore = (*loggingStore)(nil)
 
-func (ls *loggingStore) Put(address, data []byte) error {
-	return logErrorOrSuccess(log.With(ls.logger, "method", "Put", "address",
-		formatAddress(address)), ls.store.Put(address, data))
+func (ls *loggingStore) Put(address []byte, data []byte) ([]byte, error) {
+	address, err := ls.store.Put(address, data)
+	return address, logErrorOrSuccess(log.With(ls.logger, "method", "Put", "address",
+		formatAddress(address)), err)
 }
 
 func (ls *loggingStore) Get(address []byte) ([]byte, error) {

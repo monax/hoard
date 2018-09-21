@@ -17,11 +17,11 @@ func NewMemoryStore() *memoryStore {
 	}
 }
 
-func (ms *memoryStore) Put(address, data []byte) error {
+func (ms *memoryStore) Put(address []byte, data []byte) ([]byte, error) {
 	ms.mtx.Lock()
 	ms.memory[string(address)] = data
 	ms.mtx.Unlock()
-	return nil
+	return address, nil
 }
 
 func (ms *memoryStore) Get(address []byte) ([]byte, error) {

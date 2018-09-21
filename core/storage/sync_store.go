@@ -45,7 +45,7 @@ func (ss *syncStore) Stat(address []byte) (*StatInfo, error) {
 
 }
 
-func (ss *syncStore) Put(address, data []byte) error {
+func (ss *syncStore) Put(address []byte, data []byte) ([]byte, error) {
 	ss.mtx.Lock(address)
 	defer ss.mtx.Unlock(address)
 	return ss.store.Put(address, data)
