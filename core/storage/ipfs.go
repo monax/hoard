@@ -32,7 +32,7 @@ func NewIPFSStore(proto, address, port string, addressEncoding AddressEncoding) 
 	}, nil
 }
 
-func (ipfss *ipfsStore) Put(address *[]byte, data []byte) error {
+func (ipfss *ipfsStore) Put(address []byte, data []byte) ([]byte, error) {
 	uri := ipfss.Protocol + ipfss.Address + ":" + ipfss.Port + "/api/v0/add"
 
 	var b bytes.Buffer
@@ -40,7 +40,7 @@ func (ipfss *ipfsStore) Put(address *[]byte, data []byte) error {
 
 	fw, err := w.CreateFormField("arg")
 	if _, err = fw.Write((data)[:]); err != nil {
-		return nil
+		return address, nil
 	}
 	w.Close()
 
@@ -50,21 +50,20 @@ func (ipfss *ipfsStore) Put(address *[]byte, data []byte) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return address, err
 	}
 	defer resp.Body.Close()
 	body := &bytes.Buffer{}
 	_, err = body.ReadFrom(resp.Body)
 	if err != nil {
-		return err
+		return address, err
 	}
 	var m map[string]interface{}
 	json.Unmarshal(body.Bytes(), &m)
 
 	// TODO deterministically generate IPFS addresses natively
 	// currently, we `add` the blob and read the return address
-	*address = []byte(m["Name"].(string))
-	return nil
+	return []byte(m["Name"].(string)), nil
 }
 
 func (ipfss *ipfsStore) Get(address []byte) ([]byte, error) {

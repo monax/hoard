@@ -24,8 +24,8 @@ func NewFileSystemStore(rootDirectory string, addressEncoding AddressEncoding) (
 	}, nil
 }
 
-func (fss *fileSystemStore) Put(address *[]byte, data []byte) error {
-	return ioutil.WriteFile(fss.Path(*address), data, 0644)
+func (fss *fileSystemStore) Put(address []byte, data []byte) ([]byte, error) {
+	return address, ioutil.WriteFile(fss.Path(address), data, 0644)
 }
 
 func (fss *fileSystemStore) Get(address []byte) ([]byte, error) {

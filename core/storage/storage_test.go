@@ -62,7 +62,7 @@ func getPutGet(t *testing.T, store Store, address, data []byte) {
 		"an error")
 
 	// Put data at address
-	err = store.Put(&address, data)
+	address, err = store.Put(address, data)
 	assert.NoError(t, err, "Should be able to Put data at address")
 
 	retrieved, err = store.Get(address)
