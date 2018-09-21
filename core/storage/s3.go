@@ -63,7 +63,7 @@ func Session(awsConfig *aws.Config) (*session.Session, error) {
 	})
 }
 
-func (s3s *s3Store) Put(address, data []byte) error {
+func (s3s *s3Store) Put(address []byte, data []byte) ([]byte, error) {
 	// Should be threadsafe
 	output, err := s3s.awsUploader.Upload(&s3manager.UploadInput{
 		Bucket: &s3s.s3Bucket,
@@ -71,14 +71,14 @@ func (s3s *s3Store) Put(address, data []byte) error {
 		Body:   bytes.NewReader(data),
 	})
 	if err != nil {
-		return err
+		return address, err
 	}
 	s3s.logger.Log("method", "Put",
 		"location", output.Location,
 		"encoded_address", s3s.encode(address),
 		"version_id", output.VersionID,
 		"upload_id", output.UploadID)
-	return err
+	return address, err
 }
 
 func (s3s *s3Store) Get(address []byte) ([]byte, error) {

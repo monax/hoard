@@ -33,7 +33,7 @@ type ReadStore interface {
 
 type WriteStore interface {
 	// Put data at address
-	Put(address, data []byte) error
+	Put(address []byte, data []byte) ([]byte, error)
 }
 
 type Store interface {
@@ -81,7 +81,7 @@ func (cas *contentAddressedStore) Address(data []byte) []byte {
 
 func (cas *contentAddressedStore) Put(data []byte) ([]byte, error) {
 	address := cas.addresser(data)
-	err := cas.store.Put(address, data)
+	address, err := cas.store.Put(address, data)
 	return address, err
 }
 

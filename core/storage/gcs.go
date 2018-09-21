@@ -49,19 +49,19 @@ func NewGCSStore(gcsBucket string, addressEncoding AddressEncoding,
 	return gcss, nil
 }
 
-func (gcss *gcsStore) Put(address, data []byte) error {
+func (gcss *gcsStore) Put(address, data []byte) ([]byte, error) {
 	writer, err := gcss.gcpGCS.NewWriter(gcss.back, gcss.encode(address), nil)
 	if err != nil {
-		return err
+		return address, err
 	}
 
 	n, err := writer.Write(data)
 	if err != nil {
-		return err
+		return address, err
 	}
 
 	if err = writer.Close(); err != nil {
-		return err
+		return address, err
 	}
 
 	gcss.logger.Log("method", "Put",
@@ -69,7 +69,7 @@ func (gcss *gcsStore) Put(address, data []byte) error {
 		"encoded_address", gcss.encode(address),
 		"uploaded_bytes", n)
 
-	return err
+	return address, err
 }
 
 func (gcss *gcsStore) Get(address []byte) ([]byte, error) {

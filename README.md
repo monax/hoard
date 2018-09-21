@@ -6,11 +6,13 @@ It is stateless in the sense of relying on storage backends for the actual persi
 
 - Memory
 - Filesystem
-- S3
+- [S3](https://aws.amazon.com/s3/)
+- [GCS](https://cloud.google.com/storage/)
+- [IPFS](https://ipfs.io/)
+
 
 Planned storage backends are:
 
-- IPFS
 - BigchainDB (and IPDB)
 - Tendermint
 
@@ -57,6 +59,9 @@ hoard config --init s3
 
 # Initialise Hoard with GCS backend
 hoard config --init gcs
+
+# Initialise Hoard with IPFS backend
+hoard config --init ipfs
 ```
 
 These will provide base configurations you can configure to meet your needs. The config is located by default in `$HOME/.config/hoard.toml` but you can specify a file with `hoard -c /path/to/config`. The XDG base directory specification is used to search for config.
