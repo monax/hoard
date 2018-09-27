@@ -131,6 +131,14 @@ func main() {
 					}
 				})
 
+			configCmd.Command("gcs", "Emit initial config with GCS storage "+
+				"backend.",
+				func(c *cli.Cmd) {
+					c.Action = func() {
+						conf.Storage = storage.DefaultGCSConfig()
+					}
+				})
+
 			configCmd.Command("ipfs", "Emit initial config with IPFS storage "+
 				"backend.",
 				func(c *cli.Cmd) {

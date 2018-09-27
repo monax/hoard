@@ -1,4 +1,4 @@
-FROM circleci/golang:1.8
+FROM circleci/golang:1.11
 
 # This Dockerfile is to generate the docker build image for CI services
 # See the update_docker_image Make target

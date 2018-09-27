@@ -1,16 +1,18 @@
 # Hoard
 
-Hoard is a stateless, deterministically encrypted, content-addressed object store. 
+Hoard is a stateless, deterministically encrypted, content-addressed object store.
 
 It is stateless in the sense of relying on storage backends for the actual persistence of objects. Currently supported backends are:
 
 - Memory
 - Filesystem
-- S3
+- [S3](https://aws.amazon.com/s3/)
+- [GCS](https://cloud.google.com/storage/)
+- [IPFS](https://ipfs.io/)
+
 
 Planned storage backends are:
 
-- IPFS
 - BigchainDB (and IPDB)
 - Tendermint
 
@@ -26,7 +28,7 @@ Hoard should be go-gettable with:
 
 ```shell
 # Install the Hoar-Daemon hoard:
-go get github.com/monax/hoard/cmd/hoard 
+go get github.com/monax/hoard/cmd/hoard
 
 # Install the Hoar-Control hoarctl:
 go get github.com/monax/hoard/cmd/hoarctl
@@ -47,13 +49,19 @@ With no config file by default `hoard` will run a memory storage backend from wh
 
 ```shell
 # Initialise Hoard with memory backend
-hoard init mem
+hoard config --init mem
 
 # Initialise Hoard with filesystem backend
-hoard init fs
+hoard config --init fs
 
 # Initialise Hoard with S3 backend
-hoard init s3
+hoard config --init s3
+
+# Initialise Hoard with GCS backend
+hoard config --init gcs
+
+# Initialise Hoard with IPFS backend
+hoard config --init ipfs
 ```
 
 These will provide base configurations you can configure to meet your needs. The config is located by default in `$HOME/.config/hoard.toml` but you can specify a file with `hoard -c /path/to/config`. The XDG base directory specification is used to search for config.
@@ -71,12 +79,12 @@ echo $ref | hoarctl get
 echo $ref | hoarctl stat
 
 # This one-liner exercises the entire API:
-echo foo | hoarctl put | hoarctl get | hoarctl put | hoarctl stat | hoarctl cat | hoarctl insert | hoarctl cat | hoarctl decrypt -k tbudgBSg+bHWHiHnlteNzN8TUvI80ygS9IULh4rklEw= | hoarctl encrypt 
+echo foo | hoarctl put | hoarctl get | hoarctl put | hoarctl stat | hoarctl cat | hoarctl insert | hoarctl cat | hoarctl decrypt -k tbudgBSg+bHWHiHnlteNzN8TUvI80ygS9IULh4rklEw= | hoarctl encrypt
 ```
 
 You can chop off segments of the final command to see the output of each intermediate command. It is contrived so that the outputs can be used as inputs for the next pipeline step. `hoarctl` either returns JSON references or raw bytes depending on the command. You may find the excellent [jq](https://stedolan.github.io/jq/) useful for working with single-line JSON files on the commandline.
 
-## Config 
+## Config
 Using the filesystem storage backend as an example (generated with `hoard init -o- fs`) you can configure Hoard with a file like:
 
 ```toml
@@ -121,7 +129,7 @@ Given an encrypted object, secret key, and salt the decryption proceeds as follo
 2. Trim the prefix `salt` from the output of (1).
 3. Return the object as `data` from the output of (2).
 
-### Security 
+### Security
 
 By design this scheme is trivially vulnerable to known-plaintext attacks (if you know the plaintext you can find the key).
 
@@ -136,7 +144,7 @@ The encryption is furthermore vulnerable to the same timing and length attacks t
 ### Maturity
 
 Hoard is still pre-release and pre-version, there may be breaking changes to the API at any time. Before version tag v1.0.0 changes minor version number changes may break the hoard.proto or hoarctl APIs (e.g. 0.3.4 -> 0.4.0) but patch number changes should leave it intact (e.g. 0.3.4 -> 0.3.5).
- 
+
 The cryptographic libraries used are standard Go libraries (and Go's NACL implementation) so should be of reasonable quality and are widely deployed. The encryption scheme is straight-forward and has an isolated implementation. However there may be bugs in the implementation.
 
 ## Specification
