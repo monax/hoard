@@ -116,11 +116,7 @@ func (gcss *gcsStore) Stat(address []byte) (*StatInfo, error) {
 
 func (gcss *gcsStore) Location(address []byte) string {
 	return fmt.Sprintf("gs://%s/%s", gcss.gcsBucket,
-		gcss.Key(address))
-}
-
-func (gcss *gcsStore) Key(address []byte) string {
-	return fmt.Sprintf("%s", gcss.encode(address))
+		gcss.encode(address))
 }
 
 func (gcss *gcsStore) Name() string {
