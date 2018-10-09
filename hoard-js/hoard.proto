@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package core;
+
+// Provide plaintext and get plaintext back
+service Cleartext {
+    // Provide a secret reference to an encrypted blob and get the plaintext
+    // data back.
+    rpc Get (Reference) returns (Plaintext);
+    // Push some plaintext data into storage and get its deterministically
+    // generated secret reference.
+    rpc Put (Plaintext) returns (Reference);
+}
+
+// Deterministic encryption
+service Encryption {
+    // Encrypt some data and get its deterministically generated
+    // secret reference including its address without storing the data.
+    rpc Encrypt (Plaintext) returns (ReferenceAndCiphertext);
+    // Decrypt the provided data by supplying it alongside its secret
+    // reference. The address is not used for decryption and may be omitted.
+    rpc Decrypt (ReferenceAndCiphertext) returns (Plaintext);
+}
+
+// Interact directly with storage backend
+service Storage {
+    // Retrieve the (presumably) encrypted data stored at address.
+    rpc Pull (Address) returns (Ciphertext);
+    // Insert the (presumably) encrypted data provided and get the its address.
+    rpc Push (Ciphertext) returns (Address);
+    // Get some information about the encrypted blob stored at an address,
+    // including whether it exists.
+    rpc Stat (Address) returns (StatInfo);
+}
+
+message Reference {
+    bytes address = 1;
+    bytes secretKey = 2;
+    bytes salt = 3;
+}
+
+message Plaintext {
+    bytes data = 1;
+    bytes salt = 2;
+}
+
+message Ciphertext {
+    bytes encryptedData = 1;
+}
+
+message ReferenceAndCiphertext {
+    Reference reference = 1;
+    Ciphertext ciphertext = 2;
+}
+
+message Address {
+    bytes address = 1;
+}
+
+message StatInfo {
+    // The address will be the same as the one passed in but is repeated to
+    // make result self-describing
+    bytes address = 1;
+    // If the blob does not exist this will be false instead of returning an
+    // error
+    bool exists = 2;
+    // Will be 0 if the blob does not existing (or omitted under protobuf3)
+    uint64 size = 3;
+    // The externally resolvable location of the encrypted blob. The location
+    // will be hypothetical if the blob does not exist
+    string location = 4;
+}
+
