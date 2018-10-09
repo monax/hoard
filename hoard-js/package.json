@@ -1,0 +1,23 @@
+{
+  "name": "hoard-client",
+  "version": "1.0.0",
+  "description": "Hoard client library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://code.monax.io/platform/hoard"
+  },
+  "dependencies": {
+    "grpc": "1.4.1",
+    "grpc-tools": "1.4.1",
+    "google-protobuf": "3.3.0"
+  },
+  "keywords": [
+    "hoard"
+  ],
+  "author": "Silas Davis",
+  "license": "Apache-2.0"
+}
