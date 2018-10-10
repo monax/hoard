@@ -19,124 +19,165 @@
 #
 
 SHELL := /bin/bash
-GOFILES_NOVENDOR := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-GOPACKAGES_NOVENDOR := $(shell go list ./... | grep -v /vendor/)
+REPO := $(shell pwd)
+GOFILES_NOVENDOR := $(shell go list -f "{{.Dir}}" ./...)
+PACKAGES_NOVENDOR := $(shell go list ./...)
+
 OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
 DIST := "dist"
 GOX_OUTPUT := "$DIST/{{.Dir}}_{{.OS}}_{{.Arch}}"
 BUILD_IMAGE := "quay.io/monax/hoard:build"
 
-# Install dependencies and also clear out vendor (we should do this in CI)
 
-# to make sure we are not depending on any local changes to dependencies in
-# vendor/
-.PHONY: ensure_vendor
-ensure_vendor:
-	@rm -rf vendor
-	@dep ensure -v
+# Formatting, linting and vetting
 
-# to make sure we are not depending on any local changes to dependencies in
-# vendor/
-.PHONY: deps
-deps:
-	@go get golang.org/x/tools/cmd/goimports
-	@go get -u github.com/golang/protobuf/protoc-gen-go
-	@go get -u github.com/Masterminds/glide
-	@go get -u github.com/goreleaser/goreleaser
-
-# Update the build image by building the Dockerfile at the project root
-# and pushing it to docker
-.PHONY: update_build_image
-update_build_image:
-	@docker build ./docker/ci -t ${BUILD_IMAGE}
-	@docker push ${BUILD_IMAGE}
-
-# Print version
-.PHONY: version
-version:
-	@go run ./cmd/version/main.go
-
-# Run goimports (also checks formatting) first display output first, then check for success
+## check the code for style standards; currently enforces go formatting.
 .PHONY: check
 check:
-	@goimports -l -d ${GOFILES_NOVENDOR}
-	@goimports -l ${GOFILES_NOVENDOR} | read && echo && \
-	echo "Your marmot has found a problem with the formatting style of the code."\
-	 1>&2 && exit 1 || true
+	@echo "Checking code for formatting style compliance."
+	@gofmt -l -d ${GOFILES_NOVENDOR}
+	@gofmt -l ${GOFILES_NOVENDOR} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
 
-# Just fix it
+## just fix it
 .PHONY: fix
 fix:
 	@goimports -l -w ${GOFILES_NOVENDOR}
 
-# Compile hoard.proto interface definition
+## fmt runs gofmt -w on the code, modifying any files that do not match
+## the style guide.
+.PHONY: fmt
+fmt:
+	@echo "Correcting any formatting style corrections."
+	@gofmt -l -w ${GOFILES_NOVENDOR}
+
+## lint installs golint and prints recommendations for coding style.
+lint:
+	@echo "Running lint checks."
+	go get -u github.com/golang/lint/golint
+	@for file in $(GOFILES_NOVENDOR); do \
+		echo; \
+		golint --set_exit_status $${file}; \
+	done
+
+
+
+# Dependency Management
+
+## erase vendor wipes the full vendor directory
+.PHONY: erase_vendor
+erase_vendor:
+	rm -rf ${REPO}/vendor/
+
+## install vendor uses dep to install vendored dependencies
+.PHONY: reinstall_vendor
+reinstall_vendor: erase_vendor
+	@go get -u github.com/golang/dep/cmd/dep
+	@dep ensure -v
+
+## delete the vendor directly and pull back using dep lock and constraints file
+## will exit with an error if the working directory is not clean (any missing files or new
+## untracked ones)
+.PHONY: ensure_vendor
+ensure_vendor: reinstall_vendor
+	@scripts/is_checkout_dirty.sh
+
+
+# Building
+
+## output commit_hash but only if we have the git repo (e.g. not in docker build)
+.PHONY: commit_hash
+commit_hash:
+	@git status &> /dev/null && scripts/commit_hash.sh > commit_hash.txt || true
+
+## compile hoard.proto interface definition
 ./core/hoard.pb.go: ./core/hoard.proto
 	@protoc -I ./core core/hoard.proto --go_out=plugins=grpc:core
 
 .PHONY: build_protobuf
 build_protobuf: ./core/hoard.pb.go
 
-# Build the hoard binary
+## build the hoard binary
 .PHONY: build_hoard
 build_hoard:
 	@go build -o bin/hoard ./cmd/hoard
 
-# Build the hoard binary
+## build the hoard binary
 .PHONY: build_hoarctl
 build_hoarctl:
 	@go build -o bin/hoarctl ./cmd/hoarctl
 
-# Build the hoard binaries
-.PHONY: build_bin
-build_bin:	build_hoard build_hoarctl
-
-# Run tests
-.PHONY:	test
-test: check build_protobuf
-	@go test ${GOPACKAGES_NOVENDOR}
-
-# Run tests for developing (noisy)
-.PHONY:	test_dev
-test_dev: build_protobuf
-	@go test -v ${GOPACKAGES_NOVENDOR}
-
-# Run tests including integration tests
-.PHONY:	test_integration
-test_integration: check build_protobuf
-	@go test -tags integration ${GOPACKAGES_NOVENDOR}
-	@integration/test.sh
-
-# Build all the things
+## build all targets in github.com/monax/hoard
 .PHONY: build
-build:	build_protobuf build_bin
+build:	check build_hoard build_hoarctl build_protobuf
 
-# Build binaries for all architectures
+.PHONY: docker_build
+docker_build: check commit_hash
+	@scripts/build_tool.sh
+
+## build binaries for all architectures
 .PHONY: build_dist
 build_dist:	build_protobuf
 	@goreleaser --rm-dist --skip-publish --skip-validate
 
-# Generate full changelog of all release notes
-changelog.md: ./release/release.go
-	@go run ./cmd/hoarctl/main.go version changelog > changelog.md
 
-# Generated release notes for this version
-notes.md: ./release/release.go
-	@go run ./cmd/hoarctl/main.go version notes > notes.md
+# Testing
+
+.PHONY:	test
+test: check build_protobuf
+	@scripts/bin_wrapper.sh go test -v ./... ${GOPACKAGES_NOVENDOR}
+
+## run tests including integration tests
+.PHONY:	test_integration
+test_integration: check build_protobuf
+	@go test -v -tags integration ./... ${GOPACKAGES_NOVENDOR}
+	@integration/test.sh
+
+
+# Clean Up
+
+## clean removes the target folder containing build artefacts
+.PHONY: clean
+clean:
+	-rm -r ./bin
+
+
+## Release and Versioning
+
+## print version
+.PHONY: version
+version:
+	@go run ./project/cmd/version/main.go
+
+## generate full changelog of all release notes
+CHANGELOG.md: project/history.go project/cmd/changelog/main.go
+	@go run ./project/cmd/changelog/main.go > CHANGELOG.md
+
+## generated release note for this version
+NOTES.md: project/history.go project/cmd/notes/main.go
+	@go run ./project/cmd/notes/main.go > NOTES.md
 
 .PHONY: docs
-docs: changelog.md notes.md
+docs: CHANGELOG.md NOTES.md
 
-# Do all available tests and checks then build
-.PHONY: build_ci
-build_ci: ensure_vendor check test build
-
-# Tag the current HEAD commit with the current release defined in
-# ./release/release.go
+## tag the current HEAD commit with the current release defined in
+## ./release/release.go
 .PHONY: tag_release
-tag_release: test check docs build_hoarctl
+tag_release: test check docs build
 	@scripts/tag_release.sh
 
-# If the checked out commit is tagged with a version then release to github
 .PHONY: release
-release: notes.md
+release: docs check test docker_build
+	@scripts/is_checkout_dirty.sh || (echo "checkout is dirty so not releasing!" && exit 1)
 	@scripts/release.sh
+
+.PHONY: release_dev
+release_dev: test docker_build
+	@scripts/release_dev.sh
+
+.PHONY: build_ci_image
+build_ci_image:
+	docker build -t ${CI_IMAGE} -f ./.circleci/Dockerfile .
+
+.PHONY: push_ci_image
+push_ci_image: build_ci_image
+	docker push ${CI_IMAGE}
