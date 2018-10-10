@@ -37,4 +37,3 @@ echo ""
 echo "$notes" | git tag -a ${version} -F-
 
 git push origin ${version}
-
