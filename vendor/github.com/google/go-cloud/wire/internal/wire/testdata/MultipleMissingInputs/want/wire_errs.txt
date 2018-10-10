@@ -1,2 +1,0 @@
-no provider found for example.com/foo.Foo
-no provider found for example.com/foo.Bar
