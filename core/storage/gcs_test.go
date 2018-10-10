@@ -12,7 +12,8 @@ import (
 
 func TestGCSStore(t *testing.T) {
 	bucket := "monax-hoard-test"
-	gcss, err := NewGCSStore(bucket, base32.StdEncoding, nil, nil)
+	prefix := "TestGCSStore/"
+	gcss, err := NewGCSStore(bucket, prefix, base32.StdEncoding, nil)
 	assert.NoError(t, err)
 	testStore(t, gcss)
 }

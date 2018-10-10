@@ -23,8 +23,8 @@ read -d '' HOARD_JSON_CONFIG << CONFIG
       "StorageType": "s3",
       "AddressEncoding": "base64",
       "Region": "${AWS_REGION}",
-      "Bucket": "${S3_BUCKET}",
-      "Prefix": "${S3_PREFIX}",
+      "S3Bucket": "${S3_BUCKET}",
+      "S3Prefix": "${S3_PREFIX}",
       "CredentialsProviderChain": [
         {
           "Provider": "env"

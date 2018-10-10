@@ -22,7 +22,7 @@ type gcsStore struct {
 	logger          log.Logger
 }
 
-func NewGCSStore(gcsBucket string, addressEncoding AddressEncoding,
+func NewGCSStore(gcsBucket, gcsPrefix string, addressEncoding AddressEncoding,
 	logger log.Logger) (*gcsStore, error) {
 
 	if logger == nil {
