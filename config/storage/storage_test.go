@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,7 +15,6 @@ func assertStorageConfigSerialisation(t *testing.T,
 		}
 	}()
 	storageConfigOut, err := ConfigFromString(storageConfig.TOMLString())
-	fmt.Println(storageConfigOut)
 	assert.NoError(t, err)
 	tomlString := storageConfig.TOMLString()
 	assert.NotEmpty(t, tomlString)

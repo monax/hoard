@@ -5,6 +5,12 @@
 # - jq
 # - AWS CLI with credentials configured with access to S3_BUCKET specified below
 
+if [[ "$(which aws)" == "" ]]
+then
+  echo "Integration test requires AWS"
+  exit 0
+fi
+
 AWS_REGION="eu-central-1"
 S3_BUCKET="monax-hoard-test"
 S3_PREFIX="integration-test"
