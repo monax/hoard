@@ -20,9 +20,23 @@ jobs:
       - run: make test
       - run: make build
 
-  test_integration:
-    <<: *defaults
+  # test_integration:
+  #   <<: *defaults
+  #   steps:
+  #     - checkout
+  #     - run: make test_integration
+
+  test_gcp_integration:
+    working_directory: /go/src/github.com/monax/hoard
+    docker:
+      - image: google/cloud-sdk
     steps:
+      - run:
+          name: Store Service Account
+          command: echo $GCLOUD_SERVICE_KEY > /gcloud-service-key.json
+      - run: |
+          sudo gcloud auth activate-service-account --key-file=/gcloud-service-key.json
+          sudo gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
       - checkout
       - run: make test_integration
 

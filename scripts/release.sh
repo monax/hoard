@@ -2,6 +2,8 @@
 
 version_regex="^v[0-9]+\.[0-9]+\.[0-9]+$"
 
+set -e
+
 function release {
     echo "Building and releasing $tag..."
     [[ -e notes.md ]] && goreleaser --release-notes notes.md || goreleaser
