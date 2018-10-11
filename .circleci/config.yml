@@ -34,9 +34,7 @@ jobs:
       - run:
           name: Store Service Account
           command: echo $GCLOUD_SERVICE_KEY > /gcloud-service-key.json
-      - run: |
-          gcloud auth activate-service-account --key-file=/gcloud-service-key.json
-          gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+      - run: gcloud auth activate-service-account --key-file=/gcloud-service-key.json
       - checkout
       - run: make test_integration
 

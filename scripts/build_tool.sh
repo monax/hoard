@@ -47,4 +47,4 @@ docker build --build-arg VERSION=${version}\
  -t ${DOCKER_REPO}:${version} ${REPO}
 # Quick smoke test
 echo "Emitting version from docker image as smoke test..."
-docker run ${DOCKER_REPO}:${version} version
+docker run ${DOCKER_REPO}:${version} hoard version
