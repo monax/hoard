@@ -79,7 +79,7 @@ workflows:
           filters:
             <<: *tags_filters
 
-      - test_integration:
+      - test_gcp_integration:
           filters:
             <<: *tags_filters
 
