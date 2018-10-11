@@ -23,7 +23,7 @@ const (
 
 type S3Config struct {
 	S3Bucket                 string
-	Prefix                   string
+	S3Prefix                 string
 	Region                   string
 	CredentialsProviderChain []*CredentialsProviderConfig
 }
@@ -88,7 +88,7 @@ func NewS3Config(addressEncoding, s3Bucket, s3Prefix, region string,
 		AddressEncoding: addressEncoding,
 		S3Config: &S3Config{
 			S3Bucket:                 s3Bucket,
-			Prefix:                   s3Prefix,
+			S3Prefix:                 s3Prefix,
 			Region:                   region,
 			CredentialsProviderChain: cpConfigs,
 		},
