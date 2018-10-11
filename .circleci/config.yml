@@ -94,7 +94,7 @@ workflows:
       - release_dev:
           requires:
           - test
-          - test_integration
+          - test_gcp_integration
           filters:
             branches:
               only: develop
@@ -102,7 +102,7 @@ workflows:
       - release:
           requires:
           - test
-          - test_integration
+          - test_gcp_integration
           filters:
             <<: *tags_filters
             branches:
