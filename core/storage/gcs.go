@@ -18,6 +18,7 @@ type gcsStore struct {
 	back            context.Context
 	gcpGCS          *blob.Bucket
 	gcsBucket       string
+	gcsPrefix       string
 	addressEncoding AddressEncoding
 	logger          log.Logger
 }
@@ -41,6 +42,7 @@ func NewGCSStore(gcsBucket, gcsPrefix string, addressEncoding AddressEncoding,
 		back:            ctx,
 		gcpGCS:          gcpSession,
 		gcsBucket:       gcsBucket,
+		gcsPrefix:       gcsPrefix,
 		addressEncoding: addressEncoding,
 		logger: logging.TraceLogger(log.With(logger,
 			structure.ComponentKey, "storage")),
@@ -50,7 +52,7 @@ func NewGCSStore(gcsBucket, gcsPrefix string, addressEncoding AddressEncoding,
 }
 
 func (gcss *gcsStore) Put(address, data []byte) ([]byte, error) {
-	writer, err := gcss.gcpGCS.NewWriter(gcss.back, gcss.encode(address), nil)
+	writer, err := gcss.gcpGCS.NewWriter(gcss.back, gcss.gcsPrefix+"/"+gcss.encode(address), nil)
 	if err != nil {
 		return address, err
 	}
@@ -73,7 +75,7 @@ func (gcss *gcsStore) Put(address, data []byte) ([]byte, error) {
 }
 
 func (gcss *gcsStore) Get(address []byte) ([]byte, error) {
-	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.encode(address))
+	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.gcsPrefix+"/"+gcss.encode(address))
 	if err != nil {
 		return address, err
 	}
@@ -93,7 +95,7 @@ func (gcss *gcsStore) Get(address []byte) ([]byte, error) {
 }
 
 func (gcss *gcsStore) Stat(address []byte) (*StatInfo, error) {
-	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.encode(address))
+	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.gcsPrefix+"/"+gcss.encode(address))
 	if err != nil {
 		return &StatInfo{
 			Exists: false,
