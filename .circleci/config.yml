@@ -27,9 +27,7 @@ jobs:
   #     - run: make test_integration
 
   test_gcp_integration:
-    working_directory: /go/src/github.com/monax/hoard
-    docker:
-      - image: google/cloud-sdk
+    <<: *defaults
     steps:
       - run:
           name: Store Service Account
@@ -80,6 +78,10 @@ workflows:
       - test_gcp_integration:
           filters:
             <<: *tags_filters
+            branches:
+              only:
+              - develop
+              - master
 
       - ensure_vendor:
           filters:
