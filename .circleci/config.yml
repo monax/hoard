@@ -29,10 +29,12 @@ jobs:
   test_gcp_integration:
     <<: *defaults
     steps:
+      - setup_remote_docker:
+          <<: *setup_docker
       - run:
           name: Store Service Account
-          command: echo $GCLOUD_SERVICE_KEY > /gcloud-service-key.json
-      - run: gcloud auth activate-service-account --key-file=/gcloud-service-key.json
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run: gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
       - checkout
       - run: make test_integration
 
@@ -66,7 +68,6 @@ jobs:
       - checkout
       - run: make release
 
-
 workflows:
   version: 2
   test_and_release:
@@ -78,10 +79,6 @@ workflows:
       - test_gcp_integration:
           filters:
             <<: *tags_filters
-            branches:
-              only:
-              - develop
-              - master
 
       - ensure_vendor:
           filters:

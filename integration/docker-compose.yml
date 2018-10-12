@@ -11,7 +11,7 @@ services:
     ports:
      - "53431:53431"
     volumes:
-    - /gcloud-service-key.json:/gcloud-service-key.json
+    - ${HOME}/gcloud-service-key.json:/gcloud-service-key.json
   hoarctl:
     build: ..
     links:
