@@ -72,25 +72,31 @@ workflows:
   version: 2
   test_and_release:
     jobs:
-      - test:
-          filters:
-            <<: *tags_filters
-
-      - test_gcp_integration:
-          filters:
-            <<: *tags_filters
-
       - ensure_vendor:
           filters:
             <<: *tags_filters
 
+      - test:
+          requires:
+          - ensure_vendor
+          filters:
+            <<: *tags_filters
+
+      - test_gcp_integration:
+          requires:
+          - test
+          filters:
+            <<: *tags_filters
+
       - build_docker:
+          requires:
+          - test
           filters:
             <<: *tags_filters
 
       - release_dev:
           requires:
-          - test
+          - build_docker
           - test_gcp_integration
           filters:
             branches:
@@ -98,7 +104,7 @@ workflows:
 
       - release:
           requires:
-          - test
+          - build_docker
           - test_gcp_integration
           filters:
             <<: *tags_filters
