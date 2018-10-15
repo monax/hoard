@@ -3,7 +3,6 @@
 # Requires:
 # - Docker compose
 # - jq
-# - AWS CLI with credentials configured with access to S3_BUCKET specified below
 
 if [[ "$(which gcloud)" == "" || "$(which gsutil)" == "" ]]
 then
