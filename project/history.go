@@ -16,8 +16,8 @@ func Commit() string {
 
 func FullVersion() string {
 	version := History.CurrentVersion().String()
-	if commit != "" {
-		return version + "+commit." + commit
+	if commit != "" && date != "" {
+		return version + "+commit." + commit + "+date." + date
 	}
 	return version
 }

@@ -130,8 +130,8 @@ test: check build_protobuf
 .PHONY:	test_integration
 test_integration: check build_protobuf
 	@go test -v -tags integration ./... ${GOPACKAGES_NOVENDOR}
+	@integration/test_aws.sh
 	@integration/test_gcp.sh
-#	@integration/test_aws.sh
 
 
 # Clean Up

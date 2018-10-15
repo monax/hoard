@@ -12,7 +12,7 @@ builds:
     - -extldflags "-static"
     - -s -w
     - -X github.com/monax/hoard/project.commit={{.Commit}}
-    - -X github.com/monax/hoard/project.commit={{.Date}}
+    - -X github.com/monax/hoard/project.date={{.Date}}
 - main: ./cmd/hoarctl
   binary: hoarctl
   env:
@@ -21,7 +21,7 @@ builds:
     - -extldflags "-static"
     - -s -w
     - -X github.com/monax/hoard/project.commit={{.Commit}}
-    - -X github.com/monax/hoard/project.commit={{.Date}}
+    - -X github.com/monax/hoard/project.date={{.Date}}
 archive:
   replacements:
     darwin: Darwin

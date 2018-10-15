@@ -11,7 +11,7 @@ func AddVersionCommand(cmd *cli.Cli) {
 	cmd.Command("version", "Get version number",
 		func(versionCmd *cli.Cmd) {
 			versionCmd.Action = func() {
-				fmt.Println(project.History.CurrentVersion().String())
+				fmt.Println(project.FullVersion())
 			}
 
 			versionCmd.Command("notes", "Get release notes for this version",

@@ -1,3 +1,1 @@
-### Changed
-- IPFS & GCP Support
-
+IPFS & GCP Support
