@@ -49,7 +49,7 @@ CONFIG
 
 export HOARD_JSON_CONFIG
 echo "Running integration test with config:"
-echo ${HOARD_JSON_CONFIG}| jq '.'
+echo ${HOARD_JSON_CONFIG} | jq '.'
 
 # Delete existing storage
 echo "Deleting existing S3 backing store..."
@@ -59,3 +59,4 @@ aws s3 rm --recursive "s3://${S3_BUCKET}/${S3_PREFIX}"
 echo "Bringing up integration test containers with docker-compose..."
 [ -z "$NOBUILD" ] && docker-compose build
 docker-compose up --exit-code-from hoarctl --abort-on-container-exit
+docker-compose stop
