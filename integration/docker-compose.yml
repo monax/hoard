@@ -9,9 +9,9 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS
       - HOARD_JSON_CONFIG
     ports:
-     - "53431:53431"
+      - "53431:53431"
     volumes:
-    - ${HOME}/gcloud-service-key.json:/gcloud-service-key.json
+      - /tmp:/config
   hoarctl:
     build: ..
     links:

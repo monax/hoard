@@ -33,7 +33,13 @@ func NewGCSStore(gcsBucket, gcsPrefix string, addressEncoding AddressEncoding,
 	ctx := context.Background()
 	// obtain default GCP credentials from Cloud Platform scope
 	creds, err := gcp.DefaultCredentials(ctx)
+	if err != nil {
+		return nil, err
+	}
 	gcsClient, err := gcp.NewHTTPClient(gcp.DefaultTransport(), gcp.CredentialsTokenSource(creds))
+	if err != nil {
+		return nil, err
+	}
 	gcpSession, err := gcsblob.OpenBucket(ctx, gcsBucket, gcsClient)
 	if err != nil {
 		return nil, err

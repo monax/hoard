@@ -25,11 +25,11 @@ jobs:
     steps:
       - setup_remote_docker:
           <<: *setup_docker
-      - run:
-          name: Store GCLOUD Service Account
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-      - run: gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
       - checkout
+      - run:
+          name: Store Service Account
+          command: echo $GCLOUD_SERVICE_KEY > /tmp/gcloud-service-key.json
+      - run: gcloud auth activate-service-account --key-file=/tmp/gcloud-service-key.json
       - run: make test_integration
 
   ensure_vendor:

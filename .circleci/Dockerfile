@@ -9,7 +9,6 @@ RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN go get -u github.com/golang/dep/cmd/dep
 RUN go get -u github.com/goreleaser/goreleaser
 
-
 # install aws auth binaries
 RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
 RUN unzip awscli-bundle.zip
