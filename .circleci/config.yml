@@ -81,6 +81,10 @@ workflows:
           - test
           filters:
             <<: *tags_filters
+            branches:
+              only:
+              - develop
+              - master
 
       - build_docker:
           requires:
