@@ -3,46 +3,104 @@ defaults: &defaults
   docker:
     - image: quay.io/monax/hoard:build
 
+tag_filters: &tags_filters
+  tags:
+    only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+
 setup_docker: &setup_docker
-  version: 17.06.1-ce
+  version: 17.11.0-ce
 
 version: 2
 jobs:
-  build:
+  test:
     <<: *defaults
     steps:
+      - run: echo $CIRCLE_PULL_REQUESTS
       - checkout
-      - run: make build_ci
-      - setup_remote_docker:
-          <<: *setup_docker
-      # Note: will only actually release images and binaries if we are on a version tag (enforced in script)
-      - run: make release
+      - run: make test
+      - run: make build
 
-  integration_test:
+  test_integration:
     <<: *defaults
     steps:
-      - checkout
       - setup_remote_docker:
           <<: *setup_docker
+      - checkout
+      - run:
+          name: Store Service Account
+          command: echo $GCLOUD_SERVICE_KEY > /tmp/gcloud-service-key.json
+      - run: gcloud auth activate-service-account --key-file=/tmp/gcloud-service-key.json
       - run: make test_integration
 
+  ensure_vendor:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: make ensure_vendor
 
+  build_docker:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          <<: *setup_docker
+      - run: make docker_build
 
-# We are forced to use a workflow to trigger builds on tag pushes. Note that despite this being
-# an 'only' filter, it does not mean we only build on version tags.
-# all branch pushes and PRs are included by default, only tags need a specific filter
+  release_dev:
+    <<: *defaults
+    steps:
+      - setup_remote_docker:
+          <<: *setup_docker
+      - checkout
+      - run: make release_dev
+
+  release:
+    <<: *defaults
+    steps:
+      - setup_remote_docker:
+          <<: *setup_docker
+      - checkout
+      - run: make release
+
 workflows:
   version: 2
-  build:
+  test_and_release:
     jobs:
-      - build:
+      - ensure_vendor:
           filters:
-            tags:
-              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+            <<: *tags_filters
 
-      - integration_test:
+      - test:
+          requires:
+          - ensure_vendor
+          filters:
+            <<: *tags_filters
+
+      - test_integration:
+          requires:
+          - test
+          filters:
+            <<: *tags_filters
+
+      - build_docker:
+          requires:
+          - test
+          filters:
+            <<: *tags_filters
+
+      - release_dev:
+          requires:
+          - build_docker
+          - test_integration
           filters:
             branches:
-              only:
-                - master
-                - develop
+              only: develop
+
+      - release:
+          requires:
+          - build_docker
+          - test_integration
+          filters:
+            <<: *tags_filters
+            branches:
+              ignore: /.*/

@@ -1,1 +1,0 @@
-unexported identifier privateMsg

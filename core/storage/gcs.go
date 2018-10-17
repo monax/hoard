@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/go-kit/kit/log"
 	"github.com/google/go-cloud/blob"
@@ -12,17 +13,19 @@ import (
 	"github.com/google/go-cloud/gcp"
 	"github.com/monax/hoard/core/logging"
 	"github.com/monax/hoard/core/logging/structure"
+	"golang.org/x/oauth2/google"
 )
 
 type gcsStore struct {
 	back            context.Context
 	gcpGCS          *blob.Bucket
 	gcsBucket       string
+	gcsPrefix       string
 	addressEncoding AddressEncoding
 	logger          log.Logger
 }
 
-func NewGCSStore(gcsBucket string, addressEncoding AddressEncoding,
+func NewGCSStore(gcsBucket, gcsPrefix string, addressEncoding AddressEncoding,
 	logger log.Logger) (*gcsStore, error) {
 
 	if logger == nil {
@@ -31,8 +34,14 @@ func NewGCSStore(gcsBucket string, addressEncoding AddressEncoding,
 
 	ctx := context.Background()
 	// obtain default GCP credentials from Cloud Platform scope
-	creds, err := gcp.DefaultCredentials(ctx)
+	creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv("GCLOUD_SERVICE_KEY")), "https://www.googleapis.com/auth/cloud-platform")
+	if err != nil {
+		return nil, err
+	}
 	gcsClient, err := gcp.NewHTTPClient(gcp.DefaultTransport(), gcp.CredentialsTokenSource(creds))
+	if err != nil {
+		return nil, err
+	}
 	gcpSession, err := gcsblob.OpenBucket(ctx, gcsBucket, gcsClient)
 	if err != nil {
 		return nil, err
@@ -41,6 +50,7 @@ func NewGCSStore(gcsBucket string, addressEncoding AddressEncoding,
 		back:            ctx,
 		gcpGCS:          gcpSession,
 		gcsBucket:       gcsBucket,
+		gcsPrefix:       gcsPrefix,
 		addressEncoding: addressEncoding,
 		logger: logging.TraceLogger(log.With(logger,
 			structure.ComponentKey, "storage")),
@@ -50,7 +60,7 @@ func NewGCSStore(gcsBucket string, addressEncoding AddressEncoding,
 }
 
 func (gcss *gcsStore) Put(address, data []byte) ([]byte, error) {
-	writer, err := gcss.gcpGCS.NewWriter(gcss.back, gcss.encode(address), nil)
+	writer, err := gcss.gcpGCS.NewWriter(gcss.back, gcss.gcsPrefix+"/"+gcss.encode(address), nil)
 	if err != nil {
 		return address, err
 	}
@@ -73,7 +83,7 @@ func (gcss *gcsStore) Put(address, data []byte) ([]byte, error) {
 }
 
 func (gcss *gcsStore) Get(address []byte) ([]byte, error) {
-	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.encode(address))
+	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.gcsPrefix+"/"+gcss.encode(address))
 	if err != nil {
 		return address, err
 	}
@@ -93,7 +103,7 @@ func (gcss *gcsStore) Get(address []byte) ([]byte, error) {
 }
 
 func (gcss *gcsStore) Stat(address []byte) (*StatInfo, error) {
-	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.encode(address))
+	reader, err := gcss.gcpGCS.NewReader(gcss.back, gcss.gcsPrefix+"/"+gcss.encode(address))
 	if err != nil {
 		return &StatInfo{
 			Exists: false,

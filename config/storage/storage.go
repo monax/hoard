@@ -116,7 +116,7 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 				logger.Log(keyvals...)
 			}),
 		}
-		return storage.NewS3Store(s3c.S3Bucket, s3c.Prefix, addressEncoding,
+		return storage.NewS3Store(s3c.S3Bucket, s3c.S3Prefix, addressEncoding,
 			awsConfig, logger)
 
 	case GCS:
@@ -125,7 +125,7 @@ func StoreFromStorageConfig(storageConfig *StorageConfig,
 			return nil, errors.New("gpc configuration must be supplied to use " +
 				"the GPC storage backend")
 		}
-		return storage.NewGCSStore(gcsc.GCSBucket, addressEncoding, logger)
+		return storage.NewGCSStore(gcsc.GCSBucket, gcsc.GCSPrefix, addressEncoding, logger)
 
 	default:
 		return nil, fmt.Errorf("did not recognise storage type '%s'",

@@ -2,13 +2,14 @@ version: '3'
 services:
   hoard:
     build: ..
-    # These are set in test.sh
+    # These are set in the tests
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - GCLOUD_SERVICE_KEY
       - HOARD_JSON_CONFIG
     ports:
-     - "53431:53431"
+      - "53431:53431"
   hoarctl:
     build: ..
     links:
