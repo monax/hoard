@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/go-kit/kit/log"
 	"github.com/google/go-cloud/blob"
@@ -12,6 +13,7 @@ import (
 	"github.com/google/go-cloud/gcp"
 	"github.com/monax/hoard/core/logging"
 	"github.com/monax/hoard/core/logging/structure"
+	"golang.org/x/oauth2/google"
 )
 
 type gcsStore struct {
@@ -32,7 +34,7 @@ func NewGCSStore(gcsBucket, gcsPrefix string, addressEncoding AddressEncoding,
 
 	ctx := context.Background()
 	// obtain default GCP credentials from Cloud Platform scope
-	creds, err := gcp.DefaultCredentials(ctx)
+	creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv("GCLOUD_SERVICE_KEY")), "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		return nil, err
 	}

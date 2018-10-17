@@ -59,4 +59,3 @@ aws s3 rm --recursive "s3://${S3_BUCKET}/${S3_PREFIX}"
 echo "Bringing up integration test containers with docker-compose..."
 [ -z "$NOBUILD" ] && docker-compose build
 docker-compose up --exit-code-from hoarctl --abort-on-container-exit
-docker-compose stop
