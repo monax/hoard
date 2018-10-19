@@ -1,4 +1,7 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [1.1.5] - 2018-10-17
+Scripted integration tests, better makefile and ci configs, gcs creds read from env var.
+
 ## [1.1.4]
 IPFS & GCP Support
 
@@ -52,6 +55,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Control hoarctl CLI
 	
 
+[1.1.5]: https://github.com/monax/hoard/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/monax/hoard/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/monax/hoard/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/monax/hoard/compare/v1.1.1...v1.1.2
