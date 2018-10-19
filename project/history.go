@@ -30,6 +30,9 @@ func FullVersion() string {
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases(
+		"1.1.5 - 2018-10-17",
+		`Scripted integration tests, better makefile and ci configs, gcs creds read from env var.`,
+
 		"1.1.4",
 		`IPFS & GCP Support`,
 

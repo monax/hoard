@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# uncomment to use the local changes
-# vcmd="go run ./cmd/hoarctl/main.go version"
 
 set -e
 
@@ -13,27 +11,30 @@ if ! git diff-index --quiet HEAD  ; then
     git diff-index HEAD
     echo
     echo "Please commit them or stash them before tagging a release."
+    echo
 fi
 
-echo "This command will tag the current commit $(git rev-parse --short HEAD)"
-echo "based on the latest version/release info defined programmatically in"
-echo "./release/release.go. It will then push the version tag."
-echo "In order for this tag to be released the commit must already be merged"
-echo "to master."
+version=v$(go run ./project/cmd/version/main.go)
+notes=$(go run ./project/cmd/notes/main.go)
+
+echo "This command will tag the current commit $(git rev-parse --short HEAD) as version $version"
+echo "defined programmatically in project/releases.go with release notes:"
+echo
+echo "$notes" | sed 's/^/> /'
+echo
+echo "It will then push the version tag to origin."
 echo
 read -p "Do you want to continue? [Y\n]: " -r
 # Just hitting return defaults to continuing
 [[ $REPLY ]] && [[ ! $REPLY =~ ^[Yy]$ ]] && echo && exit 0
 echo
 
-# We expect this to be built from HEAD (which is ensured from make tag_release)
-vcmd="bin/hoarctl version"
-version=v$(${vcmd})
-notes=$(${vcmd} notes)
+# Create tag
 echo "Tagging version $version with message:"
 echo ""
 echo "$notes"
 echo ""
-echo "$notes" | git tag -a ${version} -F-
+echo "$notes" | git tag -s -a ${version} -F-
 
+# Push tag
 git push origin ${version}
