@@ -10,7 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/core/storage"
+	"github.com/monax/hoard/storage"
 )
 
 const DefaultAddressEncodingName = storage.Base64EncodingName

@@ -23,6 +23,11 @@ REPO := $(shell pwd)
 GOFILES_NOVENDOR := $(shell go list -f "{{.Dir}}" ./...)
 PACKAGES_NOVENDOR := $(shell go list ./...)
 
+# Protobuf generated go files
+PROTO_FILES = $(shell find . -path ./vendor -prune -o -type f -name '*.proto' -print)
+PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
+PROTO_GO_FILES_REAL = $(shell find . -path ./vendor -prune -o -type f -name '*.pb.go' -print)
+
 OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
 DIST := "dist"
 GOX_OUTPUT := "$DIST/{{.Dir}}_{{.OS}}_{{.Arch}}"
@@ -59,8 +64,6 @@ lint:
 		golint --set_exit_status $${file}; \
 	done
 
-
-
 # Dependency Management
 
 ## erase vendor wipes the full vendor directory
@@ -89,12 +92,22 @@ ensure_vendor: reinstall_vendor
 commit_hash:
 	@git status &> /dev/null && scripts/commit_hash.sh > commit_hash.txt || true
 
-## compile hoard.proto interface definition
-./core/hoard.pb.go: ./core/hoard.proto
-	@protoc -I ./core core/hoard.proto --go_out=plugins=grpc:core
+# Protobuffing
 
-.PHONY: build_protobuf
-build_protobuf: ./core/hoard.pb.go
+## compile hoard.proto interface definition
+%.pb.go: %.proto
+	protoc -I protobuf -I vendor $< --gogo_out=plugins=grpc:${GOPATH}/src
+
+.PHONY: protobuf
+protobuf: $(PROTO_GO_FILES)
+
+.PHONY: clean_protobuf
+clean_protobuf:
+	@rm -f $(PROTO_GO_FILES_REAL)
+
+.PHONY: protobuf_deps
+protobuf_deps:
+	@go get -u github.com/gogo/protobuf/protoc-gen-gogo
 
 ## build the hoard binary
 .PHONY: build_hoard
@@ -108,7 +121,7 @@ build_hoarctl:
 
 ## build all targets in github.com/monax/hoard
 .PHONY: build
-build:	check build_hoard build_hoarctl build_protobuf
+build:	check build_hoard build_hoarctl protobuf
 
 .PHONY: docker_build
 docker_build: check commit_hash
@@ -116,19 +129,19 @@ docker_build: check commit_hash
 
 ## build binaries for all architectures
 .PHONY: build_dist
-build_dist:	build_protobuf
+build_dist:	protobuf
 	@goreleaser --rm-dist --skip-publish --skip-validate
 
 
 # Testing
 
 .PHONY:	test
-test: check build_protobuf
+test: check protobuf
 	@scripts/bin_wrapper.sh go test -v ./... ${GOPACKAGES_NOVENDOR}
 
 ## run tests including integration tests
 .PHONY:	test_integration
-test_integration: check build_protobuf
+test_integration: check protobuf
 	@go test -v -tags integration ./... ${GOPACKAGES_NOVENDOR}
 	@integration/test_gcp.sh
 	@integration/test_aws.sh
@@ -139,7 +152,6 @@ test_integration: check build_protobuf
 .PHONY: clean
 clean:
 	-rm -r ./bin
-
 
 ## Release and Versioning
 

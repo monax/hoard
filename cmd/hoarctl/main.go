@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/monax/hoard"
+
 	"context"
 	"io/ioutil"
 
@@ -20,7 +22,6 @@ import (
 	"github.com/jawher/mow.cli"
 	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
-	"github.com/monax/hoard/core"
 	"github.com/monax/hoard/server"
 	"google.golang.org/grpc"
 )
@@ -36,9 +37,9 @@ func main() {
 			"or 'unix:///tmp/hoard.sock'")
 
 	// Scope a few variables to this lexical scope
-	var cleartextClient core.CleartextClient
-	var encryptionClient core.EncryptionClient
-	var storageClient core.StorageClient
+	var cleartextClient hoard.CleartextClient
+	var encryptionClient hoard.EncryptionClient
+	var storageClient hoard.StorageClient
 	var conn *grpc.ClientConn
 
 	hoarctlApp.Before = func() {
@@ -54,9 +55,9 @@ func main() {
 		if err != nil {
 			fatalf("Could not dial hoard server on %s: %v", *dialURL, err)
 		}
-		cleartextClient = core.NewCleartextClient(conn)
-		encryptionClient = core.NewEncryptionClient(conn)
-		storageClient = core.NewStorageClient(conn)
+		cleartextClient = hoard.NewCleartextClient(conn)
+		encryptionClient = hoard.NewEncryptionClient(conn)
+		storageClient = hoard.NewStorageClient(conn)
 	}
 
 	cmd.AddVersionCommand(hoarctlApp)
@@ -72,7 +73,7 @@ func main() {
 					fatalf("Could read bytes from STDIN to store: %v", err)
 				}
 				ref, err := cleartextClient.Put(context.Background(),
-					&core.Plaintext{
+					&hoard.Plaintext{
 						Data: data,
 						Salt: parseSalt(*saltString),
 					})
@@ -97,14 +98,14 @@ func main() {
 			cmd.Spec = fmt.Sprintf("[--key=<SECRET_KEY>%s ADDRESS]", cmd.Spec)
 
 			cmd.Action = func() {
-				var ref *core.Reference
+				var ref *hoard.Reference
 				var err error
 				// If given address then try to read reference from arguments and option
 				if address != nil && *address != "" {
 					if secretKey == nil || *secretKey == "" {
 						fatalf("A secret key must be provided in order to decrypt.")
 					}
-					ref = &core.Reference{
+					ref = &hoard.Reference{
 						Address:   readBase64(*address),
 						SecretKey: readBase64(*secretKey),
 						Salt:      parseSalt(*saltString),
@@ -136,7 +137,7 @@ func main() {
 					fatalf("Could read bytes from STDIN to store: %v", err)
 				}
 				refAndCiphertext, err := encryptionClient.Encrypt(context.Background(),
-					&core.Plaintext{
+					&hoard.Plaintext{
 						Data: data,
 						Salt: parseSalt(*saltString),
 					})
@@ -159,7 +160,7 @@ func main() {
 					fatalf("Could read bytes from STDIN to store: %v", err)
 				}
 				refAndCiphertext, err := encryptionClient.Encrypt(context.Background(),
-					&core.Plaintext{
+					&hoard.Plaintext{
 						Data: data,
 						Salt: parseSalt(*saltString),
 					})
@@ -187,12 +188,12 @@ func main() {
 					fatalf("Could read bytes from STDIN to store: %v", err)
 				}
 				plaintext, err := encryptionClient.Decrypt(context.Background(),
-					&core.ReferenceAndCiphertext{
-						Reference: &core.Reference{
+					&hoard.ReferenceAndCiphertext{
+						Reference: &hoard.Reference{
 							SecretKey: readBase64(*secretKey),
 							Salt:      parseSalt(*saltString),
 						},
-						Ciphertext: &core.Ciphertext{
+						Ciphertext: &hoard.Ciphertext{
 							EncryptedData: encryptedData,
 						},
 					})
@@ -227,7 +228,7 @@ func main() {
 					addressBytes = ref.Address
 				}
 				statInfo, err := storageClient.Stat(context.Background(),
-					&core.Address{Address: addressBytes})
+					&hoard.Address{Address: addressBytes})
 				if err != nil {
 					fatalf("Error querying data: %v", err)
 				}
@@ -246,7 +247,7 @@ func main() {
 				}
 				// If given address use it
 				address, err := storageClient.Push(context.Background(),
-					&core.Ciphertext{EncryptedData: data})
+					&hoard.Ciphertext{EncryptedData: data})
 				if err != nil {
 					fatalf("Error querying data: %v", err)
 				}
@@ -283,7 +284,7 @@ func main() {
 					addressBytes = ref.Address
 				}
 				ciphertext, err := storageClient.Pull(context.Background(),
-					&core.Address{Address: addressBytes})
+					&hoard.Address{Address: addressBytes})
 				if err != nil {
 					fatalf("Error querying data: %v", err)
 				}
@@ -325,8 +326,8 @@ func jsonString(v interface{}) string {
 
 }
 
-func parseReference(r io.Reader) (*core.Reference, error) {
-	ref := new(core.Reference)
+func parseReference(r io.Reader) (*hoard.Reference, error) {
+	ref := new(hoard.Reference)
 	bs, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err

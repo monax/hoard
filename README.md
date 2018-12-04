@@ -149,7 +149,7 @@ The cryptographic libraries used are standard Go libraries (and Go's NACL implem
 
 ## Specification
 
-See [hoard.proto](./core/hoard.proto) for the protobuf3 definition of the API. Also see `hoarctl <CMD> -h` for full help on each sub-command.
+See [hoard.proto](protobuf/hoard.proto) for the protobuf3 definition of the API. Also see `hoarctl <CMD> -h` for full help on each sub-command.
 
 ## Clients
 

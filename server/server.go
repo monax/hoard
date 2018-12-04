@@ -5,11 +5,12 @@ import (
 	"net"
 	"strings"
 
+	"github.com/monax/hoard"
+
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/core"
-	"github.com/monax/hoard/core/logging"
-	"github.com/monax/hoard/core/logging/loggers"
-	"github.com/monax/hoard/core/storage"
+	"github.com/monax/hoard/logging"
+	"github.com/monax/hoard/logging/loggers"
+	"github.com/monax/hoard/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -48,11 +49,11 @@ func (serv *server) Serve() error {
 
 	logging.InfoMsg(serv.logger, "Initialising Hoard server",
 		"store_name", serv.store.Name())
-	hoardServer := core.NewHoardServer(core.NewHoard(serv.store, serv.logger))
+	hoardServer := hoard.NewHoardServer(hoard.NewHoard(serv.store, serv.logger))
 
-	core.RegisterCleartextServer(serv.grpcServer, hoardServer)
-	core.RegisterEncryptionServer(serv.grpcServer, hoardServer)
-	core.RegisterStorageServer(serv.grpcServer, hoardServer)
+	hoard.RegisterCleartextServer(serv.grpcServer, hoardServer)
+	hoard.RegisterEncryptionServer(serv.grpcServer, hoardServer)
+	hoard.RegisterStorageServer(serv.grpcServer, hoardServer)
 	// Register reflection service on gRPC server.
 	reflection.Register(serv.grpcServer)
 	err = serv.grpcServer.Serve(listener)
