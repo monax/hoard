@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/monax/hoard/secrets"
+
 	"os/signal"
 	"syscall"
 
@@ -11,7 +13,7 @@ import (
 
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
-	"github.com/jawher/mow.cli"
+	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
 	"github.com/monax/hoard/config/logging"
@@ -67,7 +69,8 @@ func main() {
 		if *listenAddressOpt != "" {
 			conf.ListenAddress = *listenAddressOpt
 		}
-		serv := server.New(conf.ListenAddress, store, logger)
+		secretProvider := secrets.SecretProviderFromConfig(conf.Secrets)
+		serv := server.New(conf.ListenAddress, store, secretProvider, logger)
 		// Catch interrupt etc
 		signalCh := make(chan os.Signal, 1)
 		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)

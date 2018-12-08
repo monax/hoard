@@ -19,11 +19,6 @@ type Locator interface {
 	Location(address []byte) string
 }
 
-type StatInfo struct {
-	Exists bool
-	Size   uint64
-}
-
 type ReadStore interface {
 	// Get data stored at address
 	Get(address []byte) (data []byte, err error)

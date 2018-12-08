@@ -2,37 +2,43 @@ syntax = "proto3";
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
+import "reference.proto";
+import "grant.proto";
+import "storage.proto";
+
 package hoard;
+
 option go_package = "github.com/monax/hoard";
+
 option (gogoproto.protosizer_all) = true;
 
-service Grants {
+service Grant {
     // Seal a Reference to create a Grant
-    rpc Seal (ReferenceAndGrantSpec) returns (Grant);
+    rpc Seal (ReferenceAndGrantSpec) returns (grant.Grant);
 
     // Unseal a Grant to recover the Reference
-    rpc Unseal (Grant) returns (Reference);
+    rpc Unseal (grant.Grant) returns (reference.Ref);
 
     // Convert one grant to another grant to re-share with another party or just
     // to change grant type
-    rpc Reseal (GrantAndGrantSpec) returns (Grant);
+    rpc Reseal (GrantAndGrantSpec) returns (grant.Grant);
 
     // Put a Plaintext and returned the sealed Reference as a Grant
-    rpc PutSealed (PlaintextAndGrantSpec) returns (Grant);
+    rpc PutSealed (PlaintextAndGrantSpec) returns (grant.Grant);
 
     // Unseal a Grant and follow the Reference to return a Plaintext
-    rpc GetUnsealed (Grant) returns (Plaintext);
+    rpc GetUnsealed (grant.Grant) returns (Plaintext);
 }
 
 // Provide plaintext and get plaintext back
 service Cleartext {
     // Push some plaintext data into storage and get its deterministically
     // generated secret reference.
-    rpc Put (Plaintext) returns (Reference);
+    rpc Put (Plaintext) returns (reference.Ref);
 
     // Provide a secret reference to an encrypted blob and get the plaintext
     // data back.
-    rpc Get (Reference) returns (Plaintext);
+    rpc Get (reference.Ref) returns (Plaintext);
 }
 
 // Deterministic encryption
@@ -56,53 +62,25 @@ service Storage {
 
     // Get some information about the encrypted blob stored at an address,
     // including whether it exists.
-    rpc Stat (Address) returns (StatInfo);
-}
-
-message Grant {
-    // The grantSpec provides sufficient information to decrypt the reference
-    // if hoard has access to the requisite secret
-    GrantSpec GrantSpec = 1;
-    bytes EncryptedReference = 2;
-}
-
-message GrantSpec {
-    enum GrantType {
-        PLAINTEXT = 0;
-        SYMMETRIC = 1;
-        OPENPGP = 2;
-    }
-    GrantType Type = 1;
-    oneof GrantData {
-        OpenPGPGrant OpenPGPGrant = 2;
-    }
-}
-
-message OpenPGPGrant {
+    rpc Stat (Address) returns (storage.StatInfo);
 }
 
 message GrantAndGrantSpec {
-    Grant Grant = 1;
+    grant.Grant Grant = 1;
     // The type of grant to output
-    GrantSpec GrantSpec = 2;
+    grant.Spec GrantSpec = 2;
 }
 
 message PlaintextAndGrantSpec {
     Plaintext Plaintext = 1;
     // The type of grant to output
-    GrantSpec GrantSpec = 2;
+    grant.Spec GrantSpec = 2;
 }
 
 message ReferenceAndGrantSpec {
-    Reference Reference = 1;
+    reference.Ref Reference = 1;
     // The type of grant to output
-    GrantSpec GrantSpec = 2;
-}
-
-message Reference {
-    bytes Address = 1;
-    bytes SecretKey = 2;
-    bytes Salt = 3;
+    grant.Spec GrantSpec = 2;
 }
 
 message Plaintext {
@@ -115,25 +93,11 @@ message Ciphertext {
 }
 
 message ReferenceAndCiphertext {
-    Reference Reference = 1;
+    reference.Ref Reference = 1;
     Ciphertext Ciphertext = 2;
 }
 
 message Address {
     bytes Address = 1;
-}
-
-message StatInfo {
-    // The address will be the same as the one passed in but is repeated to
-    // make result self-describing
-    bytes Address = 1;
-    // If the blob does not exist this will be false instead of returning an
-    // error
-    bool Exists = 2;
-    // Will be 0 if the blob does not existing (or omitted under protobuf3)
-    uint64 Size = 3;
-    // The externally resolvable location of the encrypted blob. The location
-    // will be hypothetical if the blob does not exist
-    string Location = 4;
 }
 

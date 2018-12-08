@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/jawher/mow.cli"
+	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/project"
 )
 

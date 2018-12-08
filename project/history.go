@@ -29,7 +29,15 @@ func FullVersion() string {
 // To cut a new release add a release to the front of this slice then run the
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
-	MustDeclareReleases(
+	MustDeclareReleases("",
+		`Changed:
+- Switched to upper case field names in protobuf
+- Used gogoproto for types
+
+Added:
+- Grant interface and GRPC service
+- Symmetric AES-GCM-based grants
+`,
 		"1.1.5 - 2018-10-17",
 		`Scripted integration tests, better makefile and ci configs, gcs creds read from env var.`,
 

@@ -22,7 +22,7 @@ func TestOpenPGPGrant(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
-	ref, err := OpenPGPGrantReference(grant, to)
+	ref, err := OpenPGPReference(grant, to)
 	assert.NoError(t, err)
 	assert.EqualValues(t, testRef, ref)
 }

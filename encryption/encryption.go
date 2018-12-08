@@ -6,27 +6,24 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"hash"
 )
+
+// There are issues with the proof of security with other nonce sizes so we only use 0 (for convergent) or 12
+const NonceSize = 12
+const KeySize = 32
 
 type BlockCipherMaker func(key []byte) (cipher.Block, error)
 
-type EncryptedBlob interface {
-	SecretKey() []byte
-	EncryptedData() []byte
+type Blob struct {
+	SecretKey     []byte
+	EncryptedData []byte
 }
 
-type encryptedBlob struct {
-	secretKey     []byte
-	encryptedData []byte
-}
-
-func (blob *encryptedBlob) SecretKey() []byte {
-	return blob.secretKey
-}
-
-func (blob *encryptedBlob) EncryptedData() []byte {
-	return blob.encryptedData
+type Args struct {
+	BlockCipherMaker BlockCipherMaker
+	Nonce            []byte
+	SecretKey        []byte
+	AdditionalData   []byte
 }
 
 // Encrypt data convergently by using a securely generated deterministic
@@ -38,22 +35,52 @@ func (blob *encryptedBlob) EncryptedData() []byte {
 // secret key, and address than the same data encrypted with a different salt
 // (or not salt). Can be used to watermark a copy of a blob shared with a
 // particular party or to hide the fact a certain plaintext is stored.
-func Encrypt(data, salt []byte) (EncryptedBlob, error) {
+func EncryptConvergent(data, salt []byte) (*Blob, error) {
 	// The SHA 256 hasher will be used to generate the secret key for AES. Since
 	// the AES cipher is parameterised by the length of the secret key in this case
 	// with the 32 byte key from SHA 256 we will get a AES 256 block cipher.
-	return encryptConvergent(sha256.New(), aes.NewCipher, salinate(data, salt),
-		additionalDataForSalt(salt))
+	// First hash the plaintext securely, we will use its hash as a key
+	hasher := sha256.New()
+	hasher.Write(data)
+	secretKey := hasher.Sum(nil)
+	return encrypt(Salinate(data, salt), Args{
+		BlockCipherMaker: aes.NewCipher,
+		SecretKey:        secretKey,
+		Nonce:            nil,
+		AdditionalData:   additionalDataForSalt(salt),
+	})
 }
 
 // Decrypt data that was deterministically encrypted with the provided salt
-func Decrypt(secretKey, encryptedData, salt []byte) ([]byte, error) {
-	data, err := decryptConvergent(aes.NewCipher, secretKey, encryptedData,
-		additionalDataForSalt(salt))
+func DecryptConvergent(encryptedData, salt, secretKey []byte) ([]byte, error) {
+	data, err := decrypt(encryptedData, Args{
+		BlockCipherMaker: aes.NewCipher,
+		SecretKey:        secretKey,
+		Nonce:            nil,
+		AdditionalData:   additionalDataForSalt(salt),
+	})
 	if err != nil {
 		return nil, err
 	}
-	return desalinate(data, salt), nil
+	plaintext, _ := Desalinate(data, len(salt))
+	return plaintext, nil
+}
+
+// Encrypt data using random nonce
+func Encrypt(data, nonce, secretKey []byte) (*Blob, error) {
+	return encrypt(data, Args{
+		BlockCipherMaker: aes.NewCipher,
+		SecretKey:        secretKey,
+		Nonce:            nonce,
+	})
+}
+
+func Decrypt(encryptedData, nonce, secretKey []byte) ([]byte, error) {
+	return decrypt(encryptedData, Args{
+		BlockCipherMaker: aes.NewCipher,
+		SecretKey:        secretKey,
+		Nonce:            nonce,
+	})
 }
 
 // Encrypt plaintext convergently by using a secure hash of the plaintext as the
@@ -76,31 +103,26 @@ func Decrypt(secretKey, encryptedData, salt []byte) ([]byte, error) {
 // blob is stored. We actually want this behaviour to deduplicate and locate
 // encrypted blobs. However if you want to distinguish copies of a plaintext or
 // hide them add a random salt as above.
-func encryptConvergent(hasher hash.Hash, blockCipherMaker BlockCipherMaker,
-	plaintext, additionalData []byte) (EncryptedBlob, error) {
-
-	// First hash the plaintext securely, we will use its hash as a key
-	hasher.Write(plaintext)
-	secretKey := hasher.Sum(nil)
-	blockCipher, err := blockCipherMaker(secretKey)
+func encrypt(plaintext []byte, args Args) (*Blob, error) {
+	blockCipher, err := args.BlockCipherMaker(args.SecretKey)
 	if err != nil {
 		return nil, err
 	}
 	// We can operate without a nonce because we are using a one-time key (the
 	// secure hash of the data) that will be not used for other messages (blobs)
 	// so IV/key pair is unique
-	gcmCipher, err := cipher.NewGCMWithNonceSize(blockCipher, 0)
+	gcmCipher, err := cipher.NewGCMWithNonceSize(blockCipher, len(args.Nonce))
 	if err != nil {
 		return nil, err
 	}
 
 	// Encrypt authenticated with Galois Counter mode
 	// TODO: consider storing contract address relating to blob in additional data
-	ciphertext := gcmCipher.Seal(nil, nil, plaintext, additionalData)
+	ciphertext := gcmCipher.Seal(nil, args.Nonce, plaintext, args.AdditionalData)
 
-	return &encryptedBlob{
-		secretKey:     secretKey,
-		encryptedData: ciphertext,
+	return &Blob{
+		SecretKey:     args.SecretKey,
+		EncryptedData: ciphertext,
 	}, nil
 }
 
@@ -108,28 +130,28 @@ func encryptConvergent(hasher hash.Hash, blockCipherMaker BlockCipherMaker,
 // provided by blockCipherMaker assuming a one-time key and so no nonce as
 // would be encrypted by encryptConvergent (though would work for any one-time
 // key case). Salt is used as GCM additional authenticated data.
-func decryptConvergent(blockCipherMaker BlockCipherMaker, secretKey,
-	ciphertext, additionalData []byte) ([]byte, error) {
+func decrypt(ciphertext []byte, args Args) ([]byte, error) {
 	// Construct the underlying block cipher
-	blockCipher, err := blockCipherMaker(secretKey)
+	blockCipher, err := args.BlockCipherMaker(args.SecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	gcmCipher, err := cipher.NewGCMWithNonceSize(blockCipher, 0)
+	gcmCipher, err := cipher.NewGCMWithNonceSize(blockCipher, len(args.Nonce))
 	if err != nil {
 		return nil, err
 	}
 
-	return gcmCipher.Open(nil, nil, ciphertext, additionalData)
+	return gcmCipher.Open(nil, args.Nonce, ciphertext, args.AdditionalData)
 }
 
-func salinate(plaintext, salt []byte) []byte {
-	return append(salt, plaintext...)
+func Salinate(data, salt []byte) []byte {
+	return append(data, salt...)
 }
 
-func desalinate(ciphertext, salt []byte) []byte {
-	return ciphertext[len(salt):]
+func Desalinate(data []byte, length int) (desalted []byte, salt []byte) {
+	saltStart := len(data) - length
+	return data[:saltStart], data[saltStart:]
 }
 
 // Provides additional authenticated data to fix context of our salting procedure

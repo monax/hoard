@@ -5,6 +5,8 @@ import (
 	"net"
 	"strings"
 
+	"github.com/monax/hoard/grant"
+
 	"github.com/monax/hoard"
 
 	"github.com/go-kit/kit/log"
@@ -17,15 +19,15 @@ import (
 
 type server struct {
 	listenURL  string
-	store      storage.NamedStore
+	hoard      *hoard.Hoard
 	grpcServer *grpc.Server
 	logger     log.Logger
 }
 
-func New(listenURL string, store storage.NamedStore, logger log.Logger) *server {
+func New(listenURL string, store storage.NamedStore, secretProvider grant.SecretProvider, logger log.Logger) *server {
 	return &server{
 		listenURL: listenURL,
-		store:     store,
+		hoard:     hoard.NewHoard(store, secretProvider, logger),
 		logger:    logger,
 	}
 }
@@ -33,11 +35,11 @@ func New(listenURL string, store storage.NamedStore, logger log.Logger) *server 
 func (serv *server) Serve() error {
 	netProtocol, localAddress, err := SplitListenURL(serv.listenURL)
 	if err != nil {
-		return fmt.Errorf("Failed to split listen URL '%s': %v", serv.listenURL, err)
+		return fmt.Errorf("failed to split listen URL '%s': %v", serv.listenURL, err)
 	}
 	listener, err := net.Listen(netProtocol, localAddress)
 	if err != nil {
-		return fmt.Errorf("Failed to create listener: %v", err)
+		return fmt.Errorf("failed to create listener: %v", err)
 	}
 	serv.grpcServer = grpc.NewServer()
 	if serv.logger == nil {
@@ -48,9 +50,9 @@ func (serv *server) Serve() error {
 	}
 
 	logging.InfoMsg(serv.logger, "Initialising Hoard server",
-		"store_name", serv.store.Name())
-	hoardServer := hoard.NewHoardServer(hoard.NewHoard(serv.store, serv.logger))
+		"store_name", serv.hoard.Name())
 
+	hoardServer := hoard.NewHoardServer(serv.hoard, serv.hoard)
 	hoard.RegisterCleartextServer(serv.grpcServer, hoardServer)
 	hoard.RegisterEncryptionServer(serv.grpcServer, hoardServer)
 	hoard.RegisterStorageServer(serv.grpcServer, hoardServer)
@@ -58,7 +60,7 @@ func (serv *server) Serve() error {
 	reflection.Register(serv.grpcServer)
 	err = serv.grpcServer.Serve(listener)
 	if err != nil {
-		return fmt.Errorf("Failed to start GRPC Server: %v", err)
+		return fmt.Errorf("failed to start GRPC Server: %v", err)
 	}
 	return nil
 }
@@ -72,15 +74,15 @@ func SplitListenURL(listenOn string) (string, string, error) {
 	// just to do a dumb split here to support the various networks
 	listenParts := strings.Split(listenOn, "://")
 	if len(listenParts) != 2 {
-		return "", "", fmt.Errorf("Expected a Go net.Listen URL of the form "+
+		return "", "", fmt.Errorf("expected a Go net.Listen URL of the form "+
 			"'<net>://<laddr>', but got: '%s'", listenOn)
 	}
 	if listenParts[0] == "" {
-		return "", "", fmt.Errorf("Expected the URL scheme to be present, "+
+		return "", "", fmt.Errorf("expected the URL scheme to be present, "+
 			"but got '%s'", listenOn)
 	}
 	if listenParts[1] == "" {
-		return "", "", fmt.Errorf("Expected the URL host to be present, "+
+		return "", "", fmt.Errorf("expected the URL host to be present, "+
 			"but got '%s'", listenOn)
 	}
 	return listenParts[0], listenParts[1], nil

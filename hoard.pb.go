@@ -7,6 +7,9 @@ import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import _ "github.com/gogo/protobuf/gogoproto"
+import grant "github.com/monax/hoard/grant"
+import reference "github.com/monax/hoard/reference"
+import storage "github.com/monax/hoard/storage"
 
 import (
 	context "golang.org/x/net/context"
@@ -24,245 +27,20 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 
-type GrantSpec_GrantType int32
-
-const (
-	GrantSpec_PLAINTEXT GrantSpec_GrantType = 0
-	GrantSpec_SYMMETRIC GrantSpec_GrantType = 1
-	GrantSpec_OPENPGP   GrantSpec_GrantType = 2
-)
-
-var GrantSpec_GrantType_name = map[int32]string{
-	0: "PLAINTEXT",
-	1: "SYMMETRIC",
-	2: "OPENPGP",
-}
-var GrantSpec_GrantType_value = map[string]int32{
-	"PLAINTEXT": 0,
-	"SYMMETRIC": 1,
-	"OPENPGP":   2,
-}
-
-func (x GrantSpec_GrantType) String() string {
-	return proto.EnumName(GrantSpec_GrantType_name, int32(x))
-}
-func (GrantSpec_GrantType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{1, 0}
-}
-
-type Grant struct {
-	// The grantSpec provides sufficient information to decrypt the reference
-	// if hoard has access to the requisite secret
-	GrantSpec            *GrantSpec `protobuf:"bytes,1,opt,name=GrantSpec" json:"GrantSpec,omitempty"`
-	EncryptedReference   []byte     `protobuf:"bytes,2,opt,name=EncryptedReference,proto3" json:"EncryptedReference,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
-}
-
-func (m *Grant) Reset()         { *m = Grant{} }
-func (m *Grant) String() string { return proto.CompactTextString(m) }
-func (*Grant) ProtoMessage()    {}
-func (*Grant) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{0}
-}
-func (m *Grant) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Grant.Unmarshal(m, b)
-}
-func (m *Grant) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Grant.Marshal(b, m, deterministic)
-}
-func (dst *Grant) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Grant.Merge(dst, src)
-}
-func (m *Grant) XXX_Size() int {
-	return xxx_messageInfo_Grant.Size(m)
-}
-func (m *Grant) XXX_DiscardUnknown() {
-	xxx_messageInfo_Grant.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Grant proto.InternalMessageInfo
-
-func (m *Grant) GetGrantSpec() *GrantSpec {
-	if m != nil {
-		return m.GrantSpec
-	}
-	return nil
-}
-
-func (m *Grant) GetEncryptedReference() []byte {
-	if m != nil {
-		return m.EncryptedReference
-	}
-	return nil
-}
-
-type GrantSpec struct {
-	Type GrantSpec_GrantType `protobuf:"varint,1,opt,name=Type,proto3,enum=hoard.GrantSpec_GrantType" json:"Type,omitempty"`
-	// Types that are valid to be assigned to GrantData:
-	//	*GrantSpec_OpenPGPGrant
-	GrantData            isGrantSpec_GrantData `protobuf_oneof:"GrantData"`
-	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
-	XXX_unrecognized     []byte                `json:"-"`
-	XXX_sizecache        int32                 `json:"-"`
-}
-
-func (m *GrantSpec) Reset()         { *m = GrantSpec{} }
-func (m *GrantSpec) String() string { return proto.CompactTextString(m) }
-func (*GrantSpec) ProtoMessage()    {}
-func (*GrantSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{1}
-}
-func (m *GrantSpec) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GrantSpec.Unmarshal(m, b)
-}
-func (m *GrantSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GrantSpec.Marshal(b, m, deterministic)
-}
-func (dst *GrantSpec) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GrantSpec.Merge(dst, src)
-}
-func (m *GrantSpec) XXX_Size() int {
-	return xxx_messageInfo_GrantSpec.Size(m)
-}
-func (m *GrantSpec) XXX_DiscardUnknown() {
-	xxx_messageInfo_GrantSpec.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GrantSpec proto.InternalMessageInfo
-
-type isGrantSpec_GrantData interface {
-	isGrantSpec_GrantData()
-	ProtoSize() int
-}
-
-type GrantSpec_OpenPGPGrant struct {
-	OpenPGPGrant *OpenPGPGrant `protobuf:"bytes,2,opt,name=OpenPGPGrant,oneof"`
-}
-
-func (*GrantSpec_OpenPGPGrant) isGrantSpec_GrantData() {}
-
-func (m *GrantSpec) GetGrantData() isGrantSpec_GrantData {
-	if m != nil {
-		return m.GrantData
-	}
-	return nil
-}
-
-func (m *GrantSpec) GetType() GrantSpec_GrantType {
-	if m != nil {
-		return m.Type
-	}
-	return GrantSpec_PLAINTEXT
-}
-
-func (m *GrantSpec) GetOpenPGPGrant() *OpenPGPGrant {
-	if x, ok := m.GetGrantData().(*GrantSpec_OpenPGPGrant); ok {
-		return x.OpenPGPGrant
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*GrantSpec) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _GrantSpec_OneofMarshaler, _GrantSpec_OneofUnmarshaler, _GrantSpec_OneofSizer, []interface{}{
-		(*GrantSpec_OpenPGPGrant)(nil),
-	}
-}
-
-func _GrantSpec_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*GrantSpec)
-	// GrantData
-	switch x := m.GrantData.(type) {
-	case *GrantSpec_OpenPGPGrant:
-		_ = b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.OpenPGPGrant); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("GrantSpec.GrantData has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _GrantSpec_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*GrantSpec)
-	switch tag {
-	case 2: // GrantData.OpenPGPGrant
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(OpenPGPGrant)
-		err := b.DecodeMessage(msg)
-		m.GrantData = &GrantSpec_OpenPGPGrant{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _GrantSpec_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*GrantSpec)
-	// GrantData
-	switch x := m.GrantData.(type) {
-	case *GrantSpec_OpenPGPGrant:
-		s := proto.Size(x.OpenPGPGrant)
-		n += 1 // tag and wire
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type OpenPGPGrant struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *OpenPGPGrant) Reset()         { *m = OpenPGPGrant{} }
-func (m *OpenPGPGrant) String() string { return proto.CompactTextString(m) }
-func (*OpenPGPGrant) ProtoMessage()    {}
-func (*OpenPGPGrant) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{2}
-}
-func (m *OpenPGPGrant) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_OpenPGPGrant.Unmarshal(m, b)
-}
-func (m *OpenPGPGrant) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_OpenPGPGrant.Marshal(b, m, deterministic)
-}
-func (dst *OpenPGPGrant) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_OpenPGPGrant.Merge(dst, src)
-}
-func (m *OpenPGPGrant) XXX_Size() int {
-	return xxx_messageInfo_OpenPGPGrant.Size(m)
-}
-func (m *OpenPGPGrant) XXX_DiscardUnknown() {
-	xxx_messageInfo_OpenPGPGrant.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_OpenPGPGrant proto.InternalMessageInfo
-
 type GrantAndGrantSpec struct {
-	Grant *Grant `protobuf:"bytes,1,opt,name=Grant" json:"Grant,omitempty"`
+	Grant *grant.Grant `protobuf:"bytes,1,opt,name=Grant" json:"Grant,omitempty"`
 	// The type of grant to output
-	GrantSpec            *GrantSpec `protobuf:"bytes,2,opt,name=GrantSpec" json:"GrantSpec,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
+	GrantSpec            *grant.Spec `protobuf:"bytes,2,opt,name=GrantSpec" json:"GrantSpec,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
 }
 
 func (m *GrantAndGrantSpec) Reset()         { *m = GrantAndGrantSpec{} }
 func (m *GrantAndGrantSpec) String() string { return proto.CompactTextString(m) }
 func (*GrantAndGrantSpec) ProtoMessage()    {}
 func (*GrantAndGrantSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{3}
+	return fileDescriptor_hoard_0745a2cd0758e889, []int{0}
 }
 func (m *GrantAndGrantSpec) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GrantAndGrantSpec.Unmarshal(m, b)
@@ -282,14 +60,14 @@ func (m *GrantAndGrantSpec) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GrantAndGrantSpec proto.InternalMessageInfo
 
-func (m *GrantAndGrantSpec) GetGrant() *Grant {
+func (m *GrantAndGrantSpec) GetGrant() *grant.Grant {
 	if m != nil {
 		return m.Grant
 	}
 	return nil
 }
 
-func (m *GrantAndGrantSpec) GetGrantSpec() *GrantSpec {
+func (m *GrantAndGrantSpec) GetGrantSpec() *grant.Spec {
 	if m != nil {
 		return m.GrantSpec
 	}
@@ -299,17 +77,17 @@ func (m *GrantAndGrantSpec) GetGrantSpec() *GrantSpec {
 type PlaintextAndGrantSpec struct {
 	Plaintext *Plaintext `protobuf:"bytes,1,opt,name=Plaintext" json:"Plaintext,omitempty"`
 	// The type of grant to output
-	GrantSpec            *GrantSpec `protobuf:"bytes,2,opt,name=GrantSpec" json:"GrantSpec,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
+	GrantSpec            *grant.Spec `protobuf:"bytes,2,opt,name=GrantSpec" json:"GrantSpec,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
 }
 
 func (m *PlaintextAndGrantSpec) Reset()         { *m = PlaintextAndGrantSpec{} }
 func (m *PlaintextAndGrantSpec) String() string { return proto.CompactTextString(m) }
 func (*PlaintextAndGrantSpec) ProtoMessage()    {}
 func (*PlaintextAndGrantSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{4}
+	return fileDescriptor_hoard_0745a2cd0758e889, []int{1}
 }
 func (m *PlaintextAndGrantSpec) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PlaintextAndGrantSpec.Unmarshal(m, b)
@@ -336,7 +114,7 @@ func (m *PlaintextAndGrantSpec) GetPlaintext() *Plaintext {
 	return nil
 }
 
-func (m *PlaintextAndGrantSpec) GetGrantSpec() *GrantSpec {
+func (m *PlaintextAndGrantSpec) GetGrantSpec() *grant.Spec {
 	if m != nil {
 		return m.GrantSpec
 	}
@@ -344,19 +122,19 @@ func (m *PlaintextAndGrantSpec) GetGrantSpec() *GrantSpec {
 }
 
 type ReferenceAndGrantSpec struct {
-	Reference *Reference `protobuf:"bytes,1,opt,name=Reference" json:"Reference,omitempty"`
+	Reference *reference.Ref `protobuf:"bytes,1,opt,name=Reference" json:"Reference,omitempty"`
 	// The type of grant to output
-	GrantSpec            *GrantSpec `protobuf:"bytes,2,opt,name=GrantSpec" json:"GrantSpec,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
+	GrantSpec            *grant.Spec `protobuf:"bytes,2,opt,name=GrantSpec" json:"GrantSpec,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
 }
 
 func (m *ReferenceAndGrantSpec) Reset()         { *m = ReferenceAndGrantSpec{} }
 func (m *ReferenceAndGrantSpec) String() string { return proto.CompactTextString(m) }
 func (*ReferenceAndGrantSpec) ProtoMessage()    {}
 func (*ReferenceAndGrantSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{5}
+	return fileDescriptor_hoard_0745a2cd0758e889, []int{2}
 }
 func (m *ReferenceAndGrantSpec) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReferenceAndGrantSpec.Unmarshal(m, b)
@@ -376,70 +154,16 @@ func (m *ReferenceAndGrantSpec) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ReferenceAndGrantSpec proto.InternalMessageInfo
 
-func (m *ReferenceAndGrantSpec) GetReference() *Reference {
+func (m *ReferenceAndGrantSpec) GetReference() *reference.Ref {
 	if m != nil {
 		return m.Reference
 	}
 	return nil
 }
 
-func (m *ReferenceAndGrantSpec) GetGrantSpec() *GrantSpec {
+func (m *ReferenceAndGrantSpec) GetGrantSpec() *grant.Spec {
 	if m != nil {
 		return m.GrantSpec
-	}
-	return nil
-}
-
-type Reference struct {
-	Address              []byte   `protobuf:"bytes,1,opt,name=Address,proto3" json:"Address,omitempty"`
-	SecretKey            []byte   `protobuf:"bytes,2,opt,name=SecretKey,proto3" json:"SecretKey,omitempty"`
-	Salt                 []byte   `protobuf:"bytes,3,opt,name=Salt,proto3" json:"Salt,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Reference) Reset()         { *m = Reference{} }
-func (m *Reference) String() string { return proto.CompactTextString(m) }
-func (*Reference) ProtoMessage()    {}
-func (*Reference) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{6}
-}
-func (m *Reference) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Reference.Unmarshal(m, b)
-}
-func (m *Reference) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Reference.Marshal(b, m, deterministic)
-}
-func (dst *Reference) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Reference.Merge(dst, src)
-}
-func (m *Reference) XXX_Size() int {
-	return xxx_messageInfo_Reference.Size(m)
-}
-func (m *Reference) XXX_DiscardUnknown() {
-	xxx_messageInfo_Reference.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Reference proto.InternalMessageInfo
-
-func (m *Reference) GetAddress() []byte {
-	if m != nil {
-		return m.Address
-	}
-	return nil
-}
-
-func (m *Reference) GetSecretKey() []byte {
-	if m != nil {
-		return m.SecretKey
-	}
-	return nil
-}
-
-func (m *Reference) GetSalt() []byte {
-	if m != nil {
-		return m.Salt
 	}
 	return nil
 }
@@ -456,7 +180,7 @@ func (m *Plaintext) Reset()         { *m = Plaintext{} }
 func (m *Plaintext) String() string { return proto.CompactTextString(m) }
 func (*Plaintext) ProtoMessage()    {}
 func (*Plaintext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{7}
+	return fileDescriptor_hoard_0745a2cd0758e889, []int{3}
 }
 func (m *Plaintext) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Plaintext.Unmarshal(m, b)
@@ -501,7 +225,7 @@ func (m *Ciphertext) Reset()         { *m = Ciphertext{} }
 func (m *Ciphertext) String() string { return proto.CompactTextString(m) }
 func (*Ciphertext) ProtoMessage()    {}
 func (*Ciphertext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{8}
+	return fileDescriptor_hoard_0745a2cd0758e889, []int{4}
 }
 func (m *Ciphertext) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Ciphertext.Unmarshal(m, b)
@@ -529,18 +253,18 @@ func (m *Ciphertext) GetEncryptedData() []byte {
 }
 
 type ReferenceAndCiphertext struct {
-	Reference            *Reference  `protobuf:"bytes,1,opt,name=Reference" json:"Reference,omitempty"`
-	Ciphertext           *Ciphertext `protobuf:"bytes,2,opt,name=Ciphertext" json:"Ciphertext,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	Reference            *reference.Ref `protobuf:"bytes,1,opt,name=Reference" json:"Reference,omitempty"`
+	Ciphertext           *Ciphertext    `protobuf:"bytes,2,opt,name=Ciphertext" json:"Ciphertext,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *ReferenceAndCiphertext) Reset()         { *m = ReferenceAndCiphertext{} }
 func (m *ReferenceAndCiphertext) String() string { return proto.CompactTextString(m) }
 func (*ReferenceAndCiphertext) ProtoMessage()    {}
 func (*ReferenceAndCiphertext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{9}
+	return fileDescriptor_hoard_0745a2cd0758e889, []int{5}
 }
 func (m *ReferenceAndCiphertext) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReferenceAndCiphertext.Unmarshal(m, b)
@@ -560,7 +284,7 @@ func (m *ReferenceAndCiphertext) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ReferenceAndCiphertext proto.InternalMessageInfo
 
-func (m *ReferenceAndCiphertext) GetReference() *Reference {
+func (m *ReferenceAndCiphertext) GetReference() *reference.Ref {
 	if m != nil {
 		return m.Reference
 	}
@@ -585,7 +309,7 @@ func (m *Address) Reset()         { *m = Address{} }
 func (m *Address) String() string { return proto.CompactTextString(m) }
 func (*Address) ProtoMessage()    {}
 func (*Address) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{10}
+	return fileDescriptor_hoard_0745a2cd0758e889, []int{6}
 }
 func (m *Address) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Address.Unmarshal(m, b)
@@ -612,89 +336,14 @@ func (m *Address) GetAddress() []byte {
 	return nil
 }
 
-type StatInfo struct {
-	// The address will be the same as the one passed in but is repeated to
-	// make result self-describing
-	Address []byte `protobuf:"bytes,1,opt,name=Address,proto3" json:"Address,omitempty"`
-	// If the blob does not exist this will be false instead of returning an
-	// error
-	Exists bool `protobuf:"varint,2,opt,name=Exists,proto3" json:"Exists,omitempty"`
-	// Will be 0 if the blob does not existing (or omitted under protobuf3)
-	Size uint64 `protobuf:"varint,3,opt,name=Size,proto3" json:"Size,omitempty"`
-	// The externally resolvable location of the encrypted blob. The location
-	// will be hypothetical if the blob does not exist
-	Location             string   `protobuf:"bytes,4,opt,name=Location,proto3" json:"Location,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *StatInfo) Reset()         { *m = StatInfo{} }
-func (m *StatInfo) String() string { return proto.CompactTextString(m) }
-func (*StatInfo) ProtoMessage()    {}
-func (*StatInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hoard_707e17e698ee7d74, []int{11}
-}
-func (m *StatInfo) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_StatInfo.Unmarshal(m, b)
-}
-func (m *StatInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_StatInfo.Marshal(b, m, deterministic)
-}
-func (dst *StatInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_StatInfo.Merge(dst, src)
-}
-func (m *StatInfo) XXX_Size() int {
-	return xxx_messageInfo_StatInfo.Size(m)
-}
-func (m *StatInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_StatInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_StatInfo proto.InternalMessageInfo
-
-func (m *StatInfo) GetAddress() []byte {
-	if m != nil {
-		return m.Address
-	}
-	return nil
-}
-
-func (m *StatInfo) GetExists() bool {
-	if m != nil {
-		return m.Exists
-	}
-	return false
-}
-
-func (m *StatInfo) GetSize() uint64 {
-	if m != nil {
-		return m.Size
-	}
-	return 0
-}
-
-func (m *StatInfo) GetLocation() string {
-	if m != nil {
-		return m.Location
-	}
-	return ""
-}
-
 func init() {
-	proto.RegisterType((*Grant)(nil), "hoard.Grant")
-	proto.RegisterType((*GrantSpec)(nil), "hoard.GrantSpec")
-	proto.RegisterType((*OpenPGPGrant)(nil), "hoard.OpenPGPGrant")
 	proto.RegisterType((*GrantAndGrantSpec)(nil), "hoard.GrantAndGrantSpec")
 	proto.RegisterType((*PlaintextAndGrantSpec)(nil), "hoard.PlaintextAndGrantSpec")
 	proto.RegisterType((*ReferenceAndGrantSpec)(nil), "hoard.ReferenceAndGrantSpec")
-	proto.RegisterType((*Reference)(nil), "hoard.Reference")
 	proto.RegisterType((*Plaintext)(nil), "hoard.Plaintext")
 	proto.RegisterType((*Ciphertext)(nil), "hoard.Ciphertext")
 	proto.RegisterType((*ReferenceAndCiphertext)(nil), "hoard.ReferenceAndCiphertext")
 	proto.RegisterType((*Address)(nil), "hoard.Address")
-	proto.RegisterType((*StatInfo)(nil), "hoard.StatInfo")
-	proto.RegisterEnum("hoard.GrantSpec_GrantType", GrantSpec_GrantType_name, GrantSpec_GrantType_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -705,208 +354,208 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// GrantsClient is the client API for Grants service.
+// GrantClient is the client API for Grant service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type GrantsClient interface {
+type GrantClient interface {
 	// Seal a Reference to create a Grant
-	Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*Grant, error)
+	Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error)
 	// Unseal a Grant to recover the Reference
-	Unseal(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Reference, error)
+	Unseal(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*reference.Ref, error)
 	// Convert one grant to another grant to re-share with another party or just
 	// to change grant type
-	Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*Grant, error)
+	Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error)
 	// Put a Plaintext and returned the sealed Reference as a Grant
-	PutSealed(ctx context.Context, in *PlaintextAndGrantSpec, opts ...grpc.CallOption) (*Grant, error)
+	PutSealed(ctx context.Context, in *PlaintextAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error)
 	// Unseal a Grant and follow the Reference to return a Plaintext
-	GetUnsealed(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Plaintext, error)
+	GetUnsealed(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*Plaintext, error)
 }
 
-type grantsClient struct {
+type grantClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewGrantsClient(cc *grpc.ClientConn) GrantsClient {
-	return &grantsClient{cc}
+func NewGrantClient(cc *grpc.ClientConn) GrantClient {
+	return &grantClient{cc}
 }
 
-func (c *grantsClient) Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*Grant, error) {
-	out := new(Grant)
-	err := c.cc.Invoke(ctx, "/hoard.Grants/Seal", in, out, opts...)
+func (c *grantClient) Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error) {
+	out := new(grant.Grant)
+	err := c.cc.Invoke(ctx, "/hoard.Grant/Seal", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *grantsClient) Unseal(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Reference, error) {
-	out := new(Reference)
-	err := c.cc.Invoke(ctx, "/hoard.Grants/Unseal", in, out, opts...)
+func (c *grantClient) Unseal(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*reference.Ref, error) {
+	out := new(reference.Ref)
+	err := c.cc.Invoke(ctx, "/hoard.Grant/Unseal", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *grantsClient) Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*Grant, error) {
-	out := new(Grant)
-	err := c.cc.Invoke(ctx, "/hoard.Grants/Reseal", in, out, opts...)
+func (c *grantClient) Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error) {
+	out := new(grant.Grant)
+	err := c.cc.Invoke(ctx, "/hoard.Grant/Reseal", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *grantsClient) PutSealed(ctx context.Context, in *PlaintextAndGrantSpec, opts ...grpc.CallOption) (*Grant, error) {
-	out := new(Grant)
-	err := c.cc.Invoke(ctx, "/hoard.Grants/PutSealed", in, out, opts...)
+func (c *grantClient) PutSealed(ctx context.Context, in *PlaintextAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error) {
+	out := new(grant.Grant)
+	err := c.cc.Invoke(ctx, "/hoard.Grant/PutSealed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *grantsClient) GetUnsealed(ctx context.Context, in *Grant, opts ...grpc.CallOption) (*Plaintext, error) {
+func (c *grantClient) GetUnsealed(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*Plaintext, error) {
 	out := new(Plaintext)
-	err := c.cc.Invoke(ctx, "/hoard.Grants/GetUnsealed", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/hoard.Grant/GetUnsealed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// GrantsServer is the server API for Grants service.
-type GrantsServer interface {
+// GrantServer is the server API for Grant service.
+type GrantServer interface {
 	// Seal a Reference to create a Grant
-	Seal(context.Context, *ReferenceAndGrantSpec) (*Grant, error)
+	Seal(context.Context, *ReferenceAndGrantSpec) (*grant.Grant, error)
 	// Unseal a Grant to recover the Reference
-	Unseal(context.Context, *Grant) (*Reference, error)
+	Unseal(context.Context, *grant.Grant) (*reference.Ref, error)
 	// Convert one grant to another grant to re-share with another party or just
 	// to change grant type
-	Reseal(context.Context, *GrantAndGrantSpec) (*Grant, error)
+	Reseal(context.Context, *GrantAndGrantSpec) (*grant.Grant, error)
 	// Put a Plaintext and returned the sealed Reference as a Grant
-	PutSealed(context.Context, *PlaintextAndGrantSpec) (*Grant, error)
+	PutSealed(context.Context, *PlaintextAndGrantSpec) (*grant.Grant, error)
 	// Unseal a Grant and follow the Reference to return a Plaintext
-	GetUnsealed(context.Context, *Grant) (*Plaintext, error)
+	GetUnsealed(context.Context, *grant.Grant) (*Plaintext, error)
 }
 
-func RegisterGrantsServer(s *grpc.Server, srv GrantsServer) {
-	s.RegisterService(&_Grants_serviceDesc, srv)
+func RegisterGrantServer(s *grpc.Server, srv GrantServer) {
+	s.RegisterService(&_Grant_serviceDesc, srv)
 }
 
-func _Grants_Seal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Grant_Seal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReferenceAndGrantSpec)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GrantsServer).Seal(ctx, in)
+		return srv.(GrantServer).Seal(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hoard.Grants/Seal",
+		FullMethod: "/hoard.Grant/Seal",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantsServer).Seal(ctx, req.(*ReferenceAndGrantSpec))
+		return srv.(GrantServer).Seal(ctx, req.(*ReferenceAndGrantSpec))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Grants_Unseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Grant)
+func _Grant_Unseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(grant.Grant)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GrantsServer).Unseal(ctx, in)
+		return srv.(GrantServer).Unseal(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hoard.Grants/Unseal",
+		FullMethod: "/hoard.Grant/Unseal",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantsServer).Unseal(ctx, req.(*Grant))
+		return srv.(GrantServer).Unseal(ctx, req.(*grant.Grant))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Grants_Reseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Grant_Reseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GrantAndGrantSpec)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GrantsServer).Reseal(ctx, in)
+		return srv.(GrantServer).Reseal(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hoard.Grants/Reseal",
+		FullMethod: "/hoard.Grant/Reseal",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantsServer).Reseal(ctx, req.(*GrantAndGrantSpec))
+		return srv.(GrantServer).Reseal(ctx, req.(*GrantAndGrantSpec))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Grants_PutSealed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Grant_PutSealed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PlaintextAndGrantSpec)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GrantsServer).PutSealed(ctx, in)
+		return srv.(GrantServer).PutSealed(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hoard.Grants/PutSealed",
+		FullMethod: "/hoard.Grant/PutSealed",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantsServer).PutSealed(ctx, req.(*PlaintextAndGrantSpec))
+		return srv.(GrantServer).PutSealed(ctx, req.(*PlaintextAndGrantSpec))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Grants_GetUnsealed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Grant)
+func _Grant_GetUnsealed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(grant.Grant)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GrantsServer).GetUnsealed(ctx, in)
+		return srv.(GrantServer).GetUnsealed(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hoard.Grants/GetUnsealed",
+		FullMethod: "/hoard.Grant/GetUnsealed",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantsServer).GetUnsealed(ctx, req.(*Grant))
+		return srv.(GrantServer).GetUnsealed(ctx, req.(*grant.Grant))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Grants_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "hoard.Grants",
-	HandlerType: (*GrantsServer)(nil),
+var _Grant_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "hoard.Grant",
+	HandlerType: (*GrantServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Seal",
-			Handler:    _Grants_Seal_Handler,
+			Handler:    _Grant_Seal_Handler,
 		},
 		{
 			MethodName: "Unseal",
-			Handler:    _Grants_Unseal_Handler,
+			Handler:    _Grant_Unseal_Handler,
 		},
 		{
 			MethodName: "Reseal",
-			Handler:    _Grants_Reseal_Handler,
+			Handler:    _Grant_Reseal_Handler,
 		},
 		{
 			MethodName: "PutSealed",
-			Handler:    _Grants_PutSealed_Handler,
+			Handler:    _Grant_PutSealed_Handler,
 		},
 		{
 			MethodName: "GetUnsealed",
-			Handler:    _Grants_GetUnsealed_Handler,
+			Handler:    _Grant_GetUnsealed_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -919,10 +568,10 @@ var _Grants_serviceDesc = grpc.ServiceDesc{
 type CleartextClient interface {
 	// Push some plaintext data into storage and get its deterministically
 	// generated secret reference.
-	Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error)
+	Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*reference.Ref, error)
 	// Provide a secret reference to an encrypted blob and get the plaintext
 	// data back.
-	Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error)
+	Get(ctx context.Context, in *reference.Ref, opts ...grpc.CallOption) (*Plaintext, error)
 }
 
 type cleartextClient struct {
@@ -933,8 +582,8 @@ func NewCleartextClient(cc *grpc.ClientConn) CleartextClient {
 	return &cleartextClient{cc}
 }
 
-func (c *cleartextClient) Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*Reference, error) {
-	out := new(Reference)
+func (c *cleartextClient) Put(ctx context.Context, in *Plaintext, opts ...grpc.CallOption) (*reference.Ref, error) {
+	out := new(reference.Ref)
 	err := c.cc.Invoke(ctx, "/hoard.Cleartext/Put", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -942,7 +591,7 @@ func (c *cleartextClient) Put(ctx context.Context, in *Plaintext, opts ...grpc.C
 	return out, nil
 }
 
-func (c *cleartextClient) Get(ctx context.Context, in *Reference, opts ...grpc.CallOption) (*Plaintext, error) {
+func (c *cleartextClient) Get(ctx context.Context, in *reference.Ref, opts ...grpc.CallOption) (*Plaintext, error) {
 	out := new(Plaintext)
 	err := c.cc.Invoke(ctx, "/hoard.Cleartext/Get", in, out, opts...)
 	if err != nil {
@@ -955,10 +604,10 @@ func (c *cleartextClient) Get(ctx context.Context, in *Reference, opts ...grpc.C
 type CleartextServer interface {
 	// Push some plaintext data into storage and get its deterministically
 	// generated secret reference.
-	Put(context.Context, *Plaintext) (*Reference, error)
+	Put(context.Context, *Plaintext) (*reference.Ref, error)
 	// Provide a secret reference to an encrypted blob and get the plaintext
 	// data back.
-	Get(context.Context, *Reference) (*Plaintext, error)
+	Get(context.Context, *reference.Ref) (*Plaintext, error)
 }
 
 func RegisterCleartextServer(s *grpc.Server, srv CleartextServer) {
@@ -984,7 +633,7 @@ func _Cleartext_Put_Handler(srv interface{}, ctx context.Context, dec func(inter
 }
 
 func _Cleartext_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Reference)
+	in := new(reference.Ref)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -996,7 +645,7 @@ func _Cleartext_Get_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/hoard.Cleartext/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CleartextServer).Get(ctx, req.(*Reference))
+		return srv.(CleartextServer).Get(ctx, req.(*reference.Ref))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1133,7 +782,7 @@ type StorageClient interface {
 	Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Ciphertext, error)
 	// Get some information about the encrypted blob stored at an address,
 	// including whether it exists.
-	Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*StatInfo, error)
+	Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*storage.StatInfo, error)
 }
 
 type storageClient struct {
@@ -1162,8 +811,8 @@ func (c *storageClient) Pull(ctx context.Context, in *Address, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *storageClient) Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*StatInfo, error) {
-	out := new(StatInfo)
+func (c *storageClient) Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*storage.StatInfo, error) {
+	out := new(storage.StatInfo)
 	err := c.cc.Invoke(ctx, "/hoard.Storage/Stat", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1179,7 +828,7 @@ type StorageServer interface {
 	Pull(context.Context, *Address) (*Ciphertext, error)
 	// Get some information about the encrypted blob stored at an address,
 	// including whether it exists.
-	Stat(context.Context, *Address) (*StatInfo, error)
+	Stat(context.Context, *Address) (*storage.StatInfo, error)
 }
 
 func RegisterStorageServer(s *grpc.Server, srv StorageServer) {
@@ -1261,68 +910,6 @@ var _Storage_serviceDesc = grpc.ServiceDesc{
 	Metadata: "hoard.proto",
 }
 
-func (m *Grant) ProtoSize() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.GrantSpec != nil {
-		l = m.GrantSpec.ProtoSize()
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	l = len(m.EncryptedReference)
-	if l > 0 {
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *GrantSpec) ProtoSize() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Type != 0 {
-		n += 1 + sovHoard(uint64(m.Type))
-	}
-	if m.GrantData != nil {
-		n += m.GrantData.ProtoSize()
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *GrantSpec_OpenPGPGrant) ProtoSize() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.OpenPGPGrant != nil {
-		l = m.OpenPGPGrant.ProtoSize()
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	return n
-}
-func (m *OpenPGPGrant) ProtoSize() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
 func (m *GrantAndGrantSpec) ProtoSize() (n int) {
 	if m == nil {
 		return 0
@@ -1375,30 +962,6 @@ func (m *ReferenceAndGrantSpec) ProtoSize() (n int) {
 	}
 	if m.GrantSpec != nil {
 		l = m.GrantSpec.ProtoSize()
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *Reference) ProtoSize() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	l = len(m.SecretKey)
-	if l > 0 {
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	l = len(m.Salt)
-	if l > 0 {
 		n += 1 + l + sovHoard(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
@@ -1479,32 +1042,6 @@ func (m *Address) ProtoSize() (n int) {
 	return n
 }
 
-func (m *StatInfo) ProtoSize() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	if m.Exists {
-		n += 2
-	}
-	if m.Size != 0 {
-		n += 1 + sovHoard(uint64(m.Size))
-	}
-	l = len(m.Location)
-	if l > 0 {
-		n += 1 + l + sovHoard(uint64(l))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
 func sovHoard(x uint64) (n int) {
 	for {
 		n++
@@ -1519,51 +1056,41 @@ func sozHoard(x uint64) (n int) {
 	return sovHoard(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
 
-func init() { proto.RegisterFile("hoard.proto", fileDescriptor_hoard_707e17e698ee7d74) }
+func init() { proto.RegisterFile("hoard.proto", fileDescriptor_hoard_0745a2cd0758e889) }
 
-var fileDescriptor_hoard_707e17e698ee7d74 = []byte{
-	// 683 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x55, 0xdb, 0x4e, 0xdb, 0x4a,
-	0x14, 0xc5, 0xc1, 0x24, 0x78, 0x27, 0x70, 0xc2, 0x1c, 0x1d, 0x14, 0x59, 0x9c, 0x0a, 0xb9, 0x95,
-	0x1a, 0x1e, 0x08, 0xad, 0x91, 0x5a, 0x95, 0x37, 0x2e, 0x51, 0x8a, 0xca, 0xc5, 0x1a, 0xa7, 0xea,
-	0xe5, 0x6d, 0x88, 0x87, 0xc4, 0x92, 0xb1, 0x23, 0x7b, 0xa2, 0x42, 0xfb, 0xd2, 0x87, 0x3e, 0xf4,
-	0x33, 0xfa, 0x1f, 0xfd, 0x9c, 0xfe, 0x48, 0xe5, 0x9d, 0xc1, 0x1e, 0x27, 0x86, 0x8a, 0xbe, 0xed,
-	0xcb, 0x5a, 0xb3, 0xf6, 0xac, 0xd9, 0x96, 0xa1, 0x3e, 0x8a, 0x58, 0xec, 0x75, 0xc6, 0x71, 0x24,
-	0x22, 0xb2, 0x84, 0x89, 0xb9, 0x3d, 0xf4, 0xc5, 0x68, 0x72, 0xd1, 0x19, 0x44, 0x57, 0x3b, 0xc3,
-	0x68, 0x18, 0xed, 0x60, 0xf7, 0x62, 0x72, 0x89, 0x19, 0x26, 0x18, 0x4d, 0x59, 0xd6, 0x10, 0x96,
-	0x7a, 0x31, 0x0b, 0x05, 0xe9, 0x80, 0x81, 0x81, 0x3b, 0xe6, 0x83, 0x96, 0xb6, 0xa9, 0xb5, 0xeb,
-	0x76, 0xb3, 0x33, 0x3d, 0x3f, 0xab, 0xd3, 0x1c, 0x42, 0x3a, 0x40, 0xba, 0xe1, 0x20, 0xbe, 0x19,
-	0x0b, 0xee, 0x51, 0x7e, 0xc9, 0x63, 0x1e, 0x0e, 0x78, 0xab, 0xb2, 0xa9, 0xb5, 0x1b, 0xb4, 0xa4,
-	0x63, 0xfd, 0xd4, 0xa0, 0xc0, 0xd6, 0xfb, 0x37, 0x63, 0x8e, 0x42, 0xab, 0xb6, 0x39, 0x2b, 0x34,
-	0x8d, 0x52, 0x04, 0x45, 0x1c, 0x79, 0x05, 0x8d, 0xf3, 0x31, 0x0f, 0x9d, 0x9e, 0x83, 0x1d, 0xd4,
-	0xa9, 0xdb, 0xff, 0x4a, 0x9e, 0xda, 0x7a, 0xbd, 0x40, 0x0b, 0x50, 0xeb, 0x85, 0xd4, 0xc5, 0x73,
-	0x56, 0xc0, 0x70, 0x4e, 0xf6, 0x8f, 0xcf, 0xfa, 0xdd, 0xf7, 0xfd, 0xe6, 0x42, 0x9a, 0xba, 0x1f,
-	0x4e, 0x4f, 0xbb, 0x7d, 0x7a, 0x7c, 0xd8, 0xd4, 0x48, 0x1d, 0x6a, 0xe7, 0x4e, 0xf7, 0xcc, 0xe9,
-	0x39, 0xcd, 0xca, 0x41, 0x5d, 0xf2, 0x8e, 0x98, 0x60, 0xd6, 0x6a, 0x51, 0xdf, 0x1a, 0xc2, 0x1a,
-	0x06, 0xfb, 0xa1, 0x97, 0x5f, 0xca, 0x92, 0x5e, 0x4a, 0xfb, 0x1a, 0xea, 0xad, 0x68, 0x99, 0xcd,
-	0x95, 0x3f, 0xda, 0x6c, 0x7d, 0x82, 0xff, 0x9c, 0x80, 0xf9, 0xa1, 0xe0, 0xd7, 0x45, 0xb1, 0x0e,
-	0x18, 0x59, 0x63, 0xe6, 0xbd, 0xb2, 0x3a, 0xcd, 0x21, 0x7f, 0x23, 0x9c, 0x3d, 0xde, 0xac, 0x70,
-	0xfe, 0xde, 0x45, 0xe1, 0xac, 0x4e, 0x73, 0xc8, 0x83, 0x85, 0xdf, 0x29, 0xe7, 0x93, 0x16, 0xd4,
-	0xf6, 0x3d, 0x2f, 0xe6, 0x49, 0x82, 0x52, 0x0d, 0x7a, 0x9b, 0x92, 0x0d, 0x30, 0x5c, 0x3e, 0x88,
-	0xb9, 0x78, 0xc3, 0x6f, 0xe4, 0xda, 0xe5, 0x05, 0x42, 0x40, 0x77, 0x59, 0x20, 0x5a, 0x8b, 0xd8,
-	0xc0, 0xd8, 0xda, 0x55, 0x1c, 0x4b, 0x01, 0xe9, 0xc3, 0xca, 0x53, 0x31, 0xce, 0x48, 0x15, 0x85,
-	0x64, 0x03, 0x1c, 0xfa, 0xe3, 0x11, 0x8f, 0x91, 0xf5, 0x04, 0x56, 0xb2, 0xd5, 0x56, 0xe8, 0xc5,
-	0xa2, 0xf5, 0x05, 0xd6, 0x55, 0xeb, 0x14, 0xfe, 0x43, 0xbd, 0x7b, 0xae, 0xaa, 0x4b, 0xf3, 0xd6,
-	0x24, 0x21, 0x6f, 0x50, 0x05, 0x64, 0x3d, 0xce, 0x1c, 0xbb, 0xdb, 0x3c, 0x2b, 0x80, 0x65, 0x57,
-	0x30, 0x71, 0x1c, 0x5e, 0x46, 0xf7, 0x58, 0xbc, 0x0e, 0xd5, 0xee, 0xb5, 0x9f, 0x88, 0x04, 0x95,
-	0x97, 0xa9, 0xcc, 0xd0, 0x27, 0xff, 0x33, 0x47, 0x73, 0x75, 0x8a, 0x31, 0x31, 0x61, 0xf9, 0x24,
-	0x1a, 0x30, 0xe1, 0x47, 0x61, 0x4b, 0xdf, 0xd4, 0xda, 0x06, 0xcd, 0x72, 0xfb, 0x6b, 0x05, 0xaa,
-	0xf8, 0xbe, 0x09, 0xb1, 0x41, 0x77, 0x39, 0x0b, 0xc8, 0xc6, 0xec, 0xad, 0xd5, 0x15, 0x33, 0x0b,
-	0x5f, 0x0e, 0x69, 0x43, 0xf5, 0x6d, 0x98, 0xa4, 0xac, 0x42, 0xdd, 0x9c, 0x73, 0x8e, 0x3c, 0x83,
-	0x2a, 0xe5, 0x88, 0x6c, 0xa9, 0xc8, 0x7b, 0xce, 0x7e, 0x09, 0x86, 0x33, 0x11, 0xe9, 0x48, 0xdc,
-	0xcb, 0x86, 0x2a, 0xfd, 0xe0, 0x66, 0x88, 0xdb, 0x50, 0xef, 0x71, 0x31, 0x9d, 0x8b, 0x7b, 0x77,
-	0x4c, 0x96, 0x1d, 0x64, 0x33, 0x30, 0x0e, 0x03, 0xce, 0xa6, 0x5b, 0xb0, 0x05, 0x8b, 0xce, 0x44,
-	0x90, 0x39, 0x54, 0xc9, 0x8d, 0xb6, 0x60, 0xb1, 0xc7, 0x73, 0x68, 0xd6, 0x28, 0x91, 0xf8, 0xa6,
-	0x01, 0xc8, 0x3d, 0xf4, 0xa3, 0x90, 0xec, 0x41, 0x4d, 0x66, 0x25, 0x42, 0xff, 0x97, 0xd8, 0xaf,
-	0xac, 0xe9, 0x1e, 0xd4, 0x8e, 0xf8, 0x94, 0x7b, 0x3f, 0xb2, 0x64, 0x8c, 0xef, 0x1a, 0xd4, 0x5c,
-	0x11, 0xc5, 0x6c, 0x98, 0x4e, 0xaf, 0x3b, 0x93, 0x64, 0x44, 0xe6, 0x57, 0xd6, 0x5c, 0x95, 0xa5,
-	0xdb, 0x5d, 0x43, 0x68, 0x10, 0x90, 0x99, 0xba, 0x39, 0x4f, 0x25, 0x4f, 0x41, 0x4f, 0x97, 0x77,
-	0x0e, 0xfa, 0x8f, 0xcc, 0x6f, 0x37, 0xfb, 0x60, 0xe3, 0xc7, 0xaf, 0x47, 0xda, 0xc7, 0x75, 0xe5,
-	0x87, 0x78, 0x15, 0x85, 0xec, 0x7a, 0x07, 0x61, 0x17, 0x55, 0xfc, 0x01, 0xee, 0xfe, 0x0e, 0x00,
-	0x00, 0xff, 0xff, 0x75, 0x0a, 0xdc, 0xce, 0x45, 0x07, 0x00, 0x00,
+var fileDescriptor_hoard_0745a2cd0758e889 = []byte{
+	// 516 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0x4d, 0x6b, 0xdb, 0x40,
+	0x10, 0x45, 0x8d, 0x63, 0xa3, 0x91, 0x93, 0x36, 0x0b, 0x09, 0x46, 0xa4, 0xa5, 0xa8, 0xa5, 0x69,
+	0xa0, 0x91, 0x5b, 0xe5, 0x50, 0xc8, 0x2d, 0x4d, 0x8a, 0xe9, 0xcd, 0xac, 0xe8, 0xa5, 0xd0, 0xc3,
+	0xda, 0x5a, 0xcb, 0x06, 0x45, 0x2b, 0x56, 0x2b, 0x88, 0xef, 0x3d, 0xf5, 0x57, 0xf4, 0xbf, 0xf5,
+	0x77, 0x14, 0x8a, 0x46, 0x6b, 0x7d, 0x13, 0xf0, 0x49, 0x3b, 0x6f, 0xde, 0x9b, 0x8f, 0xd5, 0x63,
+	0xc1, 0x5a, 0x0b, 0x26, 0x03, 0x37, 0x91, 0x42, 0x09, 0x72, 0x88, 0x81, 0x7d, 0x15, 0x6e, 0xd4,
+	0x3a, 0x5b, 0xb8, 0x4b, 0xf1, 0x30, 0x0d, 0x45, 0x28, 0xa6, 0x98, 0x5d, 0x64, 0x2b, 0x8c, 0x30,
+	0xc0, 0x53, 0xa1, 0xb2, 0x9f, 0x4b, 0xbe, 0xe2, 0x92, 0xc7, 0x4b, 0xae, 0x01, 0x2b, 0x94, 0x2c,
+	0x56, 0x3a, 0x38, 0x4a, 0x95, 0x90, 0x2c, 0xd4, 0x39, 0x67, 0x01, 0x27, 0xb3, 0x3c, 0x7b, 0x1b,
+	0x07, 0xf8, 0xf5, 0x13, 0xbe, 0x24, 0x0e, 0x1c, 0x62, 0x30, 0x31, 0x5e, 0x1b, 0xef, 0x2d, 0x6f,
+	0xec, 0x16, 0x05, 0x10, 0xa3, 0x45, 0x8a, 0x5c, 0x82, 0x59, 0x0a, 0x26, 0xcf, 0x90, 0x67, 0x69,
+	0x5e, 0x0e, 0xd1, 0x2a, 0xeb, 0x48, 0x38, 0x9d, 0x47, 0x6c, 0x13, 0x2b, 0xfe, 0xd8, 0xec, 0xe3,
+	0x82, 0x59, 0x26, 0x74, 0xaf, 0x17, 0x6e, 0x71, 0x01, 0x25, 0x4e, 0x2b, 0xca, 0x3e, 0x3d, 0x13,
+	0x38, 0xa5, 0xbb, 0x6b, 0x68, 0xf4, 0xfc, 0x00, 0x66, 0x99, 0xd0, 0x3d, 0x8f, 0xdd, 0xea, 0xc6,
+	0x28, 0x5f, 0xd1, 0x8a, 0xb0, 0x4f, 0xc7, 0xeb, 0xda, 0x32, 0x84, 0xc0, 0xe0, 0x9e, 0x29, 0x86,
+	0x0d, 0xc6, 0x14, 0xcf, 0x39, 0xe6, 0xb3, 0x48, 0x61, 0x99, 0x31, 0xc5, 0xb3, 0xe3, 0x01, 0xdc,
+	0x6d, 0x92, 0x35, 0x97, 0xa8, 0x7a, 0x0b, 0x47, 0x5f, 0xe3, 0xa5, 0xdc, 0x26, 0x8a, 0x07, 0x35,
+	0x79, 0x13, 0x74, 0xb6, 0x70, 0x56, 0x5f, 0xad, 0xa6, 0xdf, 0x6f, 0xb7, 0x4f, 0xf5, 0xde, 0x7a,
+	0xb9, 0x13, 0x7d, 0xfd, 0x55, 0x82, 0xd6, 0x48, 0xce, 0x1b, 0x18, 0xdd, 0x06, 0x81, 0xe4, 0x69,
+	0x4a, 0x26, 0xe5, 0x51, 0x4f, 0xb9, 0x0b, 0xbd, 0x7f, 0x86, 0xb6, 0x0f, 0xf1, 0x60, 0xe0, 0x73,
+	0x16, 0x91, 0x73, 0x5d, 0xb5, 0xf7, 0x8f, 0xd8, 0x0d, 0x7b, 0x91, 0x77, 0x30, 0xfc, 0x1e, 0xa7,
+	0xb9, 0xaa, 0x81, 0xdb, 0xad, 0x45, 0xc8, 0x47, 0x18, 0x52, 0x8e, 0xbc, 0x89, 0xae, 0xde, 0xf1,
+	0x71, 0xab, 0xf2, 0x67, 0x30, 0xe7, 0x99, 0xca, 0x07, 0xe2, 0x41, 0x39, 0x52, 0xaf, 0x31, 0x5b,
+	0xc2, 0x2b, 0xb0, 0x66, 0x5c, 0x15, 0x53, 0xf1, 0xa0, 0x35, 0x57, 0xc7, 0xb0, 0xde, 0x4f, 0x30,
+	0xef, 0x22, 0xce, 0x8a, 0x5f, 0x72, 0x01, 0x07, 0xf3, 0x4c, 0x91, 0x0e, 0xab, 0xb3, 0xcf, 0x05,
+	0x1c, 0xcc, 0xb8, 0x22, 0x2d, 0xb8, 0xa7, 0xfc, 0x2f, 0x03, 0x40, 0x1b, 0x62, 0x23, 0x62, 0x72,
+	0x03, 0x23, 0x1d, 0xf5, 0x34, 0x79, 0xd9, 0x73, 0xf1, 0x35, 0xbf, 0xdc, 0xc0, 0xe8, 0x9e, 0x17,
+	0xda, 0xa7, 0x99, 0x3d, 0x63, 0xfc, 0x36, 0x60, 0xe4, 0x17, 0x4f, 0x09, 0xb9, 0x84, 0xc1, 0x3c,
+	0x4b, 0xd7, 0xa4, 0xeb, 0x1e, 0xfb, 0x58, 0x43, 0x3b, 0xdb, 0x20, 0x35, 0x8a, 0x48, 0x0b, 0xb7,
+	0xbb, 0xd2, 0x9c, 0xea, 0x2b, 0xa6, 0x7a, 0xa8, 0xbb, 0x27, 0x2c, 0x4f, 0x7f, 0x8b, 0x57, 0xe2,
+	0xcb, 0xf9, 0x9f, 0xbf, 0xaf, 0x8c, 0x1f, 0x67, 0xb5, 0x77, 0xf2, 0x41, 0xc4, 0xec, 0x71, 0x8a,
+	0xc2, 0xc5, 0x10, 0x9f, 0xba, 0xeb, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff, 0x3c, 0x90, 0x49, 0xef,
+	0x5c, 0x05, 0x00, 0x00,
 }

@@ -18,9 +18,7 @@ const (
 	OpenPGPGrantType = "HOARD OPENPGP GRANT"
 )
 
-func OpenPGPGrant(ref *reference.Ref, to []*openpgp.Entity,
-	signed *openpgp.Entity) (string, error) {
-
+func OpenPGPGrant(ref *reference.Ref, to []*openpgp.Entity, signed *openpgp.Entity) (string, error) {
 	buf := bytes.NewBuffer(nil)
 	armorWriter, err := armor.Encode(buf, OpenPGPGrantType, nil)
 	if err != nil {
@@ -28,7 +26,7 @@ func OpenPGPGrant(ref *reference.Ref, to []*openpgp.Entity,
 	}
 	plaintextWriter, err := openpgp.Encrypt(armorWriter, to, signed, nil, nil)
 	if err != nil {
-		fmt.Errorf("Could not set up openpgp encryption: %s", err)
+		return "", fmt.Errorf("could not set up openpgp encryption: %s", err)
 	}
 
 	_, err = io.WriteString(plaintextWriter, ref.Plaintext(nil))
@@ -41,8 +39,7 @@ func OpenPGPGrant(ref *reference.Ref, to []*openpgp.Entity,
 	return buf.String(), nil
 }
 
-func OpenPGPGrantReference(grant string,
-	keyRing openpgp.KeyRing) (*reference.Ref, error) {
+func OpenPGPReference(grant string, keyRing openpgp.KeyRing) (*reference.Ref, error) {
 	block, err := armor.Decode(strings.NewReader(grant))
 	if err != nil {
 		return nil, err

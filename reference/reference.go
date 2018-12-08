@@ -5,12 +5,6 @@ import (
 	"fmt"
 )
 
-type Ref struct {
-	Address   []byte
-	SecretKey []byte
-	Salt      []byte `json:",omitempty"`
-}
-
 func New(address, secretKey, salt []byte) *Ref {
 	if len(salt) == 0 {
 		salt = nil

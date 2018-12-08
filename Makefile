@@ -20,11 +20,11 @@
 
 SHELL := /bin/bash
 REPO := $(shell pwd)
-GOFILES_NOVENDOR := $(shell go list -f "{{.Dir}}" ./...)
+GOFILES_NOVENDOR := $(shell find . -path ./vendor -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
 PACKAGES_NOVENDOR := $(shell go list ./...)
 
 # Protobuf generated go files
-PROTO_FILES = $(shell find . -path ./vendor -prune -o -type f -name '*.proto' -print)
+PROTO_FILES = $(shell find . -path ./vendor -prune -o -path ./hoard-js/node_modules -prune -o -type f -name '*.proto' -print)
 PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
 PROTO_GO_FILES_REAL = $(shell find . -path ./vendor -prune -o -type f -name '*.pb.go' -print)
 
@@ -40,20 +40,13 @@ BUILD_IMAGE := "quay.io/monax/hoard:build"
 .PHONY: check
 check:
 	@echo "Checking code for formatting style compliance."
-	@gofmt -l -d ${GOFILES_NOVENDOR}
-	@gofmt -l ${GOFILES_NOVENDOR} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
+	@goimports -l -d ${GOFILES_NOVENDOR}
+	@goimports -l ${GOFILES_NOVENDOR} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
 
 ## just fix it
 .PHONY: fix
 fix:
 	@goimports -l -w ${GOFILES_NOVENDOR}
-
-## fmt runs gofmt -w on the code, modifying any files that do not match
-## the style guide.
-.PHONY: fmt
-fmt:
-	@echo "Correcting any formatting style corrections."
-	@gofmt -l -w ${GOFILES_NOVENDOR}
 
 ## lint installs golint and prints recommendations for coding style.
 lint:
@@ -118,6 +111,11 @@ build_hoard:
 .PHONY: build_hoarctl
 build_hoarctl:
 	@go build -o bin/hoarctl ./cmd/hoarctl
+
+.PHONY: install
+install:
+	@go install ./cmd/hoard
+	@go install ./cmd/hoarctl
 
 ## build all targets in github.com/monax/hoard
 .PHONY: build

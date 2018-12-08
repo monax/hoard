@@ -3,6 +3,8 @@ package hoard
 import (
 	"testing"
 
+	"github.com/monax/hoard/secrets"
+
 	"github.com/go-kit/kit/log"
 	"github.com/monax/hoard/reference"
 	"github.com/monax/hoard/storage"
@@ -10,7 +12,7 @@ import (
 )
 
 func TestDeterministicEncryptedStore(t *testing.T) {
-	hrd := NewHoard(storage.NewMemoryStore(), log.NewNopLogger())
+	hrd := NewHoard(storage.NewMemoryStore(), secrets.NoopSecretProvider, log.NewNopLogger())
 	bunsIn := bs("hot buns")
 
 	ref, err := hrd.Put(bunsIn, nil)

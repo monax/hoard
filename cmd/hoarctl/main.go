@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/monax/hoard/reference"
+
 	"github.com/monax/hoard"
 
 	"context"
@@ -19,7 +21,7 @@ import (
 
 	"encoding/base64"
 
-	"github.com/jawher/mow.cli"
+	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/cmd"
 	"github.com/monax/hoard/config"
 	"github.com/monax/hoard/server"
@@ -98,14 +100,14 @@ func main() {
 			cmd.Spec = fmt.Sprintf("[--key=<SECRET_KEY>%s ADDRESS]", cmd.Spec)
 
 			cmd.Action = func() {
-				var ref *hoard.Reference
+				var ref *reference.Ref
 				var err error
 				// If given address then try to read reference from arguments and option
 				if address != nil && *address != "" {
 					if secretKey == nil || *secretKey == "" {
 						fatalf("A secret key must be provided in order to decrypt.")
 					}
-					ref = &hoard.Reference{
+					ref = &reference.Ref{
 						Address:   readBase64(*address),
 						SecretKey: readBase64(*secretKey),
 						Salt:      parseSalt(*saltString),
@@ -189,7 +191,7 @@ func main() {
 				}
 				plaintext, err := encryptionClient.Decrypt(context.Background(),
 					&hoard.ReferenceAndCiphertext{
-						Reference: &hoard.Reference{
+						Reference: &reference.Ref{
 							SecretKey: readBase64(*secretKey),
 							Salt:      parseSalt(*saltString),
 						},
@@ -326,8 +328,8 @@ func jsonString(v interface{}) string {
 
 }
 
-func parseReference(r io.Reader) (*hoard.Reference, error) {
-	ref := new(hoard.Reference)
+func parseReference(r io.Reader) (*reference.Ref, error) {
+	ref := new(reference.Ref)
 	bs, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
