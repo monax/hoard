@@ -24,10 +24,10 @@ service Grant {
     rpc Reseal (GrantAndGrantSpec) returns (grant.Grant);
 
     // Put a Plaintext and returned the sealed Reference as a Grant
-    rpc PutSealed (PlaintextAndGrantSpec) returns (grant.Grant);
+    rpc PutSeal (PlaintextAndGrantSpec) returns (grant.Grant);
 
     // Unseal a Grant and follow the Reference to return a Plaintext
-    rpc GetUnsealed (grant.Grant) returns (Plaintext);
+    rpc UnsealGet (grant.Grant) returns (Plaintext);
 }
 
 // Provide plaintext and get plaintext back

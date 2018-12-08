@@ -119,7 +119,7 @@ func (service *grpcService) Reseal(ctx context.Context, arg *GrantAndGrantSpec) 
 	return service.gs.Seal(ref, arg.GrantSpec)
 }
 
-func (service *grpcService) PutSealed(ctx context.Context, arg *PlaintextAndGrantSpec) (*grant.Grant, error) {
+func (service *grpcService) PutSeal(ctx context.Context, arg *PlaintextAndGrantSpec) (*grant.Grant, error) {
 	ref, err := service.des.Put(arg.Plaintext.Data, arg.Plaintext.Salt)
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func (service *grpcService) PutSealed(ctx context.Context, arg *PlaintextAndGran
 	return service.gs.Seal(ref, arg.GrantSpec)
 }
 
-func (service *grpcService) GetUnsealed(ctx context.Context, grt *grant.Grant) (*Plaintext, error) {
+func (service *grpcService) UnsealGet(ctx context.Context, grt *grant.Grant) (*Plaintext, error) {
 	ref, err := service.gs.Unseal(grt)
 	if err != nil {
 		return nil, err
