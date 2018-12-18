@@ -157,7 +157,7 @@ Hoard uses [GRPC](https://grpc.io/) for its API for which there is a wide range 
 
 ### Javascript
 
-A Javascript client library can be found here: [hoard-js](https://github.com/monax/hoard-js).
+A Javascript client library can be found here: [hoard-js](https://github.com/monax/hoard/tree/master/hoard-js).
 
 ## Building
 
