@@ -119,7 +119,7 @@ install:
 
 ## build all targets in github.com/monax/hoard
 .PHONY: build
-build:	check build_hoard build_hoarctl protobuf
+build:	check build_hoard build_hoarctl
 
 .PHONY: docker_build
 docker_build: check commit_hash
@@ -127,19 +127,18 @@ docker_build: check commit_hash
 
 ## build binaries for all architectures
 .PHONY: build_dist
-build_dist:	protobuf
+build_dist:
 	@goreleaser --rm-dist --skip-publish --skip-validate
-
 
 # Testing
 
 .PHONY:	test
-test: check protobuf
+test: check
 	@scripts/bin_wrapper.sh go test -v ./... ${GOPACKAGES_NOVENDOR}
 
 ## run tests including integration tests
 .PHONY:	test_integration
-test_integration: check protobuf
+test_integration: check
 	@go test -v -tags integration ./... ${GOPACKAGES_NOVENDOR}
 	@integration/test_gcp.sh
 	@integration/test_aws.sh
