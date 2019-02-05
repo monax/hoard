@@ -19,8 +19,8 @@ let hoard = new Hoard.Client('localhost:53431');
 // length of the salt. This is useful if we want to disguise that a known
 // piece of text has been stored since it will give it a different address
 let plaintext = {
-    data: new Buffer('some stuff', 'utf8'),
-    salt: new Buffer('foo', 'ascii')
+    Data: Buffer.from('some stuff', 'utf8'),
+    Salt: Buffer.from('foo', 'ascii')
 };
 
 // Below is an example of running through a series of hoard calls wrapped in promises.
@@ -37,22 +37,22 @@ const example = async function (plaintextIn) {
         console.log(base64ify(ref));
         // We can get the plaintext back by `get`ing the reference
         let plaintext = await hoard.get(ref);
-        console.log('Plaintext: ' + plaintext.data.toString());
+        console.log('Plaintext: ' + plaintext.Data.toString());
         // This time we'll just encrypt and ask for the result rather than storing it
         let refAndCiphertext = await hoard.encrypt(plaintext);
         // We get a 'hypothetical' reference (since it is not stored) and the ciphertext itself
         console.log(refAndCiphertext);
         // decrypt is our inverse
         let plaintext2 = await hoard.decrypt(refAndCiphertext);
-        console.log('Plaintext (again): ' + plaintext2.data.toString());
+        console.log('Plaintext (again): ' + plaintext2.Data.toString());
         // Put it back to get a ref
         let ref2 = await hoard.put(plaintext2);
         // We can ask for file information (we could have just provided the ref here, but address is all that is needed)
-        let statInfo = await hoard.stat({address: ref2.address});
+        let statInfo = await hoard.stat({Address: ref2.Address});
         console.log(statInfo);
         // Note that all arguments take an object, representing the message, so 'address' is {address: address}
         // pull interacts with underlying storage directly so fetches ciphertext
-        let ciphertext2 = await hoard.pull({address: statInfo.address});
+        let ciphertext2 = await hoard.pull({Address: statInfo.Address});
         console.log(ciphertext2);
         let address = await hoard.push(ciphertext2);
         console.log(address)

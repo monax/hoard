@@ -20,3 +20,4 @@ dist/
 notes.md
 
 commit_hash.txt
+node_modules

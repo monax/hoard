@@ -11,9 +11,9 @@
     "url": "https://code.monax.io/platform/hoard"
   },
   "dependencies": {
-    "grpc": "1.4.1",
-    "grpc-tools": "1.4.1",
-    "google-protobuf": "3.3.0"
+    "grpc": "1.16.1",
+    "grpc-tools": "1.6.6",
+    "google-protobuf": "3.6.1"
   },
   "keywords": [
     "hoard"

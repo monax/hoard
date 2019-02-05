@@ -20,8 +20,13 @@
 
 SHELL := /bin/bash
 REPO := $(shell pwd)
-GOFILES_NOVENDOR := $(shell go list -f "{{.Dir}}" ./...)
+GOFILES_NOVENDOR := $(shell find . -path ./vendor -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
 PACKAGES_NOVENDOR := $(shell go list ./...)
+
+# Protobuf generated go files
+PROTO_FILES = $(shell find . -path ./vendor -prune -o -path ./hoard-js/node_modules -prune -o -type f -name '*.proto' -print)
+PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
+PROTO_GO_FILES_REAL = $(shell find . -path ./vendor -prune -o -type f -name '*.pb.go' -print)
 
 OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
 DIST := "dist"
@@ -35,20 +40,13 @@ BUILD_IMAGE := "quay.io/monax/hoard:build"
 .PHONY: check
 check:
 	@echo "Checking code for formatting style compliance."
-	@gofmt -l -d ${GOFILES_NOVENDOR}
-	@gofmt -l ${GOFILES_NOVENDOR} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
+	@goimports -l -d ${GOFILES_NOVENDOR}
+	@goimports -l ${GOFILES_NOVENDOR} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
 
 ## just fix it
 .PHONY: fix
 fix:
 	@goimports -l -w ${GOFILES_NOVENDOR}
-
-## fmt runs gofmt -w on the code, modifying any files that do not match
-## the style guide.
-.PHONY: fmt
-fmt:
-	@echo "Correcting any formatting style corrections."
-	@gofmt -l -w ${GOFILES_NOVENDOR}
 
 ## lint installs golint and prints recommendations for coding style.
 lint:
@@ -58,8 +56,6 @@ lint:
 		echo; \
 		golint --set_exit_status $${file}; \
 	done
-
-
 
 # Dependency Management
 
@@ -89,12 +85,22 @@ ensure_vendor: reinstall_vendor
 commit_hash:
 	@git status &> /dev/null && scripts/commit_hash.sh > commit_hash.txt || true
 
-## compile hoard.proto interface definition
-./core/hoard.pb.go: ./core/hoard.proto
-	@protoc -I ./core core/hoard.proto --go_out=plugins=grpc:core
+# Protobuffing
 
-.PHONY: build_protobuf
-build_protobuf: ./core/hoard.pb.go
+## compile hoard.proto interface definition
+%.pb.go: %.proto
+	protoc -I protobuf -I vendor $< --gogo_out=plugins=grpc:${GOPATH}/src
+
+.PHONY: protobuf
+protobuf: $(PROTO_GO_FILES)
+
+.PHONY: clean_protobuf
+clean_protobuf:
+	@rm -f $(PROTO_GO_FILES_REAL)
+
+.PHONY: protobuf_deps
+protobuf_deps:
+	@go get -u github.com/gogo/protobuf/protoc-gen-gogo
 
 ## build the hoard binary
 .PHONY: build_hoard
@@ -106,9 +112,14 @@ build_hoard:
 build_hoarctl:
 	@go build -o bin/hoarctl ./cmd/hoarctl
 
+.PHONY: install
+install:
+	@go install ./cmd/hoard
+	@go install ./cmd/hoarctl
+
 ## build all targets in github.com/monax/hoard
 .PHONY: build
-build:	check build_hoard build_hoarctl build_protobuf
+build:	check build_hoard build_hoarctl
 
 .PHONY: docker_build
 docker_build: check commit_hash
@@ -116,19 +127,18 @@ docker_build: check commit_hash
 
 ## build binaries for all architectures
 .PHONY: build_dist
-build_dist:	build_protobuf
+build_dist:
 	@goreleaser --rm-dist --skip-publish --skip-validate
-
 
 # Testing
 
 .PHONY:	test
-test: check build_protobuf
+test: check
 	@scripts/bin_wrapper.sh go test -v ./... ${GOPACKAGES_NOVENDOR}
 
 ## run tests including integration tests
 .PHONY:	test_integration
-test_integration: check build_protobuf
+test_integration: check
 	@go test -v -tags integration ./... ${GOPACKAGES_NOVENDOR}
 	@integration/test_gcp.sh
 	@integration/test_aws.sh
@@ -139,7 +149,6 @@ test_integration: check build_protobuf
 .PHONY: clean
 clean:
 	-rm -r ./bin
-
 
 ## Release and Versioning
 

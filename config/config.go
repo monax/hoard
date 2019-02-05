@@ -2,12 +2,12 @@ package config
 
 import (
 	"bytes"
-	"fmt"
-
 	"encoding/json"
+	"fmt"
 
 	"github.com/BurntSushi/toml"
 	"github.com/monax/hoard/config/logging"
+	"github.com/monax/hoard/config/secrets"
 	"github.com/monax/hoard/config/storage"
 )
 
@@ -20,7 +20,7 @@ type HoardConfig struct {
 	ListenAddress string
 	Storage       *storage.StorageConfig
 	Logging       *logging.LoggingConfig
-	// TODO: SecretsConfig - how to access bootstrapping secrets
+	Secrets       *secrets.SecretsConfig
 }
 
 func NewHoardConfig(listenAddress string, storageConfig *storage.StorageConfig,

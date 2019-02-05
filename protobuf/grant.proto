@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package grant;
+
+option go_package = "github.com/monax/hoard/grant";
+
+option (gogoproto.protosizer_all) = true;
+
+message Grant {
+    // The grantSpec provides sufficient information to decrypt the reference
+    // if hoard has access to the requisite secret
+    Spec Spec = 1;
+    bytes EncryptedReference = 2;
+}
+
+message Spec {
+    option (gogoproto.onlyone) = true;
+    PlaintextSpec Plaintext = 1;
+    SymmetricSpec Symmetric = 2;
+    OpenPGPSpec OpenPGP = 3;
+}
+
+message PlaintextSpec {
+
+}
+
+message SymmetricSpec {
+    // A non-secret identifier for a secret that is 'known' to Hoard (accessible via store or config)
+    string SecretID = 1;
+}
+
+
+message OpenPGPSpec {
+    // TODO: figurate how to access local GPG entities, presuambly id
+}
+

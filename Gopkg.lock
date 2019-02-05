@@ -144,6 +144,18 @@
   version = "v1.8.0"
 
 [[projects]]
+  digest = "1:700c0988d24fac04439828af2aab8e7d1638cea3bc91ff20d2a2befc970ff165"
+  name = "github.com/gogo/protobuf"
+  packages = [
+    "gogoproto",
+    "proto",
+    "protoc-gen-gogo/descriptor",
+  ]
+  pruneopts = "NUT"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   digest = "1:f7b10f91ce79b47f81d5df3c0cb86ce2eb370b53305e4d0962913c13a1ba1ded"
   name = "github.com/golang/protobuf"
@@ -229,9 +241,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:bacb8b590716ab7c33f2277240972c9582d389593ee8d66fc10074e0508b8126"
+  digest = "1:0331452965d8695c0a5633e0f509012987681a654f388f2ad0c3b2d7f7004b1c"
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = [
+    "assert",
+    "require",
+  ]
   pruneopts = "NUT"
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
@@ -260,7 +275,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:750eed65b71884c0f5160863e09d81ad8478ecf6d5ce2cea5d005cedebd68c83"
+  digest = "1:31ffb8be25358eb77569cf5226a002a74516249697d381bf5d7fe5b328053bb4"
   name = "golang.org/x/crypto"
   packages = [
     "cast5",
@@ -270,9 +285,11 @@
     "openpgp/errors",
     "openpgp/packet",
     "openpgp/s2k",
+    "pbkdf2",
+    "scrypt",
   ]
   pruneopts = "NUT"
-  revision = "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb"
+  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
   branch = "master"
@@ -444,15 +461,18 @@
     "github.com/go-kit/kit/log",
     "github.com/go-kit/kit/log/term",
     "github.com/go-stack/stack",
-    "github.com/golang/protobuf/proto",
+    "github.com/gogo/protobuf/gogoproto",
+    "github.com/gogo/protobuf/proto",
     "github.com/google/go-cloud/blob",
     "github.com/google/go-cloud/blob/gcsblob",
     "github.com/google/go-cloud/gcp",
     "github.com/jawher/mow.cli",
     "github.com/monax/relic",
     "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/require",
     "golang.org/x/crypto/openpgp",
     "golang.org/x/crypto/openpgp/armor",
+    "golang.org/x/crypto/scrypt",
     "golang.org/x/net/context",
     "golang.org/x/oauth2/google",
     "google.golang.org/grpc",
