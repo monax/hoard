@@ -56,6 +56,7 @@ func (serv *server) Serve() error {
 	hoard.RegisterCleartextServer(serv.grpcServer, hoardServer)
 	hoard.RegisterEncryptionServer(serv.grpcServer, hoardServer)
 	hoard.RegisterStorageServer(serv.grpcServer, hoardServer)
+	hoard.RegisterGrantServer(serv.grpcServer, hoardServer)
 	// Register reflection service on gRPC server.
 	reflection.Register(serv.grpcServer)
 	err = serv.grpcServer.Serve(listener)

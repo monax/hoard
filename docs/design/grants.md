@@ -7,7 +7,7 @@ A `GrantSpec` describes how the encryption is performed - its content depends on
 Below are some planned Hoard grants types (not all are implemented).
 
 #### Symmetric
-This is the first grant type to be implemented. The grants are encrypted with AES256-GCM using
+This is the first grant type to be implemented. The grants are encrypted with AES256-GCM.
 
 #### OpenPGP (WIP)
 Use local system keys to asymmetrically encrypt grants

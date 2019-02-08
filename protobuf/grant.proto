@@ -33,6 +33,6 @@ message SymmetricSpec {
 
 
 message OpenPGPSpec {
-    // TODO: figurate how to access local GPG entities, presuambly id
+    // TODO: figure out how to access local GPG entities, presumably id
 }
 
