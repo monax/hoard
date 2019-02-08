@@ -6,14 +6,13 @@ package hoard
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	grant "github.com/monax/hoard/grant"
 	reference "github.com/monax/hoard/reference"
 	storage "github.com/monax/hoard/storage"
 	grpc "google.golang.org/grpc"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

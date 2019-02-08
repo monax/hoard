@@ -13,8 +13,8 @@ It is stateless in the sense of relying on storage backends for the actual persi
 
 Planned storage backends are:
 
-- BigchainDB (and IPDB)
-- Tendermint
+- [BigchainDB](https://www.bigchaindb.com/) (and IPDB)
+- [Tendermint](https://tendermint.com/)
 
 It encrypts deterministically (convergently) because it encrypts an object using the object's hash (SHA256) as the secret key (which can than be shared as a 'grant').
 
@@ -79,10 +79,10 @@ echo $ref | hoarctl get
 echo $ref | hoarctl stat
 
 # This one-liner exercises the entire API:
-echo foo | hoarctl put | hoarctl get | hoarctl put | hoarctl stat | hoarctl cat | hoarctl insert | hoarctl cat | hoarctl decrypt -k tbudgBSg+bHWHiHnlteNzN8TUvI80ygS9IULh4rklEw= | hoarctl encrypt
+echo foo | hoarctl put | hoarctl get | hoarctl putseal | hoarctl unsealget | hoarctl encrypt | hoarctl insert | hoarctl stat | hoarctl cat | hoarctl decrypt -k tbudgBSg+bHWHiHnlteNzN8TUvI80ygS9IULh4rklEw= | hoarctl ref | hoarctl seal | hoarctl reseal | hoarctl unseal | hoarctl get
 ```
 
-You can chop off segments of the final command to see the output of each intermediate command. It is contrived so that the outputs can be used as inputs for the next pipeline step. `hoarctl` either returns JSON references or raw bytes depending on the command. You may find the excellent [jq](https://stedolan.github.io/jq/) useful for working with single-line JSON files on the commandline.
+You can chop off segments of the final command to see the output of each intermediate command. It is contrived so that the outputs can be used as inputs for the next pipeline step. `hoarctl` either returns JSON references or raw bytes depending on the command. You may find the excellent [jq](https://stedolan.github.io/jq/) useful for working with single-line JSON files on the command line.
 
 ## Config
 Using the filesystem storage backend as an example (generated with `hoard init -o- fs`) you can configure Hoard with a file like:
@@ -170,7 +170,7 @@ Then, from the project root run:
 
 ```shell
 # Install protobuf GRPC plugin, glide, and glide dependencies
-make deps
+make protobuf_deps
 # Run checks, tests, and build binaries
-make build
+make build && make install
 ```

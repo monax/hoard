@@ -14,15 +14,15 @@ func Seal(secret SecretProvider, ref *reference.Ref, spec *Spec) (*Grant, error)
 	grt := &Grant{Spec: spec}
 
 	switch s := spec.GetValue().(type) {
-	case PlaintextSpec:
+	case *PlaintextSpec:
 		grt.EncryptedReference = PlaintextGrant(ref)
-	case SymmetricSpec:
+	case *SymmetricSpec:
 		encRef, err := SymmetricGrant(ref, secret(s.SecretID))
 		if err != nil {
 			return nil, err
 		}
 		grt.EncryptedReference = encRef
-	case OpenPGPSpec:
+	case *OpenPGPSpec:
 		//OpenPGPGrant(ref, spec.Data)
 	default:
 		return nil, fmt.Errorf("grant type %v not recognised", s)
@@ -33,11 +33,11 @@ func Seal(secret SecretProvider, ref *reference.Ref, spec *Spec) (*Grant, error)
 // Unseal a Grant exposing its secret reference
 func Unseal(secret SecretProvider, grt *Grant) (*reference.Ref, error) {
 	switch s := grt.Spec.GetValue().(type) {
-	case PlaintextSpec:
+	case *PlaintextSpec:
 		return PlaintextReference(grt.EncryptedReference), nil
-	case SymmetricSpec:
+	case *SymmetricSpec:
 		return SymmetricReference(grt.EncryptedReference, secret(s.SecretID))
-	case OpenPGPSpec:
+	case *OpenPGPSpec:
 		//OpenPGPGrant(ref, spec.Data)
 	}
 	return nil, fmt.Errorf("grant type %v not recognised", grt.Spec)
