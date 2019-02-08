@@ -18,6 +18,22 @@
   version = "v0.30.0"
 
 [[projects]]
+  digest = "1:d2ccb697dc13c8fbffafa37baae97594d5592ae8f7e113471084137315536e2b"
+  name = "github.com/Azure/azure-pipeline-go"
+  packages = ["pipeline"]
+  pruneopts = "NUT"
+  revision = "b8e3409182fd52e74f7d7bdfbff5833591b3b655"
+  version = "v0.1.8"
+
+[[projects]]
+  digest = "1:435043934aa0a8221e2c660e88dffe588783e9497facf6b517a465a37c58c97b"
+  name = "github.com/Azure/azure-storage-blob-go"
+  packages = ["azblob"]
+  pruneopts = "NUT"
+  revision = "457680cc0804810f6d02958481e0ffdda51d5c60"
+  version = "0.5.0"
+
+[[projects]]
   digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
@@ -171,18 +187,20 @@
   revision = "ddf22928ea3c56eb4292a0adbbf5001b1e8e7d0d"
 
 [[projects]]
-  digest = "1:40aa9610f1bf1923bdb15b3e0fe1a1421517d508edc0df02fea47aff4763a864"
-  name = "github.com/google/go-cloud"
-  packages = [
-    "blob",
-    "blob/driver",
-    "blob/gcsblob",
-    "gcp",
-    "wire",
-  ]
+  digest = "1:56a1f3949ebb7fa22fa6b4e4ac0fe0f77cc4faee5b57413e6fa9199a8458faf1"
+  name = "github.com/google/uuid"
+  packages = ["."]
   pruneopts = "NUT"
-  revision = "7a6776b9aa5d9e7400c46516ad5aa4f75091316a"
-  version = "v0.2.0"
+  revision = "9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:4626dac5aa045daaa10d6b2ab215bf063fc2820b2b970dffd38d0063b7f9ec16"
+  name = "github.com/google/wire"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "9a7ae3ba6b734d831e88c75966fd5e9c0abdeace"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:fe852c57b4fc4d11e6ef79bce1e930ee2f2f7d148b370afef8f8d012a80960ea"
@@ -272,6 +290,22 @@
   pruneopts = "NUT"
   revision = "79993219becaa7e29e3b60cb67f5b8e82dee11d6"
   version = "v0.17.0"
+
+[[projects]]
+  digest = "1:a457f59812988f1ad5ccdbe5f75cdc93994a326ce2b937934223c4f37c72c15e"
+  name = "gocloud.dev"
+  packages = [
+    "blob",
+    "blob/azureblob",
+    "blob/driver",
+    "blob/gcsblob",
+    "blob/s3blob",
+    "gcp",
+    "internal/useragent",
+  ]
+  pruneopts = "NUT"
+  revision = "dc9e05ecda52b5d9531cfbfb5fc492c6c1a213a2"
+  version = "v0.9.0"
 
 [[projects]]
   branch = "master"
@@ -445,14 +479,12 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "cloud.google.com/go/storage",
+    "github.com/Azure/azure-storage-blob-go/azblob",
     "github.com/BurntSushi/toml",
     "github.com/OneOfOne/xxhash",
     "github.com/aws/aws-sdk-go/aws",
-    "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/credentials",
-    "github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds",
-    "github.com/aws/aws-sdk-go/aws/credentials/endpointcreds",
-    "github.com/aws/aws-sdk-go/aws/defaults",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/s3",
     "github.com/aws/aws-sdk-go/service/s3/s3manager",
@@ -463,18 +495,20 @@
     "github.com/go-stack/stack",
     "github.com/gogo/protobuf/gogoproto",
     "github.com/gogo/protobuf/proto",
-    "github.com/google/go-cloud/blob",
-    "github.com/google/go-cloud/blob/gcsblob",
-    "github.com/google/go-cloud/gcp",
     "github.com/jawher/mow.cli",
     "github.com/monax/relic",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
+    "gocloud.dev/blob",
+    "gocloud.dev/blob/azureblob",
+    "gocloud.dev/blob/gcsblob",
+    "gocloud.dev/blob/s3blob",
+    "gocloud.dev/gcp",
     "golang.org/x/crypto/openpgp",
     "golang.org/x/crypto/openpgp/armor",
     "golang.org/x/crypto/scrypt",
-    "golang.org/x/net/context",
     "golang.org/x/oauth2/google",
+    "google.golang.org/api/option",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/reflection",
