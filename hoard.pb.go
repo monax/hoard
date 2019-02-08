@@ -6,11 +6,6 @@ package hoard
 import (
 	context "context"
 	fmt "fmt"
-<<<<<<< HEAD
-	math "math"
-
-=======
->>>>>>> init hoarctl grant seal/unseal
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	grant "github.com/monax/hoard/grant"
