@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:fc6bea887749008f24ad3bff347a47339d71a719f4ad2d790f441db4a39062f9"
+  digest = "1:2b2dd370d2e40f72a622dfecefcf668cca701b4a31a2119355bc3166fb863280"
   name = "cloud.google.com/go"
   packages = [
     "compute/metadata",
@@ -14,8 +14,8 @@
     "storage",
   ]
   pruneopts = "NUT"
-  revision = "28a4bc8c44b3acbcc482cff0cdf7de29a4688b61"
-  version = "v0.35.1"
+  revision = "c9474f2f8deb81759839474b6bd1726bbfe1c1c4"
+  version = "v0.36.0"
 
 [[projects]]
   digest = "1:d2ccb697dc13c8fbffafa37baae97594d5592ae8f7e113471084137315536e2b"
@@ -50,7 +50,7 @@
   version = "v1.2.2"
 
 [[projects]]
-  digest = "1:4b0b6baac2975a040f02b07dc219a19e43470a51bcfc0d65f40e735d206243f1"
+  digest = "1:5f793570f6eb82da07eee5c986c1f30c654f5308dbc3cb57909216cbdd43daf2"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -91,8 +91,8 @@
     "service/sts",
   ]
   pruneopts = "NUT"
-  revision = "949cbce4e4443b72f6da12adbeb5d416dd506fbe"
-  version = "v1.16.27"
+  revision = "130e7e7f5cfa00e267b884bd2772ae986f9e8273"
+  version = "v1.16.30"
 
 [[projects]]
   branch = "master"
@@ -181,7 +181,19 @@
   version = "v1.2.0"
 
 [[projects]]
-<<<<<<< HEAD
+  digest = "1:504f5311d8125e470d5a5d459d5359ffd01ff95f2e8c040715af9c3fd1fa8706"
+  name = "github.com/google/go-cloud"
+  packages = [
+    "blob",
+    "blob/driver",
+    "blob/gcsblob",
+    "gcp",
+  ]
+  pruneopts = "NUT"
+  revision = "e981f0586e2290f34ecf78282261b3693a894ec8"
+  version = "v0.7.0"
+
+[[projects]]
   digest = "1:56a1f3949ebb7fa22fa6b4e4ac0fe0f77cc4faee5b57413e6fa9199a8458faf1"
   name = "github.com/google/uuid"
   packages = ["."]
@@ -196,32 +208,14 @@
   pruneopts = "NUT"
   revision = "9a7ae3ba6b734d831e88c75966fd5e9c0abdeace"
   version = "v0.2.1"
-=======
-  digest = "1:504f5311d8125e470d5a5d459d5359ffd01ff95f2e8c040715af9c3fd1fa8706"
-  name = "github.com/google/go-cloud"
-  packages = [
-    "blob",
-    "blob/driver",
-    "blob/gcsblob",
-    "gcp",
-  ]
-  pruneopts = "NUT"
-  revision = "e981f0586e2290f34ecf78282261b3693a894ec8"
-  version = "v0.7.0"
->>>>>>> init hoarctl grant seal/unseal
 
 [[projects]]
-  digest = "1:4626dac5aa045daaa10d6b2ab215bf063fc2820b2b970dffd38d0063b7f9ec16"
-  name = "github.com/google/wire"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "9a7ae3ba6b734d831e88c75966fd5e9c0abdeace"
-  version = "v0.2.1"
-
-[[projects]]
-  digest = "1:fa300677001e58a995e10afe4e251d2a6e30d3815a234d553b5810db7795d5a2"
+  digest = "1:fd4d1f4c2d75aee3833ee7d8ef11fcf42ddec3c63d1819548288c3d868d6eb14"
   name = "github.com/googleapis/gax-go"
-  packages = ["v2"]
+  packages = [
+    ".",
+    "v2",
+  ]
   pruneopts = "NUT"
   revision = "c8a15bac9b9fe955bd9f900272f9a306465d28cf"
   version = "v2.0.3"
@@ -286,13 +280,14 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:016c43a85a8941df73d003f1baaf314bf9b46f81216c0770eadc723ec3af1d75"
+  digest = "1:daf84293cb0cd57d4b3b12a44f6b3e50fc46c8a362771344564c7b361e25b26e"
   name = "go.opencensus.io"
   packages = [
     ".",
     "exemplar",
     "internal",
     "internal/tagencoding",
+    "plugin/ocgrpc",
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
     "stats",
@@ -309,7 +304,8 @@
   version = "v0.19.0"
 
 [[projects]]
-  digest = "1:a457f59812988f1ad5ccdbe5f75cdc93994a326ce2b937934223c4f37c72c15e"
+  branch = "master"
+  digest = "1:9728f09fe26cd49f0ed49d1ff65cd2f56307dc9e160d109e078bf3b7fb64cbe1"
   name = "gocloud.dev"
   packages = [
     "blob",
@@ -317,12 +313,15 @@
     "blob/driver",
     "blob/gcsblob",
     "blob/s3blob",
+    "gcerrors",
     "gcp",
+    "internal/gcerr",
+    "internal/oc",
+    "internal/retry",
     "internal/useragent",
   ]
   pruneopts = "NUT"
-  revision = "dc9e05ecda52b5d9531cfbfb5fc492c6c1a213a2"
-  version = "v0.9.0"
+  revision = "f00ce32f049a074c611b3d8e9ed133f867a4ab55"
 
 [[projects]]
   branch = "master"
@@ -357,7 +356,7 @@
     "trace",
   ]
   pruneopts = "NUT"
-  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
+  revision = "65e2d4e15006aab9813ff8769e768bbf4bb667a0"
 
 [[projects]]
   branch = "master"
@@ -403,6 +402,17 @@
   pruneopts = "NUT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5b7388ff320747fd2fb936b4447686ec4081169382c7995a8441bfcd5bf34a91"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "NUT"
+  revision = "4e09f5a7a913efc0eb0cd0887138548b9b6fe013"
 
 [[projects]]
   digest = "1:23d9fc277640dc6c36702437a57f0ee033b9f7c9f05a7a425abc7df28f6dd259"
@@ -517,6 +527,9 @@
     "github.com/go-stack/stack",
     "github.com/gogo/protobuf/gogoproto",
     "github.com/gogo/protobuf/proto",
+    "github.com/google/go-cloud/blob",
+    "github.com/google/go-cloud/blob/gcsblob",
+    "github.com/google/go-cloud/gcp",
     "github.com/jawher/mow.cli",
     "github.com/monax/relic",
     "github.com/stretchr/testify/assert",
