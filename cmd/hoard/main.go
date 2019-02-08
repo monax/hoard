@@ -38,7 +38,7 @@ func main() {
 		"config file. If omitted default config is used.")
 
 	environmentOpt := hoardApp.BoolOpt("e env", false,
-		fmt.Sprintf("Parse the contents of the enironment variable %s as a complete JSON config",
+		fmt.Sprintf("Parse the contents of the environment variable %s as a complete JSON config",
 			source.DefaultJSONConfigEnvironmentVariable))
 
 	// This string spec is parsed by mow.cli and has actual semantic significance
@@ -108,55 +108,17 @@ func main() {
 			initOpt := configCmd.BoolOpt("i init", false, "Write file to "+
 				"XDG standard location")
 
+			arg := configCmd.StringArg("CONFIG", "", "Supported config to generate")
 			configCmd.Spec = "[--json] | (([--output=<output file>] |  [--init]) [--force])"
+			configCmd.Spec += "CONFIG"
 
-			configCmd.Command("mem", "Emit initial config with memory "+
-				"storage backend.",
-				func(c *cli.Cmd) {
-					c.Action = func() {
-						conf.Storage = storage.DefaultMemoryConfig()
-					}
-				})
-
-			configCmd.Command("fs", "Emit initial config with "+
-				"filesystem storage backend.",
-				func(c *cli.Cmd) {
-					c.Action = func() {
-						conf.Storage = storage.DefaultFileSystemConfig()
-					}
-				})
-
-			configCmd.Command("s3", "Emit initial config with S3 storage "+
-				"backend.",
-				func(c *cli.Cmd) {
-					c.Action = func() {
-						conf.Storage = storage.DefaultS3Config()
-					}
-				})
-
-			configCmd.Command("gcs", "Emit initial config with GCS storage "+
-				"backend.",
-				func(c *cli.Cmd) {
-					c.Action = func() {
-						conf.Storage = storage.DefaultGCSConfig()
-					}
-				})
-
-			configCmd.Command("ipfs", "Emit initial config with IPFS storage "+
-				"backend.",
-				func(c *cli.Cmd) {
-					c.Action = func() {
-						conf.Storage = storage.DefaultIPFSConfig()
-					}
-				})
-
-			configCmd.Command("existing", "Emit existing config (useful for checking "+
-				"config source or converting format)",
-				func(c *cli.Cmd) {
-					c.Action = func() {
-						conf.Storage = storage.DefaultS3Config()
-					}
-				})
+			configCmd.Action = func() {
+				store, err := storage.GetDefaultConfig(*arg)
+				if err != nil {
+					fatalf("Error fetching default config for %s: %s", arg, err)
+				}
+				conf.Storage = store
+			}
 
 			configCmd.After = func() {
 				configString := conf.TOMLString()

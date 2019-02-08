@@ -8,7 +8,6 @@ import (
 	"errors"
 
 	"github.com/BurntSushi/toml"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/go-kit/kit/log"
 	"github.com/monax/hoard/storage"
 )
@@ -21,10 +20,11 @@ type StorageType string
 
 const (
 	Unspecified StorageType = ""
-	Memory      StorageType = "memory"
-	Filesystem  StorageType = "filesystem"
-	S3          StorageType = "s3"
-	GCS         StorageType = "gcs"
+	Memory      StorageType = "mem"
+	Filesystem  StorageType = "fs"
+	AWS         StorageType = "aws"
+	Azure       StorageType = "azure"
+	GCP         StorageType = "gcp"
 	IPFS        StorageType = "ipfs"
 )
 
@@ -37,8 +37,7 @@ type StorageConfig struct {
 	// relevant one, while at the same time those that are left as nil will be
 	// omitted from being serialised.
 	*FileSystemConfig
-	*S3Config
-	*GCSConfig
+	*CloudConfig
 	*IPFSConfig
 }
 
@@ -46,6 +45,26 @@ func NewStorageConfig(storageType StorageType, addressEncoding string) *StorageC
 	return &StorageConfig{
 		StorageType:     storageType,
 		AddressEncoding: addressEncoding,
+	}
+}
+
+func GetDefaultConfig(c string) (*StorageConfig, error) {
+
+	switch StorageType(c) {
+	case Memory, Unspecified:
+		return DefaultMemoryConfig(), nil
+	case Filesystem:
+		return DefaultFileSystemConfig(), nil
+	case IPFS:
+		return DefaultIPFSConfig(), nil
+	case AWS:
+		return DefaultCloudConfig(c), nil
+	case Azure:
+		return DefaultCloudConfig(c), nil
+	case GCP:
+		return DefaultCloudConfig(c), nil
+	default:
+		return nil, fmt.Errorf("did not recognise storage type '%s'", c)
 	}
 }
 
@@ -60,70 +79,56 @@ func StoreFromStorageConfig(storageConfig *StorageConfig, logger log.Logger) (st
 		return storage.NewMemoryStore(), nil
 
 	case Filesystem:
-		fsc := storageConfig.FileSystemConfig
-		if fsc == nil {
+		fsConf := storageConfig.FileSystemConfig
+		if fsConf == nil {
 			return nil, errors.New("filesystem storage configuration must be " +
 				"supplied to use the filesystem storage backend")
 		}
-		if fsc.RootDirectory == "" {
+		if fsConf.RootDirectory == "" {
 			return nil, errors.New("rootDirectory key must be non-empty in " +
 				"filesystem storage config")
 		}
-		return storage.NewFileSystemStore(fsc.RootDirectory, addressEncoding)
+		return storage.NewFileSystemStore(fsConf.RootDirectory, addressEncoding)
 
 	case IPFS:
-		ipfsc := storageConfig.IPFSConfig
-		if ipfsc == nil {
+		ipfsConf := storageConfig.IPFSConfig
+		if ipfsConf == nil {
 			return nil, errors.New("IPFS storage configuration must be " +
 				"supplied to use the filesystem storage backend")
 		}
-		if ipfsc.Protocol == "" {
-			ipfsc.Protocol = "https://"
+		if ipfsConf.Protocol == "" {
+			ipfsConf.Protocol = "https://"
 		}
-		if ipfsc.Address == "" {
+		if ipfsConf.Address == "" {
 			return nil, errors.New("http api url must be non-empty in " +
 				"ipfs storage config")
 		}
-		if ipfsc.Port == "" {
+		if ipfsConf.Port == "" {
 			return nil, errors.New("http api port must be non-empty in " +
 				"ipfs storage config")
 		}
-		return storage.NewIPFSStore(ipfsc.Protocol, ipfsc.Address, ipfsc.Port, addressEncoding)
+		return storage.NewIPFSStore(ipfsConf.Protocol, ipfsConf.Address, ipfsConf.Port, addressEncoding)
 
-	case S3:
-		s3c := storageConfig.S3Config
-		if s3c == nil {
-			return nil, errors.New("s3 configuration must be supplied to use " +
-				"the S3 storage backend")
+	case AWS:
+		awsConf := storageConfig.CloudConfig
+		if awsConf == nil {
+			return nil, errors.New("aws configuration must be supplied")
 		}
+		return storage.NewCloudStore(storage.CloudType(AWS), awsConf.Bucket, awsConf.Prefix, awsConf.Region, addressEncoding, logger)
 
-		creds, err := AWSCredentialsFromChain(s3c.CredentialsProviderChain)
-		if err != nil {
-			return nil, fmt.Errorf("could not create credentials: %s", err)
+	case Azure:
+		azureConf := storageConfig.CloudConfig
+		if azureConf == nil {
+			return nil, errors.New("azureConf configuration must be supplied")
 		}
+		return storage.NewCloudStore(storage.CloudType(Azure), azureConf.Bucket, azureConf.Prefix, azureConf.Region, addressEncoding, logger)
 
-		var region *string
-		if s3c.Region != "" {
-			region = aws.String(s3c.Region)
+	case GCP:
+		gcpConf := storageConfig.CloudConfig
+		if gcpConf == nil {
+			return nil, errors.New("gcp configuration must be supplied")
 		}
-
-		awsConfig := &aws.Config{
-			Credentials: creds,
-			Region:      region,
-			Logger: aws.LoggerFunc(func(keyvals ...interface{}) {
-				logger.Log(keyvals...)
-			}),
-		}
-		return storage.NewS3Store(s3c.S3Bucket, s3c.S3Prefix, addressEncoding,
-			awsConfig, logger)
-
-	case GCS:
-		gcsc := storageConfig.GCSConfig
-		if gcsc == nil {
-			return nil, errors.New("gpc configuration must be supplied to use " +
-				"the GPC storage backend")
-		}
-		return storage.NewGCSStore(gcsc.GCSBucket, gcsc.GCSPrefix, addressEncoding, logger)
+		return storage.NewCloudStore(storage.CloudType(GCP), gcpConf.Bucket, gcpConf.Prefix, gcpConf.Region, addressEncoding, logger)
 
 	default:
 		return nil, fmt.Errorf("did not recognise storage type '%s'",

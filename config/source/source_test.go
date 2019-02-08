@@ -48,7 +48,7 @@ func TestCascade(t *testing.T) {
 	assert.Equal(t, fileConfig.TOMLString(), conf.TOMLString())
 
 	// Env set so caught by environment source
-	envConfig := config.NewHoardConfig("unix:///tmp/hoard.sock'", storage.DefaultS3Config(),
+	envConfig := config.NewHoardConfig("unix:///tmp/hoard.sock'", storage.DefaultCloudConfig("aws"),
 		logging.DefaultConfig)
 	os.Setenv(DefaultJSONConfigEnvironmentVariable, envConfig.JSONString())
 	conf, err = Cascade(os.Stderr, true,
