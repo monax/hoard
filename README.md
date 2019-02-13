@@ -2,35 +2,34 @@
 
 Hoard is a stateless, deterministically encrypted, content-addressed object store.
 
-It is stateless in the sense of relying on storage backends for the actual persistence of objects. Currently supported backends are:
+![hoarding marmot](docs/images/hoard.jpg)
 
+## Introduction
+
+It convergently encrypts an object using its (SHA256) hash as the secret key (which can than be shared as a 'grant').
+The address is then deterministically generated from the encrypted object's (SHA256) digest and allocated to the configured storage backend:
+
+### Supported
 - Memory
 - Filesystem
-- [S3](https://aws.amazon.com/s3/)
-- [GCS](https://cloud.google.com/storage/)
+- [AWS](https://aws.amazon.com/s3/)
+- [GCP](https://cloud.google.com/storage/)
+- [Azure](https://azure.microsoft.com/en-gb/services/storage/)
 - [IPFS](https://ipfs.io/)
 
-
-Planned storage backends are:
-
+### Planned
 - [BigchainDB](https://www.bigchaindb.com/) (and IPDB)
 - [Tendermint](https://tendermint.com/)
-
-It encrypts deterministically (convergently) because it encrypts an object using the object's hash (SHA256) as the secret key (which can than be shared as a 'grant').
-
-It is content-addressed because encrypted objects are stored at an address determined by the encrypted object's hash (SHA256 again).
-
-![hoarding marmot](docs/images/hoard.jpg)
 
 ## Installing
 
 Hoard should be go-gettable with:
 
 ```shell
-# Install the Hoar-Daemon hoard:
+# Install Hoard-Daemon:
 go get github.com/monax/hoard/cmd/hoard
 
-# Install the Hoar-Control hoarctl:
+# Install Hoard-Control:
 go get github.com/monax/hoard/cmd/hoarctl
 ```
 ## Usage
@@ -45,7 +44,7 @@ hoard
 hoard --logging
 ```
 
-With no config file by default `hoard` will run a memory storage backend from which all objects will be lost when `hoard` is terminated. You can initialise a Hoard config by running one of:
+You can initialise a Hoard config by running one of:
 
 ```shell
 # Initialise Hoard with memory backend
@@ -55,10 +54,13 @@ hoard config --init mem
 hoard config --init fs
 
 # Initialise Hoard with S3 backend
-hoard config --init s3
+hoard config --init aws
+
+# Initialise Hoard with Azure backend
+hoard config --init azure
 
 # Initialise Hoard with GCS backend
-hoard config --init gcs
+hoard config --init gcp
 
 # Initialise Hoard with IPFS backend
 hoard config --init ipfs
