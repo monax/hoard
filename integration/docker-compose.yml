@@ -8,11 +8,13 @@ services:
       - AWS_SECRET_ACCESS_KEY
       - GCLOUD_SERVICE_KEY
       - HOARD_JSON_CONFIG
+    network_mode: host
     ports:
       - "53431:53431"
   hoarctl:
     build: ..
-    links:
+    network_mode: host
+    depends_on:
       - hoard
     # note: '$$' escapes '$'
-    command: sh -c '[ $$(echo "marmottes" | hoarctl -a tcp://hoard:53431 put | hoarctl -a tcp://hoard:53431 get) = "marmottes" ]'
+    command: sh -c '[ $$(echo "marmottes" | hoarctl -a tcp://localhost:53431 put | hoarctl -a tcp://localhost:53431 get) = "marmottes" ]'
