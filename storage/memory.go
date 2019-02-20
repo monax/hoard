@@ -17,40 +17,40 @@ func NewMemoryStore() *memoryStore {
 	}
 }
 
-func (ms *memoryStore) Put(address []byte, data []byte) ([]byte, error) {
-	ms.mtx.Lock()
-	ms.memory[string(address)] = data
-	ms.mtx.Unlock()
+func (inv *memoryStore) Put(address []byte, data []byte) ([]byte, error) {
+	inv.mtx.Lock()
+	inv.memory[string(address)] = data
+	inv.mtx.Unlock()
 	return address, nil
 }
 
-func (ms *memoryStore) Get(address []byte) ([]byte, error) {
-	data, exists := ms.get(address)
+func (inv *memoryStore) Get(address []byte) ([]byte, error) {
+	data, exists := inv.get(address)
 	if !exists {
 		return nil, ErrorAddressNotFound(address)
 	}
 	return data, nil
 }
 
-func (ms *memoryStore) Stat(address []byte) (*StatInfo, error) {
-	data, exists := ms.get(address)
+func (inv *memoryStore) Stat(address []byte) (*StatInfo, error) {
+	data, exists := inv.get(address)
 	return &StatInfo{
 		Exists: exists,
 		Size:   uint64(len(data)),
 	}, nil
 }
 
-func (ms *memoryStore) Location(address []byte) string {
+func (inv *memoryStore) Location(address []byte) string {
 	return fmt.Sprintf("memfs://%x", address)
 }
 
-func (ms *memoryStore) Name() string {
+func (inv *memoryStore) Name() string {
 	return "memoryStore"
 }
 
-func (ms *memoryStore) get(address []byte) ([]byte, bool) {
-	ms.mtx.RLock()
-	data, exists := ms.memory[string(address)]
-	ms.mtx.RUnlock()
+func (inv *memoryStore) get(address []byte) ([]byte, bool) {
+	inv.mtx.RLock()
+	data, exists := inv.memory[string(address)]
+	inv.mtx.RUnlock()
 	return data, exists
 }

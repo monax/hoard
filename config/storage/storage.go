@@ -96,18 +96,11 @@ func StoreFromStorageConfig(storageConfig *StorageConfig, logger log.Logger) (st
 			return nil, errors.New("IPFS storage configuration must be " +
 				"supplied to use the filesystem storage backend")
 		}
-		if ipfsConf.Protocol == "" {
-			ipfsConf.Protocol = "https://"
-		}
-		if ipfsConf.Address == "" {
+		if ipfsConf.RemoteAPI == "" {
 			return nil, errors.New("http api url must be non-empty in " +
 				"ipfs storage config")
 		}
-		if ipfsConf.Port == "" {
-			return nil, errors.New("http api port must be non-empty in " +
-				"ipfs storage config")
-		}
-		return storage.NewIPFSStore(ipfsConf.Protocol, ipfsConf.Address, ipfsConf.Port, addressEncoding)
+		return storage.NewIPFSStore(ipfsConf.RemoteAPI, addressEncoding)
 
 	case AWS:
 		awsConf := storageConfig.CloudConfig

@@ -16,41 +16,41 @@ type loggingStore struct {
 
 // Decorates a Store with some simple logging of method/address pairs
 func NewLoggingStore(store NamedStore, logger log.Logger) *loggingStore {
-	ls := &loggingStore{
+	inv := &loggingStore{
 		store:  store,
 		logger: logging.TraceLogger(log.With(logger, "module", "storage")),
 	}
-	ls.logger = log.With(ls.logger, "store", ls.Name())
-	return ls
+	inv.logger = log.With(inv.logger, "store", inv.Name())
+	return inv
 }
 
 var _ NamedStore = (*loggingStore)(nil)
 
-func (ls *loggingStore) Put(address []byte, data []byte) ([]byte, error) {
-	address, err := ls.store.Put(address, data)
-	return address, logErrorOrSuccess(log.With(ls.logger, "method", "Put", "address",
+func (inv *loggingStore) Put(address []byte, data []byte) ([]byte, error) {
+	address, err := inv.store.Put(address, data)
+	return address, logErrorOrSuccess(log.With(inv.logger, "method", "Put", "address",
 		formatAddress(address)), err)
 }
 
-func (ls *loggingStore) Get(address []byte) ([]byte, error) {
-	data, err := ls.store.Get(address)
-	return data, logErrorOrSuccess(log.With(ls.logger, "method", "Get", "address",
+func (inv *loggingStore) Get(address []byte) ([]byte, error) {
+	data, err := inv.store.Get(address)
+	return data, logErrorOrSuccess(log.With(inv.logger, "method", "Get", "address",
 		formatAddress(address)), err)
 }
 
-func (ls *loggingStore) Stat(address []byte) (*StatInfo, error) {
-	statInfo, err := ls.store.Stat(address)
-	return statInfo, logErrorOrSuccess(log.With(ls.logger, "method", "Stat", "address",
+func (inv *loggingStore) Stat(address []byte) (*StatInfo, error) {
+	statInfo, err := inv.store.Stat(address)
+	return statInfo, logErrorOrSuccess(log.With(inv.logger, "method", "Stat", "address",
 		formatAddress(address)), err)
 }
 
-func (ls *loggingStore) Location(address []byte) string {
-	ls.logger.Log("method", "Location", "address", formatAddress(address))
-	return ls.store.Location(address)
+func (inv *loggingStore) Location(address []byte) string {
+	inv.logger.Log("method", "Location", "address", formatAddress(address))
+	return inv.store.Location(address)
 }
 
-func (ls *loggingStore) Name() string {
-	return fmt.Sprintf("loggingStore(%s)", ls.store.Name())
+func (inv *loggingStore) Name() string {
+	return fmt.Sprintf("loggingStore(%s)", inv.store.Name())
 }
 
 func logErrorOrSuccess(logger log.Logger, err error) error {

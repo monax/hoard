@@ -46,4 +46,4 @@ gsutil rm "gs://${GCS_BUCKET}/${GCS_PREFIX}/**"
 # Build unless asked not to
 echo "Bringing up integration test containers with docker-compose..."
 [ -z "$NOBUILD" ] && docker-compose build
-docker-compose up --build --exit-code-from hoarctl --abort-on-container-exit
+docker-compose up --exit-code-from hoarctl --abort-on-container-exit

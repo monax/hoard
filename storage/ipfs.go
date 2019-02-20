@@ -7,44 +7,40 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"strings"
 )
 
 type ipfsStore struct {
-	Protocol        string
-	Address         string
-	Port            string
-	addressEncoding AddressEncoding
+	host     string
+	encoding AddressEncoding
 }
 
-func NewIPFSStore(proto, address, port string, addressEncoding AddressEncoding) (*ipfsStore, error) {
-	if proto == "http://" {
-		fmt.Println("Warning: IPFS connection not secure.")
-	}
-	_, err := http.Get(proto + address + ":" + port + "/api/v0/")
+func NewIPFSStore(host string, encoding AddressEncoding) (*ipfsStore, error) {
+	host = fmt.Sprintf("%s/api/v0", strings.TrimRight(host, "/"))
+	_, err := http.Get(host)
 	if err != nil {
 		return nil, err
 	}
 	return &ipfsStore{
-		Protocol:        proto,
-		Address:         address,
-		Port:            port,
-		addressEncoding: addressEncoding,
+		host:     host,
+		encoding: encoding,
 	}, nil
 }
 
-func (ipfss *ipfsStore) Put(address []byte, data []byte) ([]byte, error) {
-	uri := ipfss.Protocol + ipfss.Address + ":" + ipfss.Port + "/api/v0/add"
-
+func (inv *ipfsStore) Put(address []byte, data []byte) ([]byte, error) {
+	url := fmt.Sprintf("%s/add", inv.host)
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
 
+	// https://docs.ipfs.io/reference/api/http/
 	fw, err := w.CreateFormField("arg")
 	if _, err = fw.Write((data)[:]); err != nil {
 		return address, nil
 	}
 	w.Close()
 
-	req, err := http.NewRequest("POST", uri, &b)
+	// pinning is true by default
+	req, err := http.NewRequest("POST", url, &b)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	client := &http.Client{}
@@ -61,13 +57,13 @@ func (ipfss *ipfsStore) Put(address []byte, data []byte) ([]byte, error) {
 	var m map[string]interface{}
 	json.Unmarshal(body.Bytes(), &m)
 
-	// TODO deterministically generate IPFS addresses natively
 	// currently, we `add` the blob and read the return address
 	return []byte(m["Name"].(string)), nil
 }
 
-func (ipfss *ipfsStore) Get(address []byte) ([]byte, error) {
-	resp, err := http.Get(ipfss.Protocol + ipfss.Address + ":" + ipfss.Port + "/api/v0/cat?arg=" + string(address))
+func (inv *ipfsStore) Get(address []byte) ([]byte, error) {
+	url := fmt.Sprintf("%s/cat?arg=%s", inv.host, string(address))
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +77,9 @@ func (ipfss *ipfsStore) Get(address []byte) ([]byte, error) {
 	return body, nil
 }
 
-func (ipfss *ipfsStore) Stat(address []byte) (*StatInfo, error) {
-	resp, err := http.Get(ipfss.Protocol + ipfss.Address + ":" + ipfss.Port + "/api/v0/cat?arg=" + string(address[:]))
+func (inv *ipfsStore) Stat(address []byte) (*StatInfo, error) {
+	url := fmt.Sprintf("%s/cat?arg=%s", inv.host, string(address))
+	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != 200 {
 		return &StatInfo{
 			Exists: false,
@@ -101,10 +98,10 @@ func (ipfss *ipfsStore) Stat(address []byte) (*StatInfo, error) {
 	}, nil
 }
 
-func (ipfss *ipfsStore) Location(address []byte) string {
+func (inv *ipfsStore) Location(address []byte) string {
 	return string(address)
 }
 
-func (ipfss *ipfsStore) Name() string {
-	return fmt.Sprintf("ipfsStore[api=%s:%s]", ipfss.Address, ipfss.Port)
+func (inv *ipfsStore) Name() string {
+	return fmt.Sprintf("ipfsStore[api=%s]", inv.host)
 }

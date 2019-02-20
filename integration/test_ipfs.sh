@@ -19,9 +19,7 @@ read -d '' HOARD_JSON_CONFIG << CONFIG
     "Storage": {
       "StorageType": "ipfs",
       "AddressEncoding": "base64",
-      "Protocol": "http://",
-      "Address": "localhost",
-      "Port": "5001"
+      "RemoteAPI": "http://:5001"
     },
     "Logging": {
       "LoggingType": "json",
@@ -40,8 +38,10 @@ echo ${HOARD_JSON_CONFIG} | jq '.'
 
 # Build unless asked not to
 echo "Bringing up integration test containers with docker-compose..."
+docker container rm ipfs --force
 docker run -d --name=ipfs --network=host ipfs/go-ipfs:latest 
 # Make sure IPFS is configured
 sleep 5
 [ -z "$NOBUILD" ] && docker-compose build
-docker-compose up --build --exit-code-from hoarctl --abort-on-container-exit
+docker-compose up --exit-code-from hoarctl --abort-on-container-exit
+

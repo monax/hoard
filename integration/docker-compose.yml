@@ -17,4 +17,4 @@ services:
     depends_on:
       - hoard
     # note: '$$' escapes '$'
-    command: sh -c '[ $$(echo "marmottes" | hoarctl -a tcp://localhost:53431 put | hoarctl -a tcp://localhost:53431 get) = "marmottes" ]'
+    command: sh -c '[ $$(echo "marmottes" | hoarctl -a tcp://:53431 put | hoarctl -a tcp://:53431 get) = "marmottes" ]'

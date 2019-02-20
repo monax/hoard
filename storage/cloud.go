@@ -51,16 +51,18 @@ func NewCloudStore(cloud CloudType, bucket, prefix, region string, addrenc Addre
 
 	switch cloud {
 	case AWS:
+		// AWS_ACCESS_KEY_ID
+		// AWS_SECRET_ACCESS_KEY
 		awsConf := &aws.Config{
-			Region: aws.String(region),
-			// AWS_ACCESS_KEY_ID
-			// AWS_SECRET_ACCESS_KEY
+			Region:      aws.String(region),
 			Credentials: credentials.NewEnvCredentials(),
 		}
 		client := session.Must(session.NewSession(awsConf))
 		conn, err = s3blob.OpenBucket(ctx, client, bucket, nil)
 
 	case Azure:
+		// AZURE_STORAGE_ACCOUNT_NAME
+		// AZURE_STORAGE_ACCOUNT_KEY
 		accountName, err := azureblob.DefaultAccountName()
 		if err != nil {
 			return nil, err
@@ -93,7 +95,7 @@ func NewCloudStore(cloud CloudType, bucket, prefix, region string, addrenc Addre
 	}
 
 	prefix = strings.TrimRight(prefix, "/")
-	store := &cloudStore{
+	inv := &cloudStore{
 		back:     ctx,
 		blob:     conn,
 		bucket:   bucket,
@@ -102,12 +104,12 @@ func NewCloudStore(cloud CloudType, bucket, prefix, region string, addrenc Addre
 		logger: logging.TraceLogger(log.With(logger,
 			structure.ComponentKey, "storage")),
 	}
-	store.logger = log.With(store.logger, "store_name", store.Name())
-	return store, nil
+	inv.logger = log.With(inv.logger, "store_name", inv.Name())
+	return inv, nil
 }
 
-func (store *cloudStore) Put(address, data []byte) ([]byte, error) {
-	writer, err := store.blob.NewWriter(store.back, fmt.Sprintf("%s/%s", store.prefix, store.encode(address)), nil)
+func (inv *cloudStore) Put(address, data []byte) ([]byte, error) {
+	writer, err := inv.blob.NewWriter(inv.back, fmt.Sprintf("%s/%s", inv.prefix, inv.encode(address)), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -121,16 +123,16 @@ func (store *cloudStore) Put(address, data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	store.logger.Log("method", "Put",
-		"location", store.Location,
-		"encoded_address", store.encode(address),
+	inv.logger.Log("method", "Put",
+		"location", inv.Location,
+		"encoded_address", inv.encode(address),
 		"uploaded_bytes", n)
 
 	return address, nil
 }
 
-func (store *cloudStore) Get(address []byte) ([]byte, error) {
-	reader, err := store.blob.NewReader(store.back, fmt.Sprintf("%s/%s", store.prefix, store.encode(address)), nil)
+func (inv *cloudStore) Get(address []byte) ([]byte, error) {
+	reader, err := inv.blob.NewReader(inv.back, fmt.Sprintf("%s/%s", inv.prefix, inv.encode(address)), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +140,8 @@ func (store *cloudStore) Get(address []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	io.Copy(&buf, reader)
 
-	store.logger.Log("method", "Get",
-		"encoded_address", store.encode(address),
+	inv.logger.Log("method", "Get",
+		"encoded_address", inv.encode(address),
 		"downloaded_bytes", reader.Size())
 
 	err = reader.Close()
@@ -149,8 +151,8 @@ func (store *cloudStore) Get(address []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (store *cloudStore) Stat(address []byte) (*StatInfo, error) {
-	reader, err := store.blob.NewReader(store.back, fmt.Sprintf("%s/%s", store.prefix, store.encode(address)), nil)
+func (inv *cloudStore) Stat(address []byte) (*StatInfo, error) {
+	reader, err := inv.blob.NewReader(inv.back, fmt.Sprintf("%s/%s", inv.prefix, inv.encode(address)), nil)
 	if err != nil {
 		return &StatInfo{
 			Exists: false,
@@ -163,23 +165,23 @@ func (store *cloudStore) Stat(address []byte) (*StatInfo, error) {
 		return nil, err
 	}
 
-	store.logger.Log("method", "Stat",
-		"encoded_address", store.encode(address))
+	inv.logger.Log("method", "Stat",
+		"encoded_address", inv.encode(address))
 	return &StatInfo{
 		Exists: true,
 		Size:   uint64(n),
 	}, nil
 }
 
-func (store *cloudStore) Location(address []byte) string {
-	return fmt.Sprintf("gs://%s/%s", store.bucket,
-		store.encode(address))
+func (inv *cloudStore) Location(address []byte) string {
+	return fmt.Sprintf("gs://%s/%s", inv.bucket,
+		inv.encode(address))
 }
 
-func (store *cloudStore) Name() string {
-	return fmt.Sprintf("gcpStore[bucket=%s]", store.bucket)
+func (inv *cloudStore) Name() string {
+	return fmt.Sprintf("gcpStore[bucket=%s]", inv.bucket)
 }
 
-func (store *cloudStore) encode(address []byte) string {
-	return store.encoding.EncodeToString(address)
+func (inv *cloudStore) encode(address []byte) string {
+	return inv.encoding.EncodeToString(address)
 }
