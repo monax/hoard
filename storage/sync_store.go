@@ -32,30 +32,30 @@ func NewSyncStore(store NamedStore) *syncStore {
 
 var _ Store = (*syncStore)(nil)
 
-func (ss *syncStore) Get(address []byte) (data []byte, err error) {
-	ss.mtx.RLock(address)
-	defer ss.mtx.RUnlock(address)
-	return ss.store.Get(address)
+func (inv *syncStore) Get(address []byte) (data []byte, err error) {
+	inv.mtx.RLock(address)
+	defer inv.mtx.RUnlock(address)
+	return inv.store.Get(address)
 }
 
-func (ss *syncStore) Stat(address []byte) (*StatInfo, error) {
-	ss.mtx.RLock(address)
-	defer ss.mtx.RUnlock(address)
-	return ss.store.Stat(address)
+func (inv *syncStore) Stat(address []byte) (*StatInfo, error) {
+	inv.mtx.RLock(address)
+	defer inv.mtx.RUnlock(address)
+	return inv.store.Stat(address)
 
 }
 
-func (ss *syncStore) Put(address []byte, data []byte) ([]byte, error) {
-	ss.mtx.Lock(address)
-	defer ss.mtx.Unlock(address)
-	return ss.store.Put(address, data)
+func (inv *syncStore) Put(address []byte, data []byte) ([]byte, error) {
+	inv.mtx.Lock(address)
+	defer inv.mtx.Unlock(address)
+	return inv.store.Put(address, data)
 }
 
-func (ss *syncStore) Location(address []byte) string {
-	return ss.store.Location(address)
+func (inv *syncStore) Location(address []byte) string {
+	return inv.store.Location(address)
 }
 
-func (ss *syncStore) Name() string {
-	return fmt.Sprintf("syncStore[mutexCount=%v](%s)", ss.mtx.Size(),
-		ss.store.Name())
+func (inv *syncStore) Name() string {
+	return fmt.Sprintf("syncStore[mutexCount=%v](%s)", inv.mtx.Size(),
+		inv.store.Name())
 }

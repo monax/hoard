@@ -181,19 +181,6 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:504f5311d8125e470d5a5d459d5359ffd01ff95f2e8c040715af9c3fd1fa8706"
-  name = "github.com/google/go-cloud"
-  packages = [
-    "blob",
-    "blob/driver",
-    "blob/gcsblob",
-    "gcp",
-  ]
-  pruneopts = "NUT"
-  revision = "e981f0586e2290f34ecf78282261b3693a894ec8"
-  version = "v0.7.0"
-
-[[projects]]
   digest = "1:56a1f3949ebb7fa22fa6b4e4ac0fe0f77cc4faee5b57413e6fa9199a8458faf1"
   name = "github.com/google/uuid"
   packages = ["."]
@@ -527,9 +514,6 @@
     "github.com/go-stack/stack",
     "github.com/gogo/protobuf/gogoproto",
     "github.com/gogo/protobuf/proto",
-    "github.com/google/go-cloud/blob",
-    "github.com/google/go-cloud/blob/gcsblob",
-    "github.com/google/go-cloud/gcp",
     "github.com/jawher/mow.cli",
     "github.com/monax/relic",
     "github.com/stretchr/testify/assert",

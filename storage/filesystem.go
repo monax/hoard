@@ -9,31 +9,31 @@ import (
 )
 
 type fileSystemStore struct {
-	rootDirectory   string
-	addressEncoding AddressEncoding
+	rootDirectory string
+	encoding      AddressEncoding
 }
 
-func NewFileSystemStore(rootDirectory string, addressEncoding AddressEncoding) (*fileSystemStore, error) {
+func NewFileSystemStore(rootDirectory string, encoding AddressEncoding) (*fileSystemStore, error) {
 	err := os.MkdirAll(rootDirectory, 0700)
 	if err != nil {
 		return nil, err
 	}
 	return &fileSystemStore{
-		rootDirectory:   rootDirectory,
-		addressEncoding: addressEncoding,
+		rootDirectory: rootDirectory,
+		encoding:      encoding,
 	}, nil
 }
 
-func (fss *fileSystemStore) Put(address []byte, data []byte) ([]byte, error) {
-	return address, ioutil.WriteFile(fss.Path(address), data, 0644)
+func (inv *fileSystemStore) Put(address []byte, data []byte) ([]byte, error) {
+	return address, ioutil.WriteFile(inv.Path(address), data, 0644)
 }
 
-func (fss *fileSystemStore) Get(address []byte) ([]byte, error) {
-	return ioutil.ReadFile(fss.Path(address))
+func (inv *fileSystemStore) Get(address []byte) ([]byte, error) {
+	return ioutil.ReadFile(inv.Path(address))
 }
 
-func (fss *fileSystemStore) Stat(address []byte) (*StatInfo, error) {
-	fileInfo, err := os.Stat(fss.Path(address))
+func (inv *fileSystemStore) Stat(address []byte) (*StatInfo, error) {
+	fileInfo, err := os.Stat(inv.Path(address))
 	statInfo := new(StatInfo)
 	// Any kind of error means we should set exists false
 	statInfo.Exists = err == nil
@@ -47,8 +47,8 @@ func (fss *fileSystemStore) Stat(address []byte) (*StatInfo, error) {
 	return statInfo, err
 }
 
-func (fss *fileSystemStore) Location(address []byte) string {
-	filePath := fss.Path(address)
+func (inv *fileSystemStore) Location(address []byte) string {
+	filePath := inv.Path(address)
 	uri, err := url.Parse(filePath)
 	if err != nil {
 		return filePath
@@ -56,11 +56,11 @@ func (fss *fileSystemStore) Location(address []byte) string {
 	return uri.String()
 }
 
-func (fss *fileSystemStore) Path(address []byte) string {
-	return path.Join(fss.rootDirectory,
-		fss.addressEncoding.EncodeToString(address))
+func (inv *fileSystemStore) Path(address []byte) string {
+	return path.Join(inv.rootDirectory,
+		inv.encoding.EncodeToString(address))
 }
 
-func (fss *fileSystemStore) Name() string {
-	return fmt.Sprintf("fileSystemStore[root=%s]", fss.rootDirectory)
+func (inv *fileSystemStore) Name() string {
+	return fmt.Sprintf("fileSystemStore[root=%s]", inv.rootDirectory)
 }
