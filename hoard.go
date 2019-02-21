@@ -3,6 +3,7 @@ package hoard
 import (
 	"crypto/sha256"
 
+	"github.com/monax/hoard/config/secrets"
 	"github.com/monax/hoard/grant"
 
 	"github.com/go-kit/kit/log"
@@ -42,13 +43,13 @@ type GrantService interface {
 // a GRPC service through grpcService which just plumbs this object into the
 // hoard.proto interface.
 type Hoard struct {
-	name           string
-	store          storage.ContentAddressedStore
-	secretProvider grant.SecretProvider
-	logger         log.Logger
+	name    string
+	store   storage.ContentAddressedStore
+	secrets secrets.Manager
+	logger  log.Logger
 }
 
-func NewHoard(store storage.NamedStore, secretProvider grant.SecretProvider, logger log.Logger) *Hoard {
+func NewHoard(store storage.NamedStore, secrets secrets.Manager, logger log.Logger) *Hoard {
 	if logger == nil {
 		logger = log.NewNopLogger()
 	}
@@ -57,8 +58,8 @@ func NewHoard(store storage.NamedStore, secretProvider grant.SecretProvider, log
 		name: store.Name(),
 		store: storage.NewContentAddressedStore(storage.MakeAddresser(sha256.New),
 			storage.NewLoggingStore(storage.NewSyncStore(store), logger)),
-		secretProvider: secretProvider,
-		logger:         log.With(logger, "scope", "NewHoard"),
+		secrets: secrets,
+		logger:  log.With(logger, "scope", "NewHoard"),
 	}
 }
 
@@ -67,11 +68,11 @@ func (hrd *Hoard) Name() string {
 }
 
 func (hrd *Hoard) Seal(ref *reference.Ref, spec *grant.Spec) (*grant.Grant, error) {
-	return grant.Seal(hrd.secretProvider, ref, spec)
+	return grant.Seal(hrd.secrets, ref, spec)
 }
 
 func (hrd *Hoard) Unseal(grt *grant.Grant) (*reference.Ref, error) {
-	return grant.Unseal(hrd.secretProvider, grt)
+	return grant.Unseal(hrd.secrets, grt)
 }
 
 // Gets encrypted blob

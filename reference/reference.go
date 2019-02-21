@@ -35,7 +35,7 @@ func (ref *Ref) Plaintext(nonce []byte) string {
 	bs, err := json.Marshal(wrapper)
 	if err != nil {
 		panic(fmt.Errorf("did not expect an error when serialising reference, " +
-			"error supressed for security"))
+			"error suppressed for security"))
 	}
 	return string(bs)
 }
@@ -45,7 +45,7 @@ func FromPlaintext(plaintext string) *Ref {
 	err := json.Unmarshal(([]byte)(plaintext), wrapper)
 	if err != nil {
 		panic(fmt.Errorf("did not expect an error when deserialising reference, " +
-			"error supressed for security"))
+			"error suppressed for security"))
 	}
 	return wrapper.Ref
 }

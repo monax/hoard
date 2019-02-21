@@ -97,7 +97,7 @@ ListenAddress = "tcp://localhost:53431"
   StorageType = "filesystem"
   # One of: base64, base32, or hex (base 16)
   AddressEncoding = "base64"
-  RootDirectory = "/home/silas/.local/share/hoard"
+  RootDirectory = "/home/user/.local/share/hoard"
 
 [Logging]
   LoggingType = "logfmt"

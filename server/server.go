@@ -5,11 +5,10 @@ import (
 	"net"
 	"strings"
 
-	"github.com/monax/hoard/grant"
-
 	"github.com/monax/hoard"
 
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/config/secrets"
 	"github.com/monax/hoard/logging"
 	"github.com/monax/hoard/logging/loggers"
 	"github.com/monax/hoard/storage"
@@ -24,10 +23,10 @@ type server struct {
 	logger     log.Logger
 }
 
-func New(listenURL string, store storage.NamedStore, secretProvider grant.SecretProvider, logger log.Logger) *server {
+func New(listenURL string, store storage.NamedStore, secretManager secrets.Manager, logger log.Logger) *server {
 	return &server{
 		listenURL: listenURL,
-		hoard:     hoard.NewHoard(store, secretProvider, logger),
+		hoard:     hoard.NewHoard(store, secretManager, logger),
 		logger:    logger,
 	}
 }

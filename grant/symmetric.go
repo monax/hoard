@@ -12,6 +12,7 @@ import (
 // We bump it a little from the 100ms for interactive logins rule: https://blog.filippo.io/the-scrypt-parameters/
 const scryptSecurityWorkExponent = 16
 
+// SymmetricGrant encrypts the given reference based on a secret read from the provider store
 func SymmetricGrant(ref *reference.Ref, secret []byte) ([]byte, error) {
 	// Generate scrypt salt
 	salt := make([]byte, encryption.NonceSize)
@@ -20,7 +21,7 @@ func SymmetricGrant(ref *reference.Ref, secret []byte) ([]byte, error) {
 		return nil, fmt.Errorf("SymmetricGrant failed to generate random salt: %v", err)
 	}
 	// Derive key
-	secretKey, err := DerviveSecretKey(secret, salt)
+	secretKey, err := DeriveSecretKey(secret, salt)
 	if err != nil {
 		return nil, fmt.Errorf("SymmetricGrant failed to derive secret key: %v", err)
 	}
@@ -39,12 +40,13 @@ func SymmetricGrant(ref *reference.Ref, secret []byte) ([]byte, error) {
 	return encryption.Salinate(blob.EncryptedData, append(nonce, salt...)), nil
 }
 
+// SymmetricReference decrypts the given grant based on a secret read from the provider store
 func SymmetricReference(ciphertext, secret []byte) (*reference.Ref, error) {
 	// Extract nonce and salt stored with ciphertext
 	encryptedData, nonceAndSalt := encryption.Desalinate(ciphertext, encryption.NonceSize+encryption.NonceSize)
 	nonce, salt := nonceAndSalt[:encryption.NonceSize], nonceAndSalt[encryption.NonceSize:]
 	// Re-derive key based on these
-	secretKey, err := DerviveSecretKey(secret, salt)
+	secretKey, err := DeriveSecretKey(secret, salt)
 	if err != nil {
 		return nil, fmt.Errorf("SymmetricReference failed to derive secret key: %v", err)
 	}
@@ -57,6 +59,6 @@ func SymmetricReference(ciphertext, secret []byte) (*reference.Ref, error) {
 	return reference.FromPlaintext(string(data)), nil
 }
 
-func DerviveSecretKey(secret, salt []byte) ([]byte, error) {
+func DeriveSecretKey(secret, salt []byte) ([]byte, error) {
 	return scrypt.Key(secret, salt, 1<<scryptSecurityWorkExponent, 8, 1, encryption.KeySize)
 }

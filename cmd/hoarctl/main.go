@@ -59,7 +59,7 @@ func main() {
 				return net.Dial(netProtocol, localAddress)
 			}))
 		if err != nil {
-			fatalf("could not dial hoard server on %s: %v", *dialURL, err)
+			fatalf("Could not dial hoard server on %s: %v", *dialURL, err)
 		}
 		client.cleartext = hoard.NewCleartextClient(conn)
 		client.encryption = hoard.NewEncryptionClient(conn)
@@ -117,7 +117,7 @@ func parseSalt(saltString string) []byte {
 func jsonString(v interface{}) string {
 	bs, err := json.Marshal(v)
 	if err != nil {
-		fatalf("could not serialise '%s' to json: %v", err)
+		fatalf("Could not serialise '%s' to json: %v", err)
 	}
 	return string(bs)
 
@@ -126,7 +126,7 @@ func jsonString(v interface{}) string {
 func readData() []byte {
 	data, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		fatalf("could not read bytes from STDIN to store: %v", err)
+		fatalf("Could not read bytes from STDIN to store: %v", err)
 	}
 	return data
 }
@@ -139,7 +139,7 @@ func readReference(address *string) *reference.Ref {
 	}
 	err := parseObject(os.Stdin, ref)
 	if err != nil {
-		fatalf("could not read reference from STDIN: %v", err)
+		fatalf("Could not read reference from STDIN: %v", err)
 	}
 	return ref
 }
@@ -148,7 +148,7 @@ func readGrant() *grant.Grant {
 	grt := new(grant.Grant)
 	err := parseObject(os.Stdin, grt)
 	if err != nil {
-		fatalf("could not read grant from STDIN: %v", err)
+		fatalf("Could not read grant from STDIN: %v", err)
 	}
 	return grt
 }
@@ -168,7 +168,7 @@ func parseObject(r io.Reader, o interface{}) error {
 func readBase64(base64String string) []byte {
 	secretKeyBytes, err := base64.StdEncoding.DecodeString(base64String)
 	if err != nil {
-		fatalf("could not decode '%s' as base64-encoded string", base64String)
+		fatalf("Could not decode '%s' as base64-encoded string", base64String)
 	}
 	return secretKeyBytes
 }

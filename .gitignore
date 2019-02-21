@@ -21,5 +21,6 @@ notes.md
 
 commit_hash.txt
 node_modules
+hoard-js/node_modules
 
 .vscode/

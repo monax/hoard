@@ -140,8 +140,9 @@ test: check
 .PHONY:	test_integration
 test_integration: check
 	@go test -v -tags integration ./... ${GOPACKAGES_NOVENDOR}
-	@integration/test_gcp.sh
-	@integration/test_aws.sh
+	@scripts/integration/test_aws.sh
+	@scripts/integration/test_gcp.sh
+	@scripts/integration/test_ipfs.sh
 
 # Clean Up
 

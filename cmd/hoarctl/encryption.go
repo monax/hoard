@@ -29,7 +29,7 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 				},
 			})
 		if err != nil {
-			fatalf("error decrypting: %v", err)
+			fatalf("Error decrypting: %v", err)
 		}
 		os.Stdout.Write(plaintext.Data)
 	}
@@ -50,7 +50,7 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 				Salt: parseSalt(*salt),
 			})
 		if err != nil {
-			fatalf("error encrypting: %v", err)
+			fatalf("Error encrypting: %v", err)
 		}
 		os.Stdout.Write(refAndCiphertext.Ciphertext.EncryptedData)
 	}
@@ -68,7 +68,7 @@ func (client *Client) Ref(cmd *cli.Cmd) {
 				Salt: parseSalt(*salt),
 			})
 		if err != nil {
-			fatalf("error generating reference: %v", err)
+			fatalf("Error generating reference: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(refAndCiphertext.Reference))
 	}

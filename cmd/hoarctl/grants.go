@@ -40,7 +40,7 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 		)
 
 		if err != nil {
-			fatalf("error sealing data: %v", err)
+			fatalf("Error sealing data: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(seal))
 	}
@@ -69,7 +69,7 @@ func (client *Client) Seal(cmd *cli.Cmd) {
 		)
 
 		if err != nil {
-			fatalf("error sealing data: %v", err)
+			fatalf("Error sealing data: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(seal))
 	}
@@ -97,7 +97,7 @@ func (client *Client) Reseal(cmd *cli.Cmd) {
 			})
 
 		if err != nil {
-			fatalf("error resealing data: %v", err)
+			fatalf("Error resealing data: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(ref))
 	}
@@ -109,7 +109,7 @@ func (client *Client) Unseal(cmd *cli.Cmd) {
 		grt := readGrant()
 		ref, err := client.grant.Unseal(context.Background(), grt)
 		if err != nil {
-			fatalf("error unsealing data: %v", err)
+			fatalf("Error unsealing data: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(ref))
 	}
@@ -122,7 +122,7 @@ func (client *Client) UnsealGet(cmd *cli.Cmd) {
 
 		plaintext, err := client.grant.UnsealGet(context.Background(), grt)
 		if err != nil {
-			fatalf("error unsealing data: %v", err)
+			fatalf("Error unsealing data: %v", err)
 		}
 		os.Stdout.Write(plaintext.Data)
 		return
