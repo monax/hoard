@@ -1,5 +1,5 @@
 {
-  "name": "@monax/hoard-client",
+  "name": "@monax/hoard",
   "version": "1.5.0",
   "description": "Hoard client library",
   "main": "index.js",
