@@ -5,7 +5,3 @@
 - Saltable (GCM additional data)
 - Confidentiality, integrity
 - Authenticity (ciphertext came from a party actually holding key and therefore plaintext)
-<<<<<<< HEAD
-=======
-
->>>>>>> init hoarctl grant seal/unseal

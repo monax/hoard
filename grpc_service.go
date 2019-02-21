@@ -77,7 +77,6 @@ func (service *grpcService) Push(ctx context.Context, ciphertext *Ciphertext) (*
 }
 
 func (service *grpcService) Pull(ctx context.Context, address *Address) (*Ciphertext, error) {
-
 	// Get from the underlying store
 	encryptedData, err := service.des.Store().Get(address.Address)
 	if err != nil {

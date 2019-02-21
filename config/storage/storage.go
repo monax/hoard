@@ -20,8 +20,8 @@ type StorageType string
 
 const (
 	Unspecified StorageType = ""
-	Memory      StorageType = "mem"
-	Filesystem  StorageType = "fs"
+	Memory      StorageType = "memory"
+	Filesystem  StorageType = "filesystem"
 	AWS         StorageType = "aws"
 	Azure       StorageType = "azure"
 	GCP         StorageType = "gcp"
@@ -112,7 +112,7 @@ func StoreFromStorageConfig(storageConfig *StorageConfig, logger log.Logger) (st
 	case Azure:
 		azureConf := storageConfig.CloudConfig
 		if azureConf == nil {
-			return nil, errors.New("azureConf configuration must be supplied")
+			return nil, errors.New("azure configuration must be supplied")
 		}
 		return storage.NewCloudStore(storage.CloudType(Azure), azureConf.Bucket, azureConf.Prefix, azureConf.Region, addressEncoding, logger)
 

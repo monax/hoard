@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/monax/hoard/secrets"
+	"github.com/monax/hoard/config/secrets"
 
 	"os/signal"
 	"syscall"
@@ -69,8 +69,12 @@ func main() {
 		if *listenAddressOpt != "" {
 			conf.ListenAddress = *listenAddressOpt
 		}
-		secretProvider := secrets.SecretProviderFromConfig(conf.Secrets)
-		serv := server.New(conf.ListenAddress, store, secretProvider, logger)
+
+		symmetricProvider := secrets.ProviderFromConfig(conf.Secrets)
+		openPGPConf := secrets.OpenPGPFromConfig(conf.Secrets)
+		sm := secrets.Manager{Provider: symmetricProvider, OpenPGP: openPGPConf}
+
+		serv := server.New(conf.ListenAddress, store, sm, logger)
 		// Catch interrupt etc
 		signalCh := make(chan os.Signal, 1)
 		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
@@ -115,7 +119,7 @@ func main() {
 			configCmd.Action = func() {
 				store, err := storage.GetDefaultConfig(*arg)
 				if err != nil {
-					fatalf("Error fetching default config for %s: %s", arg, err)
+					fatalf("Error fetching default config for %v: %v", arg, err)
 				}
 				conf.Storage = store
 			}

@@ -19,7 +19,7 @@ func (client *Client) Cat(cmd *cli.Cmd) {
 		ciphertext, err := client.storage.Pull(context.Background(),
 			&hoard.Address{Address: ref.Address})
 		if err != nil {
-			fatalf("error querying data: %v", err)
+			fatalf("Error querying data: %v", err)
 		}
 		os.Stdout.Write(ciphertext.EncryptedData)
 	}
@@ -36,7 +36,7 @@ func (client *Client) Get(cmd *cli.Cmd) {
 		ref := readReference(address)
 		if ref.SecretKey == nil {
 			if secretKey == nil || *secretKey == "" {
-				fatalf("a secret key must be provided in order to decrypt")
+				fatalf("A secret key must be provided in order to decrypt")
 			}
 			ref = &reference.Ref{
 				Address:   readBase64(*address),
@@ -46,7 +46,7 @@ func (client *Client) Get(cmd *cli.Cmd) {
 		}
 		plaintext, err := client.cleartext.Get(context.Background(), ref)
 		if err != nil {
-			fatalf("error retrieving data: %v", err)
+			fatalf("Error retrieving data: %v", err)
 		}
 		os.Stdout.Write(plaintext.Data)
 	}
@@ -60,7 +60,7 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 		address, err := client.storage.Push(context.Background(),
 			&hoard.Ciphertext{EncryptedData: data})
 		if err != nil {
-			fatalf("error querying data: %v", err)
+			fatalf("Error querying data: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(address))
 	}
@@ -78,7 +78,7 @@ func (client *Client) Put(cmd *cli.Cmd) {
 				Salt: parseSalt(*salt),
 			})
 		if err != nil {
-			fatalf("error storing data: %v", err)
+			fatalf("Error storing data: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(ref))
 	}
@@ -93,7 +93,7 @@ func (client *Client) Stat(cmd *cli.Cmd) {
 		statInfo, err := client.storage.Stat(context.Background(),
 			&hoard.Address{Address: ref.Address})
 		if err != nil {
-			fatalf("error querying data: %v", err)
+			fatalf("Error querying data: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(statInfo))
 	}

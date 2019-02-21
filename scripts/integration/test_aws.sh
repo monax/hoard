@@ -3,27 +3,34 @@
 # Requires:
 # - Docker compose
 # - jq
+# - AWS CLI with credentials configured with access to S3_BUCKET specified below
 
-if [[ "$(which gcloud)" == "" || "$(which gsutil)" == "" ]]
+if [[ "$(which aws)" == "" ]]
 then
-  echo "Integration test requires GCP"
+  echo "Integration test requires AWS"
   exit 1
 fi
 
-GCS_BUCKET="maap.monax.io"
-GCS_PREFIX="hoard-integration-test"
+AWS_REGION="eu-central-1"
+S3_BUCKET="monax-hoard-test"
+S3_PREFIX="integration-test"
 
 # Integration test dir
 cd "$(dirname "$0")"
+
+# For CI we expect these to be set
+export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-$(aws configure get aws_access_key_id)}
+export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-$(aws configure get aws_secret_access_key)}
 
 read -d '' HOARD_JSON_CONFIG << CONFIG
   {
     "ListenAddress": "tcp://:53431",
     "Storage": {
-      "StorageType": "gcs",
+      "StorageType": "aws",
       "AddressEncoding": "base64",
-      "GCSBucket": "${GCS_BUCKET}",
-      "GCSPrefix": "${GCS_PREFIX}"
+      "Bucket": "${S3_BUCKET}",
+      "Prefix": "${S3_PREFIX}",
+      "Region": "${AWS_REGION}"
     },
     "Logging": {
       "LoggingType": "json",
@@ -31,7 +38,8 @@ read -d '' HOARD_JSON_CONFIG << CONFIG
         "info",
         "trace"
       ]
-    }
+    },
+    "Secrets": null
   }
 CONFIG
 
@@ -40,8 +48,8 @@ echo "Running integration test with config:"
 echo ${HOARD_JSON_CONFIG} | jq '.'
 
 # Delete existing storage
-echo "Deleting existing GCS backing store..."
-gsutil rm "gs://${GCS_BUCKET}/${GCS_PREFIX}/**"
+echo "Deleting existing S3 backing store..."
+aws s3 rm --recursive "s3://${S3_BUCKET}/${S3_PREFIX}"
 
 # Build unless asked not to
 echo "Bringing up integration test containers with docker-compose..."

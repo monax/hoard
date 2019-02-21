@@ -18,6 +18,8 @@ const HoardClientStatic = function (address) {
         GRPC.credentials.createInsecure());
     this.storageClient = new services.StorageClient(address,
         GRPC.credentials.createInsecure());
+    this.grantClient = new services.GrantClient(address,
+        GRPC.credentials.createInsecure());
 };
 
 // HoardClient using dynamically types and mapping (the default)
@@ -28,6 +30,8 @@ const HoardClientDynamic = function (address) {
     this.encryptionClient = new hoard_proto.Encryption(address,
         GRPC.credentials.createInsecure());
     this.storageClient = new hoard_proto.Storage(address,
+        GRPC.credentials.createInsecure());
+    this.grantClient = new hoard_proto.Grant(address,
         GRPC.credentials.createInsecure());
 };
 
@@ -52,6 +56,32 @@ HoardClient.prototype.put = function (plaintext) {
                 reject(err);
             } else {
                 resolve(reference);
+            }
+        });
+    });
+};
+
+HoardClient.prototype.unsealget = function (grant) {
+    const client = this.grantClient;
+    return new Promise(function (resolve, reject) {
+        client.unsealGet(grant, function (err, plaintext) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(plaintext);
+            }
+        });
+    });
+};
+
+HoardClient.prototype.putseal = function (plaintext) {
+    const client = this.grantClient;
+    return new Promise(function (resolve, reject) {
+        client.putSeal(plaintext, function (err, grant) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(grant);
             }
         });
     });

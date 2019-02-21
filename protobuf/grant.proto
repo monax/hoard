@@ -13,6 +13,7 @@ message Grant {
     // if hoard has access to the requisite secret
     Spec Spec = 1;
     bytes EncryptedReference = 2;
+    int32 Version = 3;
 }
 
 message Spec {
@@ -31,8 +32,7 @@ message SymmetricSpec {
     string SecretID = 1;
 }
 
-
 message OpenPGPSpec {
-    // TODO: figure out how to access local GPG entities, presumably id
+    string PublicKey = 1;
 }
 
