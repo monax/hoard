@@ -1,4 +1,20 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [2.0.0] - 2019-02-21
+### Changed
+- [PROTO] Upper case field names in protobuf
+- [PROTO] Used gogoproto for types
+- [STORE] Go-cloud project for s3 store backend
+- [STORE] Minimized IPFS configuration
+
+### Added
+- [STORE] Initial support for Azure backend thanks to go-cloud
+- [GRANTS] Interface and GRPC service
+- [GRANTS] Symmetric AES-GCM-based grants
+- [GRANTS] Asymmetric OpenPGP support
+- [GRANTS] Go-client (hoarctl) tooling
+- [NODEJS] Support for using the grant service + examples
+- [STORE] IPFS integration test
+
 ## [1.1.5] - 2018-10-17
 Scripted integration tests, better makefile and ci configs, gcs creds read from env var.
 
@@ -28,7 +44,6 @@ Minor breaking change in that 'hoard init' becomes 'hoard config':
 	- 'hoard config' adds some niceties for printing JSON config for --env configuration source
 	- Added S3 'remote' credentials provider enabling credentials to be sourced from EC2 instance roles (note since [RemoteCredProvider()](https://github.com/aws/aws-sdk-go/blob/5a2026bfb28e86839f9fcc46523850319399006c/aws/defaults/defaults.go#L108) is used it also support ECS configuration via AWS_CONTAINER_CREDENTIALS_RELATIVE_URI and AWS_CONTAINER_CREDENTIALS_FULL_URI)
 
-
 ## [0.1.1]
 Include hoarctl in Docker image
 
@@ -38,12 +53,10 @@ Release adding environment config and docker image
 	- Add --json and --toml flags to 'hoard init' to generate JSON optionally
 	- Added alpine based docker image pushed on releases (that reads config from environment variable)
 
-
 ## [0.0.2]
 Bug fix release for FileSystemStorage:
 	- Switch to URL and filesystem compliant base64 alphabet so some addresses do not target non-existent directories
 	- Create root directory for FileSystemStorage if it does not exist
-	
 
 ## [0.0.1]
 This is the first Hoard open source release and includes:
@@ -53,8 +66,8 @@ This is the first Hoard open source release and includes:
 	- Configuration
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
-	
 
+[2.0.0]: https://github.com/monax/hoard/compare/v1.1.5...v2.0.0
 [1.1.5]: https://github.com/monax/hoard/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/monax/hoard/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/monax/hoard/compare/v1.1.2...v1.1.3
