@@ -5,12 +5,6 @@
 // the Hoard daemon.
 let Hoard = require('./index.js');
 
-var fs = require('fs');
-const path = require('path')
-
-const openpgp = require('openpgp');
-openpgp.initWorker({ path:'openpgp.worker.js' })
-
 // This is the default tcp socket that hoard runs on, just run `bin/hoard`
 // after running `make build` in the main hoard repo.
 let hoard = new Hoard.Client('localhost:53431');
@@ -43,7 +37,7 @@ const example = async function (plaintextIn) {
         // Put the plaintext in storage
         ref = await hoard.put(plaintextIn);
         // (Base64 should be standard text representation for address, secretKey, and salt)
-        console.log(base64ify(ref));
+        console.log(hoard.base64ify(ref));
         // We can get the plaintext back by `get`ing the grant
         plaintext = await hoard.get(ref);
         console.log('Plaintext (Reference): ' + plaintext.Data.toString());
@@ -81,40 +75,11 @@ const example = async function (plaintextIn) {
         }
 
         grant = await hoard.putseal(grantIn);
-        console.log(base64ify(grant));
+        console.log(hoard.base64ify(grant));
 
         // We can get the plaintext back by `get`ing the grant
         plaintext = await hoard.unsealget(grant);
         console.log('Plaintext (Grant): ' + plaintext.Data.toString());
-
-        // OpenPGP
-        // Note: This will only work if the hoard daemon is configured to do PGP signing
-        var pubkey = fs.readFileSync(path.join(__dirname, '../grant', 'public.key.asc'));
-        var privkey = fs.readFileSync(path.join(__dirname, '../grant', 'private.key.asc'));
-    
-        grantIn = {
-            Plaintext: plaintextIn,
-            GrantSpec: {
-                OpenPGP: {
-                    PublicKey: pubkey.toString()
-                }
-            }
-        }
-    
-        grant = await hoard.putseal(grantIn);
-        console.log(grant.Data)
-        console.log(base64ify(grant));
-
-        const options = {
-            message: await openpgp.message.readArmored(grant.EncryptedReference),
-            privateKeys: [(await openpgp.key.readArmored(privkey)).keys[0]]
-        }
-
-        ref = JSON.parse((await openpgp.decrypt(options)).data)
-        console.log(base64ify(ref));
-        plaintext = await hoard.get(ref)
-        console.log(plaintext)
-        console.log('Plaintext (PGP Grant): ' + plaintext.Data.toString());
     }
     catch (err) {
         console.log(err)
@@ -123,19 +88,3 @@ const example = async function (plaintextIn) {
 
 // Run the async example in this case ignoring the promise result
 example(plaintext);
-
-
-// Utility for printing message types
-const base64ify = function (obj) {
-    let newObj = {};
-    for (let key of Object.keys(obj)) {
-        let value = obj[key];
-        if (value instanceof Buffer) {
-            newObj[key] = value.toString(`base64`)
-        } else {
-            newObj[key] = value
-        }
-    }
-    return newObj;
-};
-

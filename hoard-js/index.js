@@ -153,6 +153,20 @@ HoardClient.prototype.stat = function (address) {
     });
 };
 
+// Utility for printing message types
+HoardClient.prototype.base64ify = function (obj) {
+    let newObj = {};
+    for (let key of Object.keys(obj)) {
+        let value = obj[key];
+        if (value instanceof Buffer) {
+            newObj[key] = value.toString(`base64`)
+        } else {
+            newObj[key] = value
+        }
+    }
+    return newObj;
+};
+
 HoardClientStatic.prototype = Object.create(HoardClient.prototype);
 HoardClientDynamic.prototype = Object.create(HoardClient.prototype);
 
