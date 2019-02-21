@@ -1,6 +1,6 @@
 {
   "name": "@monax/hoard",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Hoard client library",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,9 @@
     "url": "git+https://github.com/monax/hoard.git"
   },
   "dependencies": {
-    "grpc": "1.18.0",
-    "grpc-tools": "1.7.0",
     "google-protobuf": "3.7.0-rc.2",
-    "openpgp": "4.4.7"
+    "grpc": "1.18.0",
+    "grpc-tools": "1.7.0"
   },
   "keywords": [
     "hoard",
@@ -23,6 +22,9 @@
     "store"
   ],
   "author": "Silas Davis",
+  "contributors": [
+    "Gregory Hill"
+  ],
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/monax/hoard/issues"
