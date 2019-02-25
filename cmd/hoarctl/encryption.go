@@ -13,16 +13,16 @@ import (
 
 // Decrypt does what it says on the tin
 func (client *Client) Decrypt(cmd *cli.Cmd) {
-	secretKey := addOpt(cmd, "key", secretOpt, "").(*string)
-	salt := addOpt(cmd, "salt", saltOpt, "").(*string)
+	secretKey := addStringOpt(cmd, "key", secretOpt)
+	salt := addStringOpt(cmd, "salt", saltOpt)
 
 	cmd.Action = func() {
 		encryptedData := readData()
 		plaintext, err := client.encryption.Decrypt(context.Background(),
 			&hoard.ReferenceAndCiphertext{
 				Reference: &reference.Ref{
-					SecretKey: readBase64(*secretKey),
-					Salt:      parseSalt(*salt),
+					SecretKey: readBase64(secretKey),
+					Salt:      parseSalt(salt),
 				},
 				Ciphertext: &hoard.Ciphertext{
 					EncryptedData: encryptedData,
@@ -37,7 +37,7 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 
 // Encrypt also does what it says on the tin
 func (client *Client) Encrypt(cmd *cli.Cmd) {
-	salt := addOpt(cmd, "salt", saltOpt, "").(*string)
+	salt := addStringOpt(cmd, "salt", saltOpt)
 
 	cmd.Action = func() {
 		data, err := ioutil.ReadAll(os.Stdin)
@@ -47,7 +47,7 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 		refAndCiphertext, err := client.encryption.Encrypt(context.Background(),
 			&hoard.Plaintext{
 				Data: data,
-				Salt: parseSalt(*salt),
+				Salt: parseSalt(salt),
 			})
 		if err != nil {
 			fatalf("Error encrypting: %v", err)
@@ -58,14 +58,14 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 
 // Ref encrypts as above, but then packages the data in a ref
 func (client *Client) Ref(cmd *cli.Cmd) {
-	salt := addOpt(cmd, "salt", saltOpt, "").(*string)
+	salt := addStringOpt(cmd, "salt", saltOpt)
 
 	cmd.Action = func() {
 		data := readData()
 		refAndCiphertext, err := client.encryption.Encrypt(context.Background(),
 			&hoard.Plaintext{
 				Data: data,
-				Salt: parseSalt(*salt),
+				Salt: parseSalt(salt),
 			})
 		if err != nil {
 			fatalf("Error generating reference: %v", err)

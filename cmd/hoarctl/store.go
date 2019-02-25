@@ -12,7 +12,7 @@ import (
 
 // Cat retrieves encrypted data from store
 func (client *Client) Cat(cmd *cli.Cmd) {
-	address := addOpt(cmd, "address", addrOpt, "").(*string)
+	address := addStringOpt(cmd, "address", addrOpt)
 
 	cmd.Action = func() {
 		ref := readReference(address)
@@ -27,9 +27,9 @@ func (client *Client) Cat(cmd *cli.Cmd) {
 
 // Get retrieves and decrypts data from store
 func (client *Client) Get(cmd *cli.Cmd) {
-	address := addOpt(cmd, "address", addrOpt, "").(*string)
-	secretKey := addOpt(cmd, "key", secretOpt, "").(*string)
-	salt := addOpt(cmd, "salt", saltOpt, "").(*string)
+	address := addStringOpt(cmd, "address", addrOpt)
+	secretKey := addStringOpt(cmd, "key", secretOpt)
+	salt := addStringOpt(cmd, "salt", saltOpt)
 
 	cmd.Action = func() {
 		// If given address then try to read reference from arguments and option
@@ -39,9 +39,9 @@ func (client *Client) Get(cmd *cli.Cmd) {
 				fatalf("A secret key must be provided in order to decrypt")
 			}
 			ref = &reference.Ref{
-				Address:   readBase64(*address),
-				SecretKey: readBase64(*secretKey),
-				Salt:      parseSalt(*salt),
+				Address:   readBase64(address),
+				SecretKey: readBase64(secretKey),
+				Salt:      parseSalt(salt),
 			}
 		}
 		plaintext, err := client.cleartext.Get(context.Background(), ref)
@@ -68,14 +68,14 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 
 // Put encrypts data and stores it
 func (client *Client) Put(cmd *cli.Cmd) {
-	salt := addOpt(cmd, "salt", saltOpt, "").(*string)
+	salt := addStringOpt(cmd, "salt", saltOpt)
 
 	cmd.Action = func() {
 		data := readData()
 		ref, err := client.cleartext.Put(context.Background(),
 			&hoard.Plaintext{
 				Data: data,
-				Salt: parseSalt(*salt),
+				Salt: parseSalt(salt),
 			})
 		if err != nil {
 			fatalf("Error storing data: %v", err)
@@ -86,7 +86,7 @@ func (client *Client) Put(cmd *cli.Cmd) {
 
 // Stat retrieves info about the stored data
 func (client *Client) Stat(cmd *cli.Cmd) {
-	address := addOpt(cmd, "address", addrOpt, "").(*string)
+	address := addStringOpt(cmd, "address", addrOpt)
 
 	cmd.Action = func() {
 		ref := readReference(address)

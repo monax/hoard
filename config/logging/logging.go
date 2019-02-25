@@ -21,9 +21,10 @@ const (
 	Json   LoggingType = "json"
 )
 
+// LoggingConfig describes the channels to listen on,
+// messages not on these channels will be filtered
+// and leaving empty disables logging
 type LoggingConfig struct {
-	// Channels to listen on, messages not on these channels will be filtered
-	// leaving empty disables logging
 	LoggingType LoggingType
 	Channels    []structure.Channel
 }

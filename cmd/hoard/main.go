@@ -69,7 +69,6 @@ func main() {
 		if *listenAddressOpt != "" {
 			conf.ListenAddress = *listenAddressOpt
 		}
-
 		symmetricProvider := secrets.ProviderFromConfig(conf.Secrets)
 		openPGPConf := secrets.OpenPGPFromConfig(conf.Secrets)
 		sm := secrets.Manager{Provider: symmetricProvider, OpenPGP: openPGPConf}
