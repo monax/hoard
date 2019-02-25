@@ -3,6 +3,7 @@ package grant
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"bytes"
 	"io"
@@ -45,8 +46,13 @@ func OpenPGPGrant(ref *reference.Ref, public []byte, private *secrets.OpenPGPSec
 		return nil, err
 	}
 
+	id, err := strconv.ParseUint(private.ID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
 	// we can only sign with one key
-	from := keyring.KeysById(private.ID)[0].Entity
+	from := keyring.KeysById(id)[0].Entity
 	if from == nil {
 		return nil, fmt.Errorf("signing identity not found")
 	}

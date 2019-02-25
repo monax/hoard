@@ -28,6 +28,7 @@ const (
 	IPFS        StorageType = "ipfs"
 )
 
+// StorageConfig identifies the configured back-end
 type StorageConfig struct {
 	// Acts a string enum
 	StorageType StorageType

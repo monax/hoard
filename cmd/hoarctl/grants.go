@@ -12,19 +12,18 @@ import (
 
 // PutSeal encrypts and stores data then prints a grant
 func (client *Client) PutSeal(cmd *cli.Cmd) {
-	salt := addOpt(cmd, "salt", saltOpt, "").(*string)
-	key := addOpt(cmd, "key", saltOpt, "").(*string)
+	salt := addStringOpt(cmd, "salt", saltOpt)
+	key := addStringOpt(cmd, "key", keyOpt)
 
 	cmd.Action = func() {
-
 		var seal *grant.Grant
 		var err error
 
 		spec := grant.Spec{Plaintext: &grant.PlaintextSpec{}}
-		if key != nil {
+		if *key != "" {
 			spec = grant.Spec{
 				Plaintext: nil,
-				Symmetric: &grant.SymmetricSpec{SecretID: string(parseSalt(*key))},
+				Symmetric: &grant.SymmetricSpec{SecretID: *key},
 			}
 		}
 
@@ -33,7 +32,7 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 			&hoard.PlaintextAndGrantSpec{
 				Plaintext: &hoard.Plaintext{
 					Data: data,
-					Salt: parseSalt(*salt),
+					Salt: parseSalt(salt),
 				},
 				GrantSpec: &spec,
 			},
@@ -48,15 +47,15 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 
 // Seal reads encrypted data then prints a grant
 func (client *Client) Seal(cmd *cli.Cmd) {
-	address := addOpt(cmd, "address", addrOpt, "").(*string)
-	key := addOpt(cmd, "key", saltOpt, "").(*string)
+	address := addStringOpt(cmd, "address", addrOpt)
+	key := addStringOpt(cmd, "key", keyOpt)
 
 	cmd.Action = func() {
 		spec := grant.Spec{Plaintext: &grant.PlaintextSpec{}}
-		if key != nil {
+		if *key != "" {
 			spec = grant.Spec{
 				Plaintext: nil,
-				Symmetric: &grant.SymmetricSpec{SecretID: string(parseSalt(*key))},
+				Symmetric: &grant.SymmetricSpec{SecretID: *key},
 			}
 		}
 
@@ -77,16 +76,16 @@ func (client *Client) Seal(cmd *cli.Cmd) {
 
 // Reseal reads a grant then prints a new grant
 func (client *Client) Reseal(cmd *cli.Cmd) {
-	salt := addOpt(cmd, "salt", saltOpt, "").(*string)
+	key := addStringOpt(cmd, "key", keyOpt)
 
 	cmd.Action = func() {
 		prev := readGrant()
 		next := grant.Spec{Plaintext: &grant.PlaintextSpec{}}
 
-		if salt != nil {
+		if *key != "" {
 			next = grant.Spec{
 				Plaintext: nil,
-				Symmetric: &grant.SymmetricSpec{SecretID: string(parseSalt(*salt))},
+				Symmetric: &grant.SymmetricSpec{SecretID: *key},
 			}
 		}
 

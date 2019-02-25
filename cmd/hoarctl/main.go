@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	addrOpt string = "The address of the data to retrieve as base64-encoded string"
+	addrOpt string = "The address of the data to retrieve as base64-encoded string."
+	keyOpt  string = "The ID of the symmetric secret to use."
 	saltOpt string = "Token to use for encryption and decryption. " +
 		"Will be parsed as base64 encoded string if this is possible, " +
 		"otherwise will be interpreted as the bytes of the string itself."
@@ -92,26 +93,21 @@ func main() {
 }
 
 // extra cli options
-func addOpt(cmd *cli.Cmd, arg, desc string, def interface{}) (opt interface{}) {
-	switch d := def.(type) {
-	case string:
-		opt = cmd.StringOpt(fmt.Sprintf("%s %s", string(arg[0]), arg), d, desc)
-	case bool:
-		opt = cmd.BoolOpt(fmt.Sprintf("%s %s", string(arg[0]), arg), d, desc)
-	}
+func addStringOpt(cmd *cli.Cmd, arg, desc string) *string {
+	opt := cmd.StringOpt(fmt.Sprintf("%s %s", string(arg[0]), arg), "", desc)
 	cmd.Spec += fmt.Sprintf("[-%s | --%s]", string(arg[0]), arg)
 	return opt
 }
 
-func parseSalt(saltString string) []byte {
-	if saltString == "" {
+func parseSalt(saltString *string) []byte {
+	if saltString == nil {
 		return nil
 	}
-	saltBytes, err := base64.StdEncoding.DecodeString(saltString)
+	saltBytes, err := base64.StdEncoding.DecodeString(*saltString)
 	if err == nil {
 		return saltBytes
 	}
-	return ([]byte)(saltString)
+	return ([]byte)(*saltString)
 }
 
 func jsonString(v interface{}) string {
@@ -134,7 +130,7 @@ func readData() []byte {
 func readReference(address *string) *reference.Ref {
 	ref := new(reference.Ref)
 	if address != nil && *address != "" {
-		ref.Address = readBase64(*address)
+		ref.Address = readBase64(address)
 		return ref
 	}
 	err := parseObject(os.Stdin, ref)
@@ -165,8 +161,11 @@ func parseObject(r io.Reader, o interface{}) error {
 	return nil
 }
 
-func readBase64(base64String string) []byte {
-	secretKeyBytes, err := base64.StdEncoding.DecodeString(base64String)
+func readBase64(base64String *string) []byte {
+	if base64String == nil {
+		return nil
+	}
+	secretKeyBytes, err := base64.StdEncoding.DecodeString(*base64String)
 	if err != nil {
 		fatalf("Could not decode '%s' as base64-encoded string", base64String)
 	}
