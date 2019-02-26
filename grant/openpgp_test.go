@@ -18,11 +18,11 @@ func TestOpenPGPGrant(t *testing.T) {
 
 	testPGP := secrets.OpenPGPSecret{
 		ID:   "10449759736975846181",
-		Data: []byte(keyPrivate),
+		Data: keyPrivate,
 	}
 
 	// Create grant from public
-	grant, err := OpenPGPGrant(testRef, []byte(keyPublic), &testPGP)
+	grant, err := OpenPGPGrant(testRef, string(keyPublic), &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
@@ -31,7 +31,7 @@ func TestOpenPGPGrant(t *testing.T) {
 	assert.EqualValues(t, testRef, ref)
 
 	// Create grant from private
-	grant, err = OpenPGPGrant(testRef, []byte(keyPrivate), &testPGP)
+	grant, err = OpenPGPGrant(testRef, string(keyPrivate), &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
@@ -40,7 +40,7 @@ func TestOpenPGPGrant(t *testing.T) {
 	assert.EqualValues(t, testRef, ref)
 
 	// Create grant from signer
-	grant, err = OpenPGPGrant(testRef, nil, &testPGP)
+	grant, err = OpenPGPGrant(testRef, "", &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
@@ -51,6 +51,6 @@ func TestOpenPGPGrant(t *testing.T) {
 	ref, err = OpenPGPReference(grant, nil)
 	assert.Errorf(t, err, "hoard is not currently configured to use openpgp")
 
-	grant, err = OpenPGPGrant(testRef, []byte(keyPublic), nil)
+	grant, err = OpenPGPGrant(testRef, string(keyPublic), nil)
 	assert.Errorf(t, err, "hoard is not currently configured to use openpgp")
 }

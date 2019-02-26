@@ -1,20 +1,23 @@
 {
   "name": "@monax/hoard",
-  "version": "1.5.1",
+  "version": "1.5.4",
   "description": "Hoard client library",
-  "main": "index.js",
+  "main": "hoard-js/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node hoard-js/examples.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/monax/hoard.git"
   },
   "dependencies": {
-    "google-protobuf": "3.7.0-rc.2",
-    "grpc": "1.18.0",
-    "grpc-tools": "1.7.0"
+    "@grpc/proto-loader": "^0.4.0",
+    "grpc": "1.18.0"
   },
+  "files": [
+    "hoard-js/",
+    "protobuf/"
+  ],
   "keywords": [
     "hoard",
     "encrypted",

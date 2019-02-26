@@ -18,7 +18,7 @@ version=v$(go run ./project/cmd/version/main.go)
 notes=$(go run ./project/cmd/notes/main.go)
 
 echo "This command will tag the current commit $(git rev-parse --short HEAD) as version $version"
-echo "defined programmatically in project/releases.go with release notes:"
+echo "defined programmatically in project/history.go with release notes:"
 echo
 echo "$notes" | sed 's/^/> /'
 echo

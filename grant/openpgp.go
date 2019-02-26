@@ -16,7 +16,7 @@ import (
 )
 
 // OpenPGPGrant encrypts and signs a given reference
-func OpenPGPGrant(ref *reference.Ref, public []byte, private *secrets.OpenPGPSecret) ([]byte, error) {
+func OpenPGPGrant(ref *reference.Ref, public string, private *secrets.OpenPGPSecret) ([]byte, error) {
 	if private == nil {
 		return nil, fmt.Errorf("cannot encrypt because no private key was provided")
 	}
@@ -28,9 +28,9 @@ func OpenPGPGrant(ref *reference.Ref, public []byte, private *secrets.OpenPGPSec
 	}
 
 	var to openpgp.EntityList
-	if public != nil {
+	if public != "" {
 		// use public keyring
-		if to, err = openpgp.ReadArmoredKeyRing(bytes.NewBuffer(public)); err != nil {
+		if to, err = openpgp.ReadArmoredKeyRing(bytes.NewBufferString(public)); err != nil {
 			return nil, fmt.Errorf("could not read public keyring: %s", err)
 		}
 	} else {
