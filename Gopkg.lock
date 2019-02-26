@@ -256,12 +256,9 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:85adecf1dbfae5769cc62a8bcea6498f8e9f0e2452e4e6686eb36fa4428a5a6e"
+  digest = "1:42e8c2456d7ec0f31e182c20022e74324c4da2cb3bd9069ff9b131fe33466308"
   name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "require",
-  ]
+  packages = ["assert"]
   pruneopts = "NUT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
@@ -517,7 +514,6 @@
     "github.com/jawher/mow.cli",
     "github.com/monax/relic",
     "github.com/stretchr/testify/assert",
-    "github.com/stretchr/testify/require",
     "gocloud.dev/blob",
     "gocloud.dev/blob/azureblob",
     "gocloud.dev/blob/gcsblob",

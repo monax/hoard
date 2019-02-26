@@ -72,7 +72,7 @@ const example = async function (plaintextIn) {
             Plaintext: plaintextIn,
             GrantSpec: {
                 Symmetric: {
-                    PublicID: Buffer.from('keyID', 'utf8')
+                    PublicID: Buffer.from('test', 'utf8')
                 }
             }
         };

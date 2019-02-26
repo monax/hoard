@@ -16,8 +16,8 @@ import (
 )
 
 // OpenPGPGrant encrypts and signs a given reference
-func OpenPGPGrant(ref *reference.Ref, public string, private *secrets.OpenPGPSecret) ([]byte, error) {
-	if private == nil {
+func OpenPGPGrant(ref *reference.Ref, public string, keyring *secrets.OpenPGPSecret) ([]byte, error) {
+	if keyring == nil {
 		return nil, fmt.Errorf("cannot encrypt because no private key was provided")
 	}
 
@@ -35,24 +35,24 @@ func OpenPGPGrant(ref *reference.Ref, public string, private *secrets.OpenPGPSec
 		}
 	} else {
 		// default to configured keyring
-		if to, err = openpgp.ReadArmoredKeyRing(bytes.NewBuffer(private.Data)); err != nil {
+		if to, err = openpgp.ReadArmoredKeyRing(bytes.NewBuffer(keyring.Data)); err != nil {
 			return nil, fmt.Errorf("could not read private keyring: %s", err)
 		}
 	}
 
 	// read configured keyring
-	keyring, err := openpgp.ReadArmoredKeyRing(bytes.NewBuffer(private.Data))
+	keys, err := openpgp.ReadArmoredKeyRing(bytes.NewBuffer(keyring.Data))
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := strconv.ParseUint(private.PrivateID, 10, 64)
+	id, err := strconv.ParseUint(keyring.PrivateID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	// we can only sign with one key
-	from := keyring.KeysById(id)[0].Entity
+	from := keys.KeysById(id)[0].Entity
 	if from == nil {
 		return nil, fmt.Errorf("signing identity not found")
 	}
@@ -73,13 +73,13 @@ func OpenPGPGrant(ref *reference.Ref, public string, private *secrets.OpenPGPSec
 }
 
 // OpenPGPReference decrypts a given grant
-func OpenPGPReference(grant []byte, private *secrets.OpenPGPSecret) (*reference.Ref, error) {
-	if private == nil {
+func OpenPGPReference(grant []byte, keyring *secrets.OpenPGPSecret) (*reference.Ref, error) {
+	if keyring == nil {
 		return nil, fmt.Errorf("cannot decrypt because no private key was provided")
 	}
 
 	// read local keyring
-	to, err := openpgp.ReadArmoredKeyRing(bytes.NewBuffer(private.Data))
+	to, err := openpgp.ReadArmoredKeyRing(bytes.NewBuffer(keyring.Data))
 	block, err := armor.Decode(bytes.NewBuffer(grant))
 	if err != nil {
 		return nil, err
