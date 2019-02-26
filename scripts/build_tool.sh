@@ -25,7 +25,6 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Grab date, commit, version
 . "$script_dir/local_version.sh" > /dev/null
 
-DOCKER_REPO=${DOCKER_REPO:-"monax/hoard"}
 REPO=${REPO:-"$GOPATH/src/github.com/monax/hoard"}
 
 function log() {
@@ -45,6 +44,7 @@ docker build --build-arg VERSION=${version}\
  --build-arg VCS_REF=${commit}\
  --build-arg BUILD_DATE=${date}\
  -t ${DOCKER_REPO}:${version} ${REPO}
+
 # Quick smoke test
 echo "Emitting version from docker image as smoke test..."
 docker run ${DOCKER_REPO}:${version} hoard version

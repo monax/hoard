@@ -11,7 +11,6 @@ set -e
 REPO=${REPO:-"$GOPATH/src/github.com/monax/hoard"}
 VERSION_REGEX="^v[0-9]+\.[0-9]+\.[0-9]+$"
 
-
 version=$(go run "$REPO/project/cmd/version/main.go")
 tag=$(git tag --points-at HEAD)
 

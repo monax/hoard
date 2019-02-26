@@ -24,14 +24,16 @@ GOFILES_NOVENDOR := $(shell find . -path ./vendor -prune -o -name '*.pb.go' -pru
 PACKAGES_NOVENDOR := $(shell go list ./...)
 
 # Protobuf generated go files
-PROTO_FILES = $(shell find . -path ./vendor -prune -o -path ./hoard-js/node_modules -prune -o -type f -name '*.proto' -print)
+PROTO_FILES = $(shell find . -path ./vendor -prune -o -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
 PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
 PROTO_GO_FILES_REAL = $(shell find . -path ./vendor -prune -o -type f -name '*.pb.go' -print)
 
 OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
 DIST := "dist"
 GOX_OUTPUT := "$DIST/{{.Dir}}_{{.OS}}_{{.Arch}}"
-BUILD_IMAGE := "quay.io/monax/hoard:build"
+export DOCKER_HUB := quay.io
+export DOCKER_REPO := $(DOCKER_HUB)/monax/hoard
+export BUILD_IMAGE := $(DOCKER_REPO):build
 
 
 # Formatting, linting and vetting
@@ -122,7 +124,7 @@ install:
 build:	check build_hoard build_hoarctl
 
 .PHONY: docker_build
-docker_build: check commit_hash
+docker_build: commit_hash
 	@scripts/build_tool.sh
 
 ## build binaries for all architectures
@@ -135,6 +137,12 @@ build_dist:
 .PHONY:	test
 test: check
 	@scripts/bin_wrapper.sh go test -v ./... ${GOPACKAGES_NOVENDOR}
+
+.PHONY: test_js
+test_js: build install
+	$(eval HID := $(shell HOARD_JSON_CONFIG=$$(hoard config -j memory) hoard -e &> /dev/null & echo $$!))
+	npm test
+	kill ${HID}
 
 ## run tests including integration tests
 .PHONY:	test_integration
@@ -170,24 +178,32 @@ NOTES.md: project/history.go project/cmd/notes/main.go
 docs: CHANGELOG.md NOTES.md
 
 ## tag the current HEAD commit with the current release defined in
-## ./release/release.go
+## ./project/history.go
 .PHONY: tag_release
 tag_release: test check docs build
 	@scripts/tag_release.sh
 
 .PHONY: release
-release: docs check test docker_build
+release: tag_release
 	@scripts/is_checkout_dirty.sh || (echo "checkout is dirty so not releasing!" && exit 1)
 	@scripts/release.sh
 
-.PHONY: release_dev
-release_dev: test docker_build
-	@scripts/release_dev.sh
+.PHONY: latest
+latest:
+	@scripts/release.sh latest
 
 .PHONY: build_ci_image
 build_ci_image:
-	docker build -t ${CI_IMAGE} -f ./.circleci/Dockerfile .
+	docker build -t ${BUILD_IMAGE} -f ./.circleci/Dockerfile .
 
 .PHONY: push_ci_image
 push_ci_image: build_ci_image
-	docker push ${CI_IMAGE}
+	docker push ${BUILD_IMAGE}
+
+.PHONY: npm_install
+npm_install:
+	@cd hoard-js && npm install
+
+.PHONY: npm_publish
+npm_publish:
+	npm publish --access public .

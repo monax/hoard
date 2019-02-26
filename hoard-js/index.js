@@ -2,37 +2,39 @@
 
 const path = require('path')
 
-const PROTO_PATH = path.join(__dirname, '../protobuf', 'hoard.proto');
+const LOCAL_PATH = path.join(__dirname, './protobuf');
+const PROTO_PATH = path.join(__dirname, '../protobuf');
+const PROTO_FILE = 'hoard.proto';
 
-const GRPC = require('grpc')
+const protoLoader = require('@grpc/proto-loader');
+const grpc = require('grpc')
 
-const HoardClient = function () {
-};
+const options = {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true,
+    includeDirs: [
+        LOCAL_PATH, PROTO_PATH
+    ]
+}
 
-// HoardClient using statically generated javascript types
-const HoardClientStatic = function (address) {
-    const services = require('./protobuf/hoard_grpc_pb');
-    this.cleartextClient = new services.CleartextClient(address,
-        GRPC.credentials.createInsecure());
-    this.encryptionClient = new services.EncryptionClient(address,
-        GRPC.credentials.createInsecure());
-    this.storageClient = new services.StorageClient(address,
-        GRPC.credentials.createInsecure());
-    this.grantClient = new services.GrantClient(address,
-        GRPC.credentials.createInsecure());
-};
+const packageDefinition = protoLoader.loadSync(PROTO_FILE, options);
 
-// HoardClient using dynamically types and mapping (the default)
+const HoardClient = function () {};
+
+// HoardClient uses dynamic types and mapping
 const HoardClientDynamic = function (address) {
-    const hoard_proto = GRPC.load(PROTO_PATH).hoard;
+    const hoard_proto = grpc.loadPackageDefinition(packageDefinition).hoard;
     this.cleartextClient = new hoard_proto.Cleartext(address,
-        GRPC.credentials.createInsecure());
+        grpc.credentials.createInsecure());
     this.encryptionClient = new hoard_proto.Encryption(address,
-        GRPC.credentials.createInsecure());
+        grpc.credentials.createInsecure());
     this.storageClient = new hoard_proto.Storage(address,
-        GRPC.credentials.createInsecure());
+        grpc.credentials.createInsecure());
     this.grantClient = new hoard_proto.Grant(address,
-        GRPC.credentials.createInsecure());
+        grpc.credentials.createInsecure());
 };
 
 HoardClient.prototype.get = function (reference) {
@@ -126,7 +128,6 @@ HoardClient.prototype.push = function (ciphertext) {
     });
 };
 
-
 HoardClient.prototype.pull = function (address) {
     const client = this.storageClient;
     return new Promise(function (resolve, reject) {
@@ -153,7 +154,7 @@ HoardClient.prototype.stat = function (address) {
     });
 };
 
-// Utility for printing message types
+// Walk over the given object and base64 encode any buffers
 HoardClient.prototype.base64ify = function (obj) {
     let newObj = {};
     for (let key of Object.keys(obj)) {
@@ -167,9 +168,5 @@ HoardClient.prototype.base64ify = function (obj) {
     return newObj;
 };
 
-HoardClientStatic.prototype = Object.create(HoardClient.prototype);
 HoardClientDynamic.prototype = Object.create(HoardClient.prototype);
-
 module.exports.Client = HoardClientDynamic;
-module.exports.DynamicClient = HoardClientDynamic;
-module.exports.StaticClient = HoardClientStatic;

@@ -22,14 +22,11 @@ let plaintext = {
     Salt: Buffer.from('foo', 'ascii')
 };
 
-
 // Below is an example of running through a series of hoard calls wrapped in promises.
 // By wrapping this in an async function we can use await/async try/catch syntactic sugar around
 const example = async function (plaintextIn) {
     try {
-        // BASIC USAGE
-        // -----------
-        var plaintext, ref, grant
+        var plaintext, ref, grant;
 
         // Both the address and secret key are a deterministic function of the
         // data and the salt (the plaintext). You need the salt and secret key
@@ -60,10 +57,7 @@ const example = async function (plaintextIn) {
         let ciphertext = await hoard.pull({Address: statInfo.Address});
         console.log(ciphertext);
         let address = await hoard.push(ciphertext);
-        console.log(address)
-
-        // GRANTS
-        // ------
+        console.log(address);
 
         // A plaintext grant allows us to reference the reference without
         // encryption for ease of later retrieval
@@ -72,17 +66,40 @@ const example = async function (plaintextIn) {
             GrantSpec: {
                 Plaintext: {}
             }
-        }
+        };
 
         grant = await hoard.putseal(grantIn);
         console.log(hoard.base64ify(grant));
 
-        // We can get the plaintext back by `get`ing the grant
+        // We can get the plaintext back by `unsealget`ing the grant
+        plaintext = await hoard.unsealget(grant);
+        console.log('Plaintext (Grant): ' + plaintext.Data.toString());
+
+        // A symmetric grant allows us to encrypt the reference
+        // through secrets configured on the hoard daemon
+        grantIn = {
+            Plaintext: plaintextIn,
+            GrantSpec: {
+                Symmetric: {
+                    SecretID: Buffer.from('keyID', 'utf8')
+                }
+            }
+        };
+
+        grant = await hoard.putseal(grantIn);
+
+        // Convert to string and back again
+        grant = JSON.stringify(hoard.base64ify(grant));
+        console.log(grant);
+        grant = JSON.parse(grant);
+        console.log(grant);
+
         plaintext = await hoard.unsealget(grant);
         console.log('Plaintext (Grant): ' + plaintext.Data.toString());
     }
     catch (err) {
-        console.log(err)
+        console.log(err);
+        process.exit(1);
     }
 };
 

@@ -12,6 +12,12 @@ setup_docker: &setup_docker
 
 version: 2
 jobs:
+  ensure_vendor:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: make ensure_vendor
+
   test:
     <<: *defaults
     steps:
@@ -19,6 +25,21 @@ jobs:
       - checkout
       - run: make test
       - run: make build
+
+  build_docker:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          <<: *setup_docker
+      - run: make docker_build
+
+  test_js:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: make npm_install
+      - run: make test_js
 
   test_integration:
     <<: *defaults
@@ -32,35 +53,13 @@ jobs:
       - run: gcloud auth activate-service-account --key-file=/tmp/gcloud-service-key.json
       - run: make test_integration
 
-  ensure_vendor:
-    <<: *defaults
-    steps:
-      - checkout
-      - run: make ensure_vendor
-
-  build_docker:
-    <<: *defaults
-    steps:
-      - checkout
-      - setup_remote_docker:
-          <<: *setup_docker
-      - run: make docker_build
-
-  release_dev:
+  push_latest:
     <<: *defaults
     steps:
       - setup_remote_docker:
           <<: *setup_docker
       - checkout
-      - run: make release_dev
-
-  release:
-    <<: *defaults
-    steps:
-      - setup_remote_docker:
-          <<: *setup_docker
-      - checkout
-      - run: make release
+      - run: make latest
 
 workflows:
   version: 2
@@ -76,6 +75,18 @@ workflows:
           filters:
             <<: *tags_filters
 
+      - build_docker:
+          requires:
+          - test
+          filters:
+            <<: *tags_filters
+
+      - test_js:
+          requires:
+          - test
+          filters:
+            <<: *tags_filters
+
       - test_integration:
           requires:
           - test
@@ -86,25 +97,12 @@ workflows:
               - develop
               - master
 
-      - build_docker:
-          requires:
-          - test
-          filters:
-            <<: *tags_filters
-
-      - release_dev:
-          requires:
-          - build_docker
-          - test_integration
-          filters:
-            branches:
-              only: develop
-
-      - release:
+      - push_latest:
           requires:
           - build_docker
           - test_integration
           filters:
             <<: *tags_filters
             branches:
-              ignore: /.*/
+              only:
+              - master
