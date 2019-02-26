@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"fmt"
 	"io/ioutil"
 )
 
@@ -31,7 +32,7 @@ type Manager struct {
 	OpenPGP  *OpenPGPSecret
 }
 
-type SymmetricProvider func(secretID string) []byte
+type SymmetricProvider func(secretID string) ([]byte, error)
 
 // NoopSecretManager is an empty secret manager
 var NoopSecretManager = Manager{
@@ -40,8 +41,8 @@ var NoopSecretManager = Manager{
 }
 
 // NoopSymmetricProvider returns an empty provider
-func NoopSymmetricProvider(_ string) []byte {
-	return nil
+func NoopSymmetricProvider(_ string) ([]byte, error) {
+	return nil, fmt.Errorf("no secrets provided to hoard")
 }
 
 // ProviderFromConfig creates a secret reader from a set of symmetric secrets
@@ -53,8 +54,14 @@ func ProviderFromConfig(conf *SecretsConfig) SymmetricProvider {
 	for _, s := range conf.Symmetric {
 		secs[s.PublicID] = []byte(s.Passphrase)
 	}
-	return func(id string) []byte {
-		return secs[id]
+	return func(id string) ([]byte, error) {
+		if id == "" {
+			return nil, fmt.Errorf("empty secret ID passed to provider")
+		}
+		if val, ok := secs[id]; ok {
+			return val, nil
+		}
+		return nil, fmt.Errorf("could not find symmetric secret with ID '%s'", id)
 	}
 }
 

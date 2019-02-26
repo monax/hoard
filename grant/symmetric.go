@@ -11,9 +11,13 @@ import (
 
 // We bump it a little from the 100ms for interactive logins rule: https://blog.filippo.io/the-scrypt-parameters/
 const scryptSecurityWorkExponent = 16
+const minSecretSize = 8
 
 // SymmetricGrant encrypts the given reference based on a secret read from the provider store
 func SymmetricGrant(ref *reference.Ref, secret []byte) ([]byte, error) {
+	if len(secret) < minSecretSize {
+		return nil, fmt.Errorf("SymmetricGrant cannot encrypt with a secret of size < %d", minSecretSize)
+	}
 	// Generate scrypt salt
 	salt := make([]byte, encryption.NonceSize)
 	_, err := rand.Read(salt)

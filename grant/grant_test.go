@@ -18,12 +18,12 @@ func TestGrants(t *testing.T) {
 
 	testPGP := secrets.OpenPGPSecret{
 		PrivateID: "10449759736975846181",
-		Data:      []byte(keyPrivate),
+		Data:      keyPrivate,
 	}
 
 	testSecrets := secrets.Manager{
-		Provider: func(_ string) []byte {
-			return nil
+		Provider: func(_ string) ([]byte, error) {
+			return nil, nil
 		},
 		OpenPGP: &testPGP,
 	}
@@ -36,18 +36,29 @@ func TestGrants(t *testing.T) {
 	plaintextRef, err := Unseal(testSecrets, plaintextGrant)
 	assert.Equal(t, testRef, plaintextRef)
 
+	// SymmetricGrant with empty provider
 	symmetricSpec := Spec{Symmetric: &SymmetricSpec{PublicID: "test"}}
 	symmetricGrant, err := Seal(testSecrets, testRef, &symmetricSpec)
+	assert.Error(t, err)
+	assert.Nil(t, symmetricGrant)
+
+	// SymmetricGrant with correct provider
+	testSecrets.Provider = func(_ string) ([]byte, error) {
+		return []byte("sssshhhh"), nil
+	}
+	symmetricGrant, err = Seal(testSecrets, testRef, &symmetricSpec)
+	assert.NotNil(t, symmetricGrant)
 	assert.NoError(t, err)
 	symmetricRef, err := Unseal(testSecrets, symmetricGrant)
 	assert.Equal(t, testRef, symmetricRef)
 	assert.NoError(t, err)
 
-	asymmetricSpec := Spec{OpenPGP: &OpenPGPSpec{}}
-	asymmetricGrant, err := Seal(testSecrets, testRef, &asymmetricSpec)
+	// OpenPGPGrant encrypt / decrypt with local keypair
+	openpgpSpec := Spec{OpenPGP: &OpenPGPSpec{}}
+	openpgpGrant, err := Seal(testSecrets, testRef, &openpgpSpec)
 	assert.NoError(t, err)
-	asymmetricRef, err := Unseal(testSecrets, asymmetricGrant)
-	assert.Equal(t, testRef, asymmetricRef)
+	openpgpRef, err := Unseal(testSecrets, openpgpGrant)
+	assert.Equal(t, testRef, openpgpRef)
 	assert.NoError(t, err)
 }
 
