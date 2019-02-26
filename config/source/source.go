@@ -14,6 +14,7 @@ import (
 
 const DefaultHoardConfigFileName = "hoard.toml"
 const DefaultJSONConfigEnvironmentVariable = "HOARD_JSON_CONFIG"
+const STDINFileIdentifier = "-"
 
 type ConfigProvider interface {
 	// Description of where this provider sources its config from
@@ -151,14 +152,24 @@ func Default() *configSource {
 }
 
 func fromFile(configFile string) (*config.HoardConfig, error) {
-	bs, err := ioutil.ReadFile(configFile)
+	bs, err := readFile(configFile)
 	if err != nil {
 		return nil, fmt.Errorf("could not read config file '%s': %s",
 			configFile, err)
 	}
+	if len(bs) == 0 {
+		return nil, fmt.Errorf("empty config")
+	}
 
 	tomlString := string(bs)
 	return config.HoardConfigFromTOMLString(tomlString)
+}
+
+func readFile(configFile string) ([]byte, error) {
+	if configFile == STDINFileIdentifier {
+		return ioutil.ReadAll(os.Stdin)
+	}
+	return ioutil.ReadFile(configFile)
 }
 
 func writeLog(writer io.Writer, msg string) {

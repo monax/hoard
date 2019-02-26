@@ -23,7 +23,7 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 		if *key != "" {
 			spec = grant.Spec{
 				Plaintext: nil,
-				Symmetric: &grant.SymmetricSpec{SecretID: *key},
+				Symmetric: &grant.SymmetricSpec{PublicID: *key},
 			}
 		}
 
@@ -55,7 +55,7 @@ func (client *Client) Seal(cmd *cli.Cmd) {
 		if *key != "" {
 			spec = grant.Spec{
 				Plaintext: nil,
-				Symmetric: &grant.SymmetricSpec{SecretID: *key},
+				Symmetric: &grant.SymmetricSpec{PublicID: *key},
 			}
 		}
 
@@ -85,7 +85,7 @@ func (client *Client) Reseal(cmd *cli.Cmd) {
 		if *key != "" {
 			next = grant.Spec{
 				Plaintext: nil,
-				Symmetric: &grant.SymmetricSpec{SecretID: *key},
+				Symmetric: &grant.SymmetricSpec{PublicID: *key},
 			}
 		}
 

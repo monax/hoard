@@ -13,15 +13,6 @@ let hoard = new Hoard.Client('localhost:53431');
 // message type with the parameters contained within. This corresponds to the
 // `message` declarations in hoard.proto which can be used as reference.
 
-// Lets store some data. Here we use a salt that means that we will get
-// different bytes for our encryption that is semantically secure in the
-// length of the salt. This is useful if we want to disguise that a known
-// piece of text has been stored since it will give it a different address
-let plaintext = {
-    Data: Buffer.from('some stuff', 'utf8'),
-    Salt: Buffer.from('foo', 'ascii')
-};
-
 // Below is an example of running through a series of hoard calls wrapped in promises.
 // By wrapping this in an async function we can use await/async try/catch syntactic sugar around
 const example = async function (plaintextIn) {
@@ -81,7 +72,7 @@ const example = async function (plaintextIn) {
             Plaintext: plaintextIn,
             GrantSpec: {
                 Symmetric: {
-                    SecretID: Buffer.from('keyID', 'utf8')
+                    PublicID: Buffer.from('keyID', 'utf8')
                 }
             }
         };
@@ -103,5 +94,18 @@ const example = async function (plaintextIn) {
     }
 };
 
-// Run the async example in this case ignoring the promise result
-example(plaintext);
+exports.example = example
+
+// To run the async example in this case ignoring the promise result uncomment the statements below
+
+// Lets store some data. Here we use a salt that means that we will get
+// different bytes for our encryption that is semantically secure in the
+// length of the salt. This is useful if we want to disguise that a known
+// piece of text has been stored since it will give it a different address
+
+// let plaintext = {
+//     Data: Buffer.from('some stuff', 'utf8'),
+//     Salt: Buffer.from('foo', 'ascii')
+// };
+
+// example(plaintext);

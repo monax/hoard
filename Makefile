@@ -140,7 +140,7 @@ test: check
 
 .PHONY: test_js
 test_js: build install
-	$(eval HID := $(shell HOARD_JSON_CONFIG=$$(hoard config -j memory) hoard -e &> /dev/null & echo $$!))
+	$(eval HID := $(shell hoard config memory -s test:secret_pass | hoard -c- &> /dev/null & echo $$!))
 	npm test
 	kill ${HID}
 
@@ -202,7 +202,7 @@ push_ci_image: build_ci_image
 
 .PHONY: npm_install
 npm_install:
-	@cd hoard-js && npm install
+	@npm install
 
 .PHONY: npm_publish
 npm_publish:

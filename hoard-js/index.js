@@ -76,10 +76,10 @@ HoardClient.prototype.unsealget = function (grant) {
     });
 };
 
-HoardClient.prototype.putseal = function (plaintext) {
+HoardClient.prototype.putseal = function (plaintextAndGrantSpec) {
     const client = this.grantClient;
     return new Promise(function (resolve, reject) {
-        client.putSeal(plaintext, function (err, grant) {
+        client.putSeal(plaintextAndGrantSpec, function (err, grant) {
             if (err) {
                 reject(err);
             } else {

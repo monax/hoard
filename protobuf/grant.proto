@@ -29,7 +29,7 @@ message PlaintextSpec {
 
 message SymmetricSpec {
     // A non-secret identifier for a secret that is 'known' to Hoard (accessible via store or config)
-    string SecretID = 1;
+    string PublicID = 1;
 }
 
 message OpenPGPSpec {

@@ -49,8 +49,18 @@ func NewStorageConfig(storageType StorageType, addressEncoding string) *StorageC
 	}
 }
 
-func GetDefaultConfig(c string) (*StorageConfig, error) {
+func GetStorageTypes() []StorageType {
+	return []StorageType{
+		Memory,
+		Filesystem,
+		AWS,
+		Azure,
+		GCP,
+		IPFS,
+	}
+}
 
+func GetDefaultConfig(c string) (*StorageConfig, error) {
 	switch StorageType(c) {
 	case Memory, Unspecified:
 		return DefaultMemoryConfig(), nil

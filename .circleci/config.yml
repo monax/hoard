@@ -63,6 +63,7 @@ jobs:
 
 workflows:
   version: 2
+  
   test_and_release:
     jobs:
       - ensure_vendor:

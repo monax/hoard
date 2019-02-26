@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/monax/hoard/config/secrets"
 
@@ -35,7 +36,7 @@ func main() {
 		"Whether to emit any operational logging")
 
 	configFileOpt := hoardApp.StringOpt("c config", "", "Path to "+
-		"config file. If omitted default config is used.")
+		"config file. If omitted default config is used. Use '-' to read config from STDIN.")
 
 	environmentOpt := hoardApp.BoolOpt("e env", false,
 		fmt.Sprintf("Parse the contents of the environment variable %s as a complete JSON config",
@@ -111,9 +112,12 @@ func main() {
 			initOpt := configCmd.BoolOpt("i init", false, "Write file to "+
 				"XDG standard location")
 
-			arg := configCmd.StringArg("CONFIG", "", "Supported config to generate")
-			configCmd.Spec = "[--json] | (([--output=<output file>] |  [--init]) [--force])"
-			configCmd.Spec += "CONFIG"
+			secretsOpt := configCmd.StringsOpt("s secret", nil, "Pairs of PublicID and Passphrase to use as symmetric secrets in config")
+
+			arg := configCmd.StringArg("CONFIG", "", fmt.Sprintf("Config type to generate, one of: %s",
+				strings.Join(configTypes(), ", ")))
+
+			configCmd.Spec = "[--json] | (([--output=<output file>] |  [--init]) [--force]) CONFIG [--secret=<PublicID:Passphrase>...]"
 
 			configCmd.Action = func() {
 				store, err := storage.GetDefaultConfig(*arg)
@@ -121,6 +125,19 @@ func main() {
 					fatalf("Error fetching default config for %v: %v", arg, err)
 				}
 				conf.Storage = store
+				if len(*secretsOpt) > 0 {
+					conf.Secrets = &secrets.SecretsConfig{
+						Symmetric: make([]secrets.SymmetricSecret, len(*secretsOpt)),
+					}
+					for i, ss := range *secretsOpt {
+						pair := strings.Split(ss, ":")
+						if len(pair) != 2 {
+							fatalf("got symmetric secret specification '%s' but must be specified as <PublicID:Passphrase>", ss)
+						}
+						conf.Secrets.Symmetric[i].PublicID = pair[0]
+						conf.Secrets.Symmetric[i].Passphrase = pair[1]
+					}
+				}
 			}
 
 			configCmd.After = func() {
@@ -174,4 +191,13 @@ func writeFile(filename string, data []byte, overwrite bool) error {
 		return ioutil.WriteFile(filename, data, 0666)
 	}
 	return fmt.Errorf("file '%s' already exists", filename)
+}
+
+func configTypes() []string {
+	storageTypes := storage.GetStorageTypes()
+	configTypes := make([]string, len(storageTypes))
+	for i, st := range storageTypes {
+		configTypes[i] = string(st)
+	}
+	return configTypes
 }

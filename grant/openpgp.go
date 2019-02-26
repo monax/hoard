@@ -46,7 +46,7 @@ func OpenPGPGrant(ref *reference.Ref, public string, private *secrets.OpenPGPSec
 		return nil, err
 	}
 
-	id, err := strconv.ParseUint(private.ID, 10, 64)
+	id, err := strconv.ParseUint(private.PrivateID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
