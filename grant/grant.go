@@ -15,7 +15,7 @@ func Seal(secret secrets.Manager, ref *reference.Ref, spec *Spec) (*Grant, error
 	case *PlaintextSpec:
 		grt.EncryptedReference = PlaintextGrant(ref)
 	case *SymmetricSpec:
-		encRef, err := SymmetricGrant(ref, secret.Provider(s.SecretID))
+		encRef, err := SymmetricGrant(ref, secret.Provider(s.PublicID))
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +38,7 @@ func Unseal(secret secrets.Manager, grt *Grant) (*reference.Ref, error) {
 	case *PlaintextSpec:
 		return PlaintextReference(grt.EncryptedReference), nil
 	case *SymmetricSpec:
-		return SymmetricReference(grt.EncryptedReference, secret.Provider(s.SecretID))
+		return SymmetricReference(grt.EncryptedReference, secret.Provider(s.PublicID))
 	case *OpenPGPSpec:
 		return OpenPGPReference(grt.EncryptedReference, secret.OpenPGP)
 	}

@@ -17,8 +17,8 @@ func TestGrants(t *testing.T) {
 	assert.NoError(t, err)
 
 	testPGP := secrets.OpenPGPSecret{
-		ID:   "10449759736975846181",
-		Data: []byte(keyPrivate),
+		PrivateID: "10449759736975846181",
+		Data:      []byte(keyPrivate),
 	}
 
 	testSecrets := secrets.Manager{
@@ -36,7 +36,7 @@ func TestGrants(t *testing.T) {
 	plaintextRef, err := Unseal(testSecrets, plaintextGrant)
 	assert.Equal(t, testRef, plaintextRef)
 
-	symmetricSpec := Spec{Symmetric: &SymmetricSpec{SecretID: "test"}}
+	symmetricSpec := Spec{Symmetric: &SymmetricSpec{PublicID: "test"}}
 	symmetricGrant, err := Seal(testSecrets, testRef, &symmetricSpec)
 	assert.NoError(t, err)
 	symmetricRef, err := Unseal(testSecrets, symmetricGrant)

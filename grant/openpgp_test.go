@@ -17,8 +17,8 @@ func TestOpenPGPGrant(t *testing.T) {
 	assert.NoError(t, err)
 
 	testPGP := secrets.OpenPGPSecret{
-		ID:   "10449759736975846181",
-		Data: keyPrivate,
+		PrivateID: "10449759736975846181",
+		Data:      keyPrivate,
 	}
 
 	// Create grant from public

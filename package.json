@@ -4,7 +4,7 @@
   "description": "Hoard client library",
   "main": "hoard-js/index.js",
   "scripts": {
-    "test": "node hoard-js/examples.js"
+    "test": "mocha hoard-js/test"
   },
   "repository": {
     "type": "git",
@@ -33,5 +33,7 @@
     "url": "https://github.com/monax/hoard/issues"
   },
   "homepage": "https://github.com/monax/hoard#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "mocha": "^6.0.2"
+  }
 }
