@@ -52,14 +52,14 @@ const example = async function (plaintextIn) {
 
         // A plaintext grant allows us to reference the reference without
         // encryption for ease of later retrieval
-        let grantIn = {
+        let plaintextAndGrantSpec = {
             Plaintext: plaintextIn,
             GrantSpec: {
                 Plaintext: {}
             }
         };
 
-        grant = await hoard.putseal(grantIn);
+        grant = await hoard.putseal(plaintextAndGrantSpec);
         console.log(hoard.base64ify(grant));
 
         // We can get the plaintext back by `unsealget`ing the grant
@@ -68,7 +68,7 @@ const example = async function (plaintextIn) {
 
         // A symmetric grant allows us to encrypt the reference
         // through secrets configured on the hoard daemon
-        grantIn = {
+        plaintextAndGrantSpec = {
             Plaintext: plaintextIn,
             GrantSpec: {
                 Symmetric: {
@@ -77,7 +77,7 @@ const example = async function (plaintextIn) {
             }
         };
 
-        grant = await hoard.putseal(grantIn);
+        grant = await hoard.putseal(plaintextAndGrantSpec);
 
         // Convert to string and back again
         grant = JSON.stringify(hoard.base64ify(grant));

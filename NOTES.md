@@ -1,14 +1,13 @@
 ### Changed
-- [PROTO] Upper case field names in protobuf
-- [PROTO] Used gogoproto for types
-- [STORE] Go-cloud project for s3 store backend
-- [STORE] Minimized IPFS configuration
+- [PROTO] Renamed symmetric grant SecretID to PublicID
+- [PROTO] Renamed openpgp grant ID to PrivateID
+
+### Fixed
+- [GRANTS] Throw an exception if symmetric secret for ID cannot be found
 
 ### Added
-- [STORE] Initial support for Azure backend thanks to go-cloud
-- [GRANTS] Interface and GRPC service
-- [GRANTS] Symmetric AES-GCM-based grants
-- [GRANTS] Asymmetric OpenPGP support
-- [GRANTS] Go-client (hoarctl) tooling
-- [NODEJS] Support for using the grant service + examples
-- [STORE] IPFS integration test
+- [NODEJS] Added integration tests including test for symmetric secrets
+- [GRANTS] Added openpgp grants example
+- [CLI] Added ability to configure secrets on command line with hoard config <config> --secret
+- 
+
