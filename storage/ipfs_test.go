@@ -12,8 +12,8 @@ import (
 func TestIPFSStore(t *testing.T) {
 	srv := &http.Server{Addr: ":5001"}
 	go srv.ListenAndServe()
-	inv, err := NewIPFSStore("http://:5001", base64.URLEncoding)
+	inv, err := NewIPFSStore("http://localhost:5001", base64.URLEncoding)
 	assert.NoError(t, err)
-	assert.Equal(t, "http://:5001/api/v0", inv.host)
+	assert.Equal(t, "http://localhost:5001/api/v0", inv.host)
 	srv.Close()
 }
