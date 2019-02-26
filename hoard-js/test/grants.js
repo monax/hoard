@@ -37,6 +37,7 @@ describe('Should be able to store plaintext under symmetric grant', function () 
             }
         }
         let hoard = new Hoard.Client('localhost:53431');
-        assert.rejects(() => hoard.putseal(plaintextAndGrantSpec), Error);
+        assert.rejects(() => hoard.putseal(plaintextAndGrantSpec), Error,
+            "should fail when PublicID id not known to Hoard");
     });
 });
