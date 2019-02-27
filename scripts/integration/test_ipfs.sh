@@ -4,12 +4,6 @@
 # - Docker compose
 # - jq
 
-if [[ "$(which ipfs)" == "" ]]
-then
-  echo "Integration test requires IPFS"
-  exit 1
-fi
-
 # Integration test dir
 cd "$(dirname "$0")"
 
