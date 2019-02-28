@@ -109,6 +109,9 @@ func main() {
 			jsonOpt := configCmd.BoolOpt("j json", false,
 				"Print config to STDOUT as a single line of JSON (suitable for the --env config source)")
 
+			yamlOpt := configCmd.BoolOpt("y yaml", false,
+				"Print config to STDOUT as a YAML specification")
+
 			initOpt := configCmd.BoolOpt("i init", false, "Write file to "+
 				"XDG standard location")
 
@@ -117,7 +120,7 @@ func main() {
 			arg := configCmd.StringArg("CONFIG", "", fmt.Sprintf("Config type to generate, one of: %s",
 				strings.Join(configTypes(), ", ")))
 
-			configCmd.Spec = "[--json] | (([--output=<output file>] |  [--init]) [--force]) CONFIG [--secret=<PublicID:Passphrase>...]"
+			configCmd.Spec = "[--json | --yaml] | (([--output=<output file>] |  [--init]) [--force]) CONFIG [--secret=<PublicID:Passphrase>...]"
 
 			configCmd.Action = func() {
 				store, err := storage.GetDefaultConfig(*arg)
@@ -144,6 +147,8 @@ func main() {
 				configString := conf.TOMLString()
 				if *jsonOpt {
 					configString = conf.JSONString()
+				} else if *yamlOpt {
+					configString = conf.YAMLString()
 				}
 				if *initOpt {
 					configFileName, err := xdgbasedir.GetConfigFileLocation(
