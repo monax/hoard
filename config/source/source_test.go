@@ -20,13 +20,22 @@ func TestEnvironment(t *testing.T) {
 	assert.Equal(t, jsonString, conf.JSONString())
 }
 
-func TestFile(t *testing.T) {
+func TestTOMLFile(t *testing.T) {
 	tomlString := config.DefaultHoardConfig.TOMLString()
-	file := writeConfigFile(t, config.DefaultHoardConfig)
+	file := writeConfigFile(t, tomlString)
 	defer os.Remove(file)
 	conf, err := File(file).Get(&config.HoardConfig{})
 	assert.NoError(t, err)
 	assert.Equal(t, tomlString, conf.TOMLString())
+}
+
+func TestYAMLFile(t *testing.T) {
+	yamlString := config.DefaultHoardConfig.YAMLString()
+	file := writeConfigFile(t, yamlString)
+	defer os.Remove(file)
+	conf, err := File(file).Get(&config.HoardConfig{})
+	assert.NoError(t, err)
+	assert.Equal(t, yamlString, conf.YAMLString())
 }
 
 func TestCascade(t *testing.T) {
@@ -38,14 +47,14 @@ func TestCascade(t *testing.T) {
 	assert.Equal(t, *config.DefaultHoardConfig, *conf)
 
 	// Env not set so falls through to file
-	fileConfig := config.DefaultHoardConfig
+	fileConfig := config.DefaultHoardConfig.TOMLString()
 	file := writeConfigFile(t, fileConfig)
 	defer os.Remove(file)
 	conf, err = Cascade(os.Stderr, true,
 		Environment(DefaultJSONConfigEnvironmentVariable),
 		File(file)).Get(&config.HoardConfig{})
 	assert.NoError(t, err)
-	assert.Equal(t, fileConfig.TOMLString(), conf.TOMLString())
+	assert.Equal(t, fileConfig, conf.TOMLString())
 
 	// Env set so caught by environment source
 	envConfig := config.NewHoardConfig("unix:///tmp/hoard.sock'", storage.DefaultCloudConfig("aws"),
@@ -58,11 +67,10 @@ func TestCascade(t *testing.T) {
 	assert.Equal(t, envConfig.TOMLString(), conf.TOMLString())
 }
 
-func writeConfigFile(t *testing.T, hoardConfig *config.HoardConfig) string {
-	tomlString := hoardConfig.TOMLString()
+func writeConfigFile(t *testing.T, hoardConfig string) string {
 	f, err := ioutil.TempFile("", DefaultHoardConfigFileName)
 	assert.NoError(t, err)
-	f.Write(([]byte)(tomlString))
+	f.Write(([]byte)(hoardConfig))
 	f.Close()
 	return f.Name()
 }

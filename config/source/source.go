@@ -12,7 +12,7 @@ import (
 	"github.com/monax/hoard/config"
 )
 
-const DefaultHoardConfigFileName = "hoard.toml"
+const DefaultHoardConfigFileName = "hoard.conf"
 const DefaultJSONConfigEnvironmentVariable = "HOARD_JSON_CONFIG"
 const STDINFileIdentifier = "-"
 
@@ -97,7 +97,7 @@ func Cascade(logWriter io.Writer, shortCircuit bool, sources ...ConfigProvider) 
 func File(configFile string) *configSource {
 	return &configSource{
 		skip: configFile == "",
-		from: fmt.Sprintf("TOML config file at '%s'", configFile),
+		from: fmt.Sprintf("Config file at '%s'", configFile),
 		provider: func(baseConfig *config.HoardConfig) (*config.HoardConfig, error) {
 			return fromFile(configFile)
 		},
@@ -161,8 +161,11 @@ func fromFile(configFile string) (*config.HoardConfig, error) {
 		return nil, fmt.Errorf("empty config")
 	}
 
-	tomlString := string(bs)
-	return config.HoardConfigFromTOMLString(tomlString)
+	configSpec := string(bs)
+	if hoardConf, err := config.HoardConfigFromTOMLString(configSpec); err == nil {
+		return hoardConf, err
+	}
+	return config.HoardConfigFromYAMLString(configSpec)
 }
 
 func readFile(configFile string) ([]byte, error) {
