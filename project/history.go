@@ -31,6 +31,10 @@ func FullVersion() string {
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases("",
 		``,
+		"3.0.1 - 2019-03-01",
+		`### Added
+		- [CLI] Optional YAML configuration`,
+
 		"3.0.0 - 2019-02-26",
 		`### Changed
 - [PROTO] Renamed symmetric grant SecretID to PublicID
@@ -42,9 +46,7 @@ var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://gi
 ### Added
 - [NODEJS] Added integration tests including test for symmetric secrets
 - [GRANTS] Added openpgp grants example
-- [CLI] Added ability to configure secrets on command line with hoard config <config> --secret
-- 
-`,
+- [CLI] Added ability to configure secrets on command line with hoard config <config> --secret`,
 		"2.0.0 - 2019-02-21",
 		`### Changed
 - [PROTO] Upper case field names in protobuf
