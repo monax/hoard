@@ -62,7 +62,7 @@ hoard config --init gcp
 hoard config --init ipfs
 ```
 
-These will provide base configurations you can configure to meet your needs. The config is located by default in `$HOME/.config/hoard.toml` but you can specify a file with `hoard -c /path/to/config`. The XDG base directory specification is used to search for config.
+These will provide base configurations you can configure to meet your needs. The config is located by default in `$HOME/.config/hoard.conf` but you can specify a file with `hoard -c /path/to/config`. The XDG base directory specification is used to search for config.
 
 You can interact with Hoard using `hoarctl`:
 
@@ -185,7 +185,7 @@ node example.js
 ## Building
 
 To build Hoard you will need to have the following installed:
-- The Go language (with $GOPATH/bin in $PATH)
+- Go (Version >= 1.11) (with $GOPATH/bin in $PATH)
 - GNU make
 - [Protocol Buffers 3](https://github.com/google/protobuf/releases/tag/v3.3.0)
 

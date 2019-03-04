@@ -18,10 +18,13 @@
 # See http://www.grpc.io/docs/quickstart/go.html to get started.
 #
 
+export GO111MODULE := on
+export GOFLAGS := -mod=vendor
+
 SHELL := /bin/bash
 REPO := $(shell pwd)
 GOFILES_NOVENDOR := $(shell find . -path ./vendor -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
-PACKAGES_NOVENDOR := $(shell go list ./...)
+PACKAGES_NOVENDOR := $(shell go list -mod=vendor ./...)
 
 # Protobuf generated go files
 PROTO_FILES = $(shell find . -path ./vendor -prune -o -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
@@ -34,7 +37,6 @@ GOX_OUTPUT := "$DIST/{{.Dir}}_{{.OS}}_{{.Arch}}"
 export DOCKER_HUB := quay.io
 export DOCKER_REPO := $(DOCKER_HUB)/monax/hoard
 export BUILD_IMAGE := $(DOCKER_REPO):build
-
 
 # Formatting, linting and vetting
 
@@ -51,9 +53,9 @@ fix:
 	@goimports -l -w ${GOFILES_NOVENDOR}
 
 ## lint installs golint and prints recommendations for coding style.
+.PHONY: lint
 lint:
 	@echo "Running lint checks."
-	go get -u github.com/golang/lint/golint
 	@for file in $(GOFILES_NOVENDOR); do \
 		echo; \
 		golint --set_exit_status $${file}; \
@@ -66,11 +68,10 @@ lint:
 erase_vendor:
 	rm -rf ${REPO}/vendor/
 
-## install vendor uses dep to install vendored dependencies
+## install vendor uses go mod to install vendored dependencies
 .PHONY: reinstall_vendor
 reinstall_vendor: erase_vendor
-	@go get -u github.com/golang/dep/cmd/dep
-	@dep ensure -v
+	@go mod vendor
 
 ## delete the vendor directly and pull back using dep lock and constraints file
 ## will exit with an error if the working directory is not clean (any missing files or new
@@ -78,7 +79,6 @@ reinstall_vendor: erase_vendor
 .PHONY: ensure_vendor
 ensure_vendor: reinstall_vendor
 	@scripts/is_checkout_dirty.sh
-
 
 # Building
 
