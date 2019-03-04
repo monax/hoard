@@ -1,5 +1,5 @@
 # We use a multistage build to avoid bloating our deployment image with build dependencies
-FROM golang:1.10.3-alpine3.8 as builder
+FROM golang:1.11-alpine as builder
 MAINTAINER Monax <support@monax.io>
 
 ARG REPO=$GOPATH/src/github.com/monax/hoard

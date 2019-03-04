@@ -13,6 +13,7 @@ RUN rm -rf protobuf protoc-*
 RUN go get -u golang.org/x/tools/cmd/goimports
 RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN go get -u github.com/golang/dep/cmd/dep
+RUN go get -u github.com/golang/lint/golint
 
 # install aws auth binaries
 RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
