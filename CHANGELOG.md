@@ -2,6 +2,10 @@
 ## [Unreleased]
 
 
+## [3.0.1] - 2019-03-01
+### Added
+		- [CLI] Optional YAML configuration
+
 ## [3.0.0] - 2019-02-26
 ### Changed
 - [PROTO] Renamed symmetric grant SecretID to PublicID
@@ -14,8 +18,6 @@
 - [NODEJS] Added integration tests including test for symmetric secrets
 - [GRANTS] Added openpgp grants example
 - [CLI] Added ability to configure secrets on command line with hoard config <config> --secret
-- 
-
 
 ## [2.0.0] - 2019-02-21
 ### Changed
@@ -85,7 +87,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v3.0.1...HEAD
+[3.0.1]: https://github.com/monax/hoard/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/monax/hoard/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/monax/hoard/compare/v1.1.5...v2.0.0
 [1.1.5]: https://github.com/monax/hoard/compare/v1.1.4...v1.1.5
