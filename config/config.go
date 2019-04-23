@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
-	"github.com/monax/hoard/config/logging"
-	"github.com/monax/hoard/config/secrets"
-	"github.com/monax/hoard/config/storage"
+	"github.com/monax/hoard/v3/config/logging"
+	"github.com/monax/hoard/v3/config/secrets"
+	"github.com/monax/hoard/v3/config/storage"
 	yaml "gopkg.in/yaml.v2"
 )
 

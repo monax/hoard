@@ -9,8 +9,8 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/monax/hoard/config/secrets"
-	"github.com/monax/hoard/reference"
+	"github.com/monax/hoard/v3/config/secrets"
+	"github.com/monax/hoard/v3/reference"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )

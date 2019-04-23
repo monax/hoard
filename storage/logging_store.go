@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/logging"
+	"github.com/monax/hoard/v3/logging"
 )
 
 type loggingStore struct {

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/monax/hoard/config/secrets"
+	"github.com/monax/hoard/v3/config/secrets"
 
 	"os/signal"
 	"syscall"
@@ -15,12 +15,12 @@ import (
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/cmd"
-	"github.com/monax/hoard/config"
-	"github.com/monax/hoard/config/logging"
-	"github.com/monax/hoard/config/source"
-	"github.com/monax/hoard/config/storage"
-	"github.com/monax/hoard/server"
+	"github.com/monax/hoard/v3/cmd"
+	"github.com/monax/hoard/v3/config"
+	"github.com/monax/hoard/v3/config/logging"
+	"github.com/monax/hoard/v3/config/source"
+	"github.com/monax/hoard/v3/config/storage"
+	"github.com/monax/hoard/v3/server"
 )
 
 func main() {

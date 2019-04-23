@@ -8,7 +8,7 @@ import "storage.proto";
 
 package hoard;
 
-option go_package = "github.com/monax/hoard";
+option go_package = "github.com/monax/hoard/v3";
 
 option (gogoproto.protosizer_all) = true;
 

@@ -14,7 +14,6 @@ require (
 	github.com/go-stack/stack v1.8.0
 	github.com/gogo/protobuf v1.2.0
 	github.com/jawher/mow.cli v1.0.4
-	github.com/monax/hoard v3.0.1+incompatible
 	github.com/monax/relic v2.0.0+incompatible
 	github.com/stretchr/testify v1.3.0
 	go.opencensus.io v0.19.0 // indirect

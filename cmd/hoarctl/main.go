@@ -11,12 +11,12 @@ import (
 	"time"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard"
-	"github.com/monax/hoard/cmd"
-	"github.com/monax/hoard/config"
-	"github.com/monax/hoard/grant"
-	"github.com/monax/hoard/reference"
-	"github.com/monax/hoard/server"
+	"github.com/monax/hoard/v3"
+	"github.com/monax/hoard/v3/cmd"
+	"github.com/monax/hoard/v3/config"
+	"github.com/monax/hoard/v3/grant"
+	"github.com/monax/hoard/v3/reference"
+	"github.com/monax/hoard/v3/server"
 	"google.golang.org/grpc"
 )
 

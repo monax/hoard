@@ -7,8 +7,8 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard"
-	"github.com/monax/hoard/reference"
+	"github.com/monax/hoard/v3"
+	"github.com/monax/hoard/v3/reference"
 )
 
 // Decrypt does what it says on the tin
