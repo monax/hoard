@@ -12,12 +12,6 @@ setup_docker: &setup_docker
 
 version: 2
 jobs:
-  ensure_vendor:
-    <<: *defaults
-    steps:
-      - checkout
-      - run: make ensure_vendor
-
   test:
     <<: *defaults
     steps:
@@ -63,16 +57,10 @@ jobs:
 
 workflows:
   version: 2
-  
+
   test_and_release:
     jobs:
-      - ensure_vendor:
-          filters:
-            <<: *tags_filters
-
       - test:
-          requires:
-          - ensure_vendor
           filters:
             <<: *tags_filters
 
