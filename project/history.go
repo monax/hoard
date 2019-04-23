@@ -31,9 +31,13 @@ func FullVersion() string {
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases("",
 		``,
+		"3.1.0 - 2019-04-23",
+		`### Added
+- [SERVER] Added Wait() function to wait until server is ready and ListenAddress for getting bound listen address (useful when using localhost:0 for a OS selected free port)
+`,
 		"3.0.1 - 2019-03-01",
 		`### Added
-		- [CLI] Optional YAML configuration`,
+- [CLI] Optional YAML configuration`,
 
 		"3.0.0 - 2019-02-26",
 		`### Changed

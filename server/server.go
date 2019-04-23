@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"strings"
@@ -16,27 +17,30 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type server struct {
+type Server struct {
 	listenURL  string
+	listener   net.Listener
 	hoard      *hoard.Hoard
 	grpcServer *grpc.Server
+	ready      chan struct{}
 	logger     log.Logger
 }
 
-func New(listenURL string, store storage.NamedStore, secretManager secrets.Manager, logger log.Logger) *server {
-	return &server{
+func New(listenURL string, store storage.NamedStore, secretManager secrets.Manager, logger log.Logger) *Server {
+	return &Server{
 		listenURL: listenURL,
 		hoard:     hoard.NewHoard(store, secretManager, logger),
+		ready:     make(chan struct{}),
 		logger:    logger,
 	}
 }
 
-func (serv *server) Serve() error {
+func (serv *Server) Serve() error {
 	netProtocol, localAddress, err := SplitListenURL(serv.listenURL)
 	if err != nil {
 		return fmt.Errorf("failed to split listen URL '%s': %v", serv.listenURL, err)
 	}
-	listener, err := net.Listen(netProtocol, localAddress)
+	serv.listener, err = net.Listen(netProtocol, localAddress)
 	if err != nil {
 		return fmt.Errorf("failed to create listener: %v", err)
 	}
@@ -58,14 +62,30 @@ func (serv *server) Serve() error {
 	hoard.RegisterGrantServer(serv.grpcServer, hoardServer)
 	// Register reflection service on gRPC server.
 	reflection.Register(serv.grpcServer)
-	err = serv.grpcServer.Serve(listener)
+	// Announce ready
+	close(serv.ready)
+	err = serv.grpcServer.Serve(serv.listener)
 	if err != nil {
 		return fmt.Errorf("failed to start GRPC Server: %v", err)
 	}
 	return nil
 }
 
-func (serv *server) Stop() {
+func (serv *Server) ListenAddress() net.Addr {
+	return serv.listener.Addr()
+}
+
+// Wait until server is listening or context is done
+func (serv *Server) Wait(ctx context.Context) error {
+	select {
+	case <-serv.ready:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (serv *Server) Stop() {
 	serv.grpcServer.Stop()
 }
 
