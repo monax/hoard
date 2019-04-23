@@ -324,6 +324,8 @@ github.com/mitchellh/reflectwalk v1.0.0/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx
 github.com/mna/pigeon v1.0.1-0.20180808201053-bb0192cfc2ae/go.mod h1:Iym28+kJVnC1hfQvv5MUtI6AiFFzvQjHcvI4RFTG/04=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
+github.com/monax/hoard v3.0.1+incompatible h1:Mfxm/5Kvu3pp2J0WyEm70pP+TwXJC6fTd3vMbFqd33Y=
+github.com/monax/hoard v3.0.1+incompatible/go.mod h1:GtE4dUgUBRZ9rhFVKvlOCIo2ynRvFBlptYu8lBX0Tek=
 github.com/monax/relic v2.0.0+incompatible h1:5q+fw8Y7UJJuOBzGV5bZNlBk9k9ii6fzmdpwXsZKMdg=
 github.com/monax/relic v2.0.0+incompatible/go.mod h1:ZJcXg8m9tYkd2h6VeEZruhRUQPklFKbzFaTxyXrXxVk=
 github.com/mschoch/smat v0.0.0-20160514031455-90eadee771ae/go.mod h1:qAyveg+e4CE+eKJXWVjKXM4ck2QobLqTDytGJbLLhJg=
