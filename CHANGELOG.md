@@ -2,9 +2,14 @@
 ## [Unreleased]
 
 
+## [3.1.0] - 2019-04-23
+### Added
+- [SERVER] Added Wait() function to wait until server is ready and ListenAddress for getting bound listen address (useful when using localhost:0 for a OS selected free port)
+
+
 ## [3.0.1] - 2019-03-01
 ### Added
-		- [CLI] Optional YAML configuration
+- [CLI] Optional YAML configuration
 
 ## [3.0.0] - 2019-02-26
 ### Changed
@@ -87,7 +92,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v3.0.1...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/monax/hoard/compare/v3.0.1...v3.1.0
 [3.0.1]: https://github.com/monax/hoard/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/monax/hoard/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/monax/hoard/compare/v1.1.5...v2.0.0
