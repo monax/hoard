@@ -8,7 +8,7 @@
 #
 set -e
 
-REPO=${REPO:-"$GOPATH/src/github.com/monax/hoard"}
+REPO=${REPO:-"$PWD"}
 VERSION_REGEX="^v[0-9]+\.[0-9]+\.[0-9]+$"
 
 version=$(go run "$REPO/project/cmd/version/main.go")

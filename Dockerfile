@@ -1,11 +1,14 @@
 # We use a multistage build to avoid bloating our deployment image with build dependencies
-FROM golang:1.11-alpine as builder
+FROM golang:1.12.1-alpine3.9 as builder
 MAINTAINER Monax <support@monax.io>
+
+RUN apk add --update --no-cache  git
 
 ARG REPO=$GOPATH/src/github.com/monax/hoard
 COPY . $REPO
 WORKDIR $REPO
 
+ENV GO111MODULE=on
 # Build purely static binaries
 RUN go build --ldflags '-extldflags "-static"' -o bin/hoard ./cmd/hoard
 RUN go build --ldflags '-extldflags "-static"' -o bin/hoarctl ./cmd/hoarctl
@@ -14,7 +17,7 @@ RUN go build --ldflags '-extldflags "-static"' -o bin/hoarctl ./cmd/hoarctl
 # N.B. Actual runtime container definitions starts here!
 #
 # This will be our base container image
-FROM alpine:3.8
+FROM alpine:3.9
 
 # We like it when TLS works
 RUN apk add --no-cache ca-certificates

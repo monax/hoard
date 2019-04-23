@@ -31,9 +31,12 @@ func FullVersion() string {
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases("",
 		``,
-		"3.1.1 - 2019-04-23",
+		"3.2.0 - 2019-04-23",
 		`### Fixed
-- Add v3 to module declaration and update imports
+- [MODULES] Add v3 to module declaration and update imports
+
+### Removed
+- [BUILD] Remove vendor and related scripting
 `,
 		"3.1.0 - 2019-04-23",
 		`### Added

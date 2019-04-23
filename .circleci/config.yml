@@ -65,20 +65,14 @@ workflows:
             <<: *tags_filters
 
       - build_docker:
-          requires:
-          - test
           filters:
             <<: *tags_filters
 
       - test_js:
-          requires:
-          - test
           filters:
             <<: *tags_filters
 
       - test_integration:
-          requires:
-          - test
           filters:
             <<: *tags_filters
             branches:
@@ -90,6 +84,7 @@ workflows:
           requires:
           - build_docker
           - test_integration
+          - test
           filters:
             <<: *tags_filters
             branches:
