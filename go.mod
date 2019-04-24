@@ -1,4 +1,4 @@
-module github.com/monax/hoard
+module github.com/monax/hoard/v3
 
 require (
 	cloud.google.com/go v0.36.0

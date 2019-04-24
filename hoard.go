@@ -3,14 +3,14 @@ package hoard
 import (
 	"crypto/sha256"
 
-	"github.com/monax/hoard/config/secrets"
-	"github.com/monax/hoard/grant"
+	"github.com/monax/hoard/v3/config/secrets"
+	"github.com/monax/hoard/v3/grant"
 
 	"github.com/go-kit/kit/log"
 
-	"github.com/monax/hoard/encryption"
-	"github.com/monax/hoard/reference"
-	"github.com/monax/hoard/storage"
+	"github.com/monax/hoard/v3/encryption"
+	"github.com/monax/hoard/v3/reference"
+	"github.com/monax/hoard/v3/storage"
 )
 
 type DeterministicEncryptor interface {

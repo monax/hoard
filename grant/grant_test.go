@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/monax/hoard/config/secrets"
-	"github.com/monax/hoard/reference"
+	"github.com/monax/hoard/v3/config/secrets"
+	"github.com/monax/hoard/v3/reference"
 )
 
 func TestGrants(t *testing.T) {

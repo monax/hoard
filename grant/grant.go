@@ -3,8 +3,8 @@ package grant
 import (
 	"fmt"
 
-	"github.com/monax/hoard/config/secrets"
-	"github.com/monax/hoard/reference"
+	"github.com/monax/hoard/v3/config/secrets"
+	"github.com/monax/hoard/v3/reference"
 )
 
 // Seal this reference into a Grant as specified by Spec

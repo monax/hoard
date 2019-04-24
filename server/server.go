@@ -6,13 +6,13 @@ import (
 	"net"
 	"strings"
 
-	"github.com/monax/hoard"
+	"github.com/monax/hoard/v3"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/config/secrets"
-	"github.com/monax/hoard/logging"
-	"github.com/monax/hoard/logging/loggers"
-	"github.com/monax/hoard/storage"
+	"github.com/monax/hoard/v3/config/secrets"
+	"github.com/monax/hoard/v3/logging"
+	"github.com/monax/hoard/v3/logging/loggers"
+	"github.com/monax/hoard/v3/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

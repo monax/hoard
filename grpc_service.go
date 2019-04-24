@@ -3,10 +3,10 @@ package hoard
 import (
 	"context"
 
-	"github.com/monax/hoard/grant"
+	"github.com/monax/hoard/v3/grant"
 
-	"github.com/monax/hoard/reference"
-	"github.com/monax/hoard/storage"
+	"github.com/monax/hoard/v3/reference"
+	"github.com/monax/hoard/v3/storage"
 )
 
 // Here we implement the GRPC Hoard service. It should mostly be plumbing to

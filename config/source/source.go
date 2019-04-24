@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/cep21/xdgbasedir"
-	"github.com/monax/hoard/config"
+	"github.com/monax/hoard/v3/config"
 )
 
 const DefaultHoardConfigFileName = "hoard.conf"

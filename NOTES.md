@@ -1,3 +1,6 @@
-### Added
-- [SERVER] Added Wait() function to wait until server is ready and ListenAddress for getting bound listen address (useful when using localhost:0 for a OS selected free port)
+### Fixed
+- [MODULES] Add v3 to module declaration and update imports
+
+### Removed
+- [BUILD] Remove vendor and related scripting
 

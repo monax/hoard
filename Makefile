@@ -19,21 +19,16 @@
 #
 
 export GO111MODULE := on
-export GOFLAGS := -mod=vendor
 
 SHELL := /bin/bash
 REPO := $(shell pwd)
-GOFILES_NOVENDOR := $(shell find . -path ./vendor -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
-PACKAGES_NOVENDOR := $(shell go list -mod=vendor ./...)
+GOFILES := $(shell find . -name '*.pb.go' -prune -o -type f -name '*.go' -print)
 
 # Protobuf generated go files
-PROTO_FILES = $(shell find . -path ./vendor -prune -o -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
+PROTO_FILES = $(shell find . -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
 PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
-PROTO_GO_FILES_REAL = $(shell find . -path ./vendor -prune -o -type f -name '*.pb.go' -print)
+PROTO_GO_FILES_REAL = $(shell find . -type f -name '*.pb.go' -print)
 
-OS_ARCHS := "linux/arm linux/386 linux/amd64 darwin/386 darwin/amd64 windows/386 windows/amd64"
-DIST := "dist"
-GOX_OUTPUT := "$DIST/{{.Dir}}_{{.OS}}_{{.Arch}}"
 export DOCKER_HUB := quay.io
 export DOCKER_REPO := $(DOCKER_HUB)/monax/hoard
 export BUILD_IMAGE := $(DOCKER_REPO):build
@@ -44,41 +39,22 @@ export BUILD_IMAGE := $(DOCKER_REPO):build
 .PHONY: check
 check:
 	@echo "Checking code for formatting style compliance."
-	@goimports -l -d ${GOFILES_NOVENDOR}
-	@goimports -l ${GOFILES_NOVENDOR} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
+	@goimports -l -d ${GOFILES}
+	@goimports -l ${GOFILES} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
 
 ## just fix it
 .PHONY: fix
 fix:
-	@goimports -l -w ${GOFILES_NOVENDOR}
+	@goimports -l -w ${GOFILES}
 
 ## lint installs golint and prints recommendations for coding style.
 .PHONY: lint
 lint:
 	@echo "Running lint checks."
-	@for file in $(GOFILES_NOVENDOR); do \
+	@for file in $(GOFILES); do \
 		echo; \
 		golint --set_exit_status $${file}; \
 	done
-
-# Dependency Management
-
-## erase vendor wipes the full vendor directory
-.PHONY: erase_vendor
-erase_vendor:
-	rm -rf ${REPO}/vendor/
-
-## install vendor uses go mod to install vendored dependencies
-.PHONY: reinstall_vendor
-reinstall_vendor: erase_vendor
-	@go mod vendor
-
-## delete the vendor directly and pull back using dep lock and constraints file
-## will exit with an error if the working directory is not clean (any missing files or new
-## untracked ones)
-.PHONY: ensure_vendor
-ensure_vendor: reinstall_vendor
-	@scripts/is_checkout_dirty.sh
 
 # Building
 
@@ -91,7 +67,7 @@ commit_hash:
 
 ## compile hoard.proto interface definition
 %.pb.go: %.proto
-	protoc -I protobuf -I vendor $< --gogo_out=plugins=grpc:${GOPATH}/src
+	protoc -I protobuf $< --gogo_out=plugins=grpc:${GOPATH}/src
 
 .PHONY: protobuf
 protobuf: $(PROTO_GO_FILES)
@@ -136,7 +112,7 @@ build_dist:
 
 .PHONY:	test
 test: check
-	@scripts/bin_wrapper.sh go test -v ./... ${GOPACKAGES_NOVENDOR}
+	@scripts/bin_wrapper.sh go test -v ./...
 
 .PHONY: test_js
 test_js: build install
@@ -147,7 +123,7 @@ test_js: build install
 ## run tests including integration tests
 .PHONY:	test_integration
 test_integration: check
-	@go test -v -tags integration ./... ${GOPACKAGES_NOVENDOR}
+	@go test -v -tags integration ./...
 	@scripts/integration/test_aws.sh
 	@scripts/integration/test_gcp.sh
 	@scripts/integration/test_ipfs.sh

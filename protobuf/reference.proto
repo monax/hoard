@@ -4,7 +4,7 @@ import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 package reference;
 
-option go_package = "github.com/monax/hoard/reference";
+option go_package = "github.com/monax/hoard/v3/reference";
 
 option (gogoproto.protosizer_all) = true;
 
