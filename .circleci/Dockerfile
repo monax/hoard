@@ -2,6 +2,7 @@ FROM golang:1.12.1-alpine3.9
 MAINTAINER Monax <support@monax.io>
 
 ENV PROTO_VERSION 3.3.0
+ENV GORELEASER_VERSION "v0.104.1"
 
 RUN apk add --update --no-cache \
  nodejs \
@@ -34,6 +35,8 @@ RUN go get -u golang.org/x/tools/cmd/goimports
 RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN go get -u golang.org/x/lint/golint
 ENV GO111MODULE=on
+
+RUN cd /usr/bin && curl -L https://github.com/goreleaser/goreleaser/releases/download/$GORELEASER_VERSION/goreleaser_Linux_x86_64.tar.gz | tar xz goreleaser
 
 # install aws auth binaries
 RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
