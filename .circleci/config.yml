@@ -47,13 +47,13 @@ jobs:
       - run: gcloud auth activate-service-account --key-file=/tmp/gcloud-service-key.json
       - run: make test_integration
 
-  push_latest:
+  release:
     <<: *defaults
     steps:
       - setup_remote_docker:
           <<: *setup_docker
       - checkout
-      - run: make latest
+      - run: make release
 
 workflows:
   version: 2
@@ -80,7 +80,7 @@ workflows:
               - develop
               - master
 
-      - push_latest:
+      - release:
           requires:
           - build_docker
           - test_integration

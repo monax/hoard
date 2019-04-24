@@ -154,19 +154,16 @@ NOTES.md: project/history.go project/cmd/notes/main.go
 docs: CHANGELOG.md NOTES.md
 
 ## tag the current HEAD commit with the current release defined in
-## ./project/history.go
+## ./project/history.go and push to remote to trigger actual release
 .PHONY: tag_release
 tag_release: test check docs build
 	@scripts/tag_release.sh
 
+## To be run by CI to effect actual release
 .PHONY: release
-release: tag_release
+release:
 	@scripts/is_checkout_dirty.sh || (echo "checkout is dirty so not releasing!" && exit 1)
 	@scripts/release.sh
-
-.PHONY: latest
-latest:
-	@scripts/release.sh latest
 
 .PHONY: build_ci_image
 build_ci_image:

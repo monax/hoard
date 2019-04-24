@@ -8,11 +8,11 @@ function publish {
     echo "Building and pushing $tag..."
     $script_dir/build_tool.sh ${tag#v}
     echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} ${DOCKER_HUB} --password-stdin
-    docker build -t quay.io/monax/hoard:${tag#v} .
+    docker build -t quay.io/monax/hoard:${tag#v} -t quay.io/monax/hoard:latest .
     docker push quay.io/monax/hoard:${tag#v}
 }
 
-if [[ -z ${DOCKER_USER} || -z ${DOCKER_PASS} ]]; then 
+if [[ -z ${DOCKER_USER} || -z ${DOCKER_PASS} ]]; then
     echo '$DOCKER_USER and $DOCKER_PASS not set.'
     exit 1
 fi
@@ -31,7 +31,6 @@ if [[ ! ${tag} ]]; then
     exit 0
 fi
 
-publish
 
 # Only release semantic version syntax tags
 version_regex="^v[0-9]+\.[0-9]+\.[0-9]+$"
@@ -39,5 +38,7 @@ if [[ ! ${tag} =~ ${version_regex} ]] ; then
     echo "Tag '$tag' does not match version regex '$version_regex' so not releasing."
     exit 0
 fi
+
+publish
 
 [[ -e notes.md ]] && goreleaser --release-notes notes.md || goreleaser
