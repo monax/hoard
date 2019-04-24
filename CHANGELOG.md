@@ -2,6 +2,11 @@
 ## [Unreleased]
 
 
+## [3.2.1] - 2019-04-24
+### Fixed
+- [RELEASE] Push latest tag with version tag and perform release on CI
+
+
 ## [3.2.0] - 2019-04-23
 ### Fixed
 - [MODULES] Add v3 to module declaration and update imports
@@ -100,7 +105,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/monax/hoard/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/monax/hoard/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/monax/hoard/compare/v3.0.1...v3.1.0
 [3.0.1]: https://github.com/monax/hoard/compare/v3.0.0...v3.0.1

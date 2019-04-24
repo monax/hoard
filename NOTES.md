@@ -1,6 +1,3 @@
 ### Fixed
-- [MODULES] Add v3 to module declaration and update imports
-
-### Removed
-- [BUILD] Remove vendor and related scripting
+- [RELEASE] Push latest tag with version tag and perform release on CI
 
