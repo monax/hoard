@@ -36,7 +36,7 @@ func (inv *memoryStore) Stat(address []byte) (*StatInfo, error) {
 	data, exists := inv.get(address)
 	return &StatInfo{
 		Exists: exists,
-		Size:   uint64(len(data)),
+		Size_:  uint64(len(data)),
 	}, nil
 }
 

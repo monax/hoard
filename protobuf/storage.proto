@@ -1,12 +1,8 @@
 syntax = "proto3";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-
 package storage;
 
-option go_package = "github.com/monax/hoard/v3/storage";
-
-option (gogoproto.protosizer_all) = true;
+option go_package = "github.com/monax/hoard/v4/storage";
 
 message StatInfo {
     // The address will be the same as the one passed in but is repeated to
@@ -21,4 +17,3 @@ message StatInfo {
     // will be hypothetical if the blob does not exist
     string Location = 4;
 }
-

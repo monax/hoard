@@ -6,9 +6,9 @@ import (
 
 	"io/ioutil"
 
-	"github.com/monax/hoard/v3/config"
-	"github.com/monax/hoard/v3/config/logging"
-	"github.com/monax/hoard/v3/config/storage"
+	"github.com/monax/hoard/v4/config"
+	"github.com/monax/hoard/v4/config/logging"
+	"github.com/monax/hoard/v4/config/storage"
 	"github.com/stretchr/testify/assert"
 )
 

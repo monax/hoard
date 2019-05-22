@@ -13,9 +13,6 @@ ENV GO111MODULE=on
 RUN go build --ldflags '-extldflags "-static"' -o bin/hoard ./cmd/hoard
 RUN go build --ldflags '-extldflags "-static"' -o bin/hoarctl ./cmd/hoarctl
 
-#
-# N.B. Actual runtime container definitions starts here!
-#
 # This will be our base container image
 FROM alpine:3.9
 

@@ -5,7 +5,7 @@ import (
 	"path"
 
 	"github.com/cep21/xdgbasedir"
-	"github.com/monax/hoard/v3/storage"
+	"github.com/monax/hoard/v4/storage"
 )
 
 type FileSystemConfig struct {

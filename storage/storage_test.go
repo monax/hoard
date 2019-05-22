@@ -22,7 +22,7 @@ func testStore(t *testing.T, store Store) {
 	stat, err := store.Stat(address)
 	if assert.NoError(t, err) {
 		assert.True(t, stat.Exists)
-		assert.Equal(t, uint64(len(data)), stat.Size)
+		assert.Equal(t, uint64(len(data)), stat.Size_)
 	}
 
 	stat, err = store.Stat(bs("bar"))

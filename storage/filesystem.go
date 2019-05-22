@@ -38,7 +38,7 @@ func (inv *fileSystemStore) Stat(address []byte) (*StatInfo, error) {
 	// Any kind of error means we should set exists false
 	statInfo.Exists = err == nil
 	if statInfo.Exists {
-		statInfo.Size = uint64(fileInfo.Size())
+		statInfo.Size_ = uint64(fileInfo.Size())
 	}
 	// Don't treat not existing as an error
 	if os.IsNotExist(err) {

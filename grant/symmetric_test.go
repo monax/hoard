@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/monax/hoard/v3/reference"
+	"github.com/monax/hoard/v4/reference"
 )
 
 func TestSymmetricGrant(t *testing.T) {

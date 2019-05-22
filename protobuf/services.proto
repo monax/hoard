@@ -1,16 +1,12 @@
 syntax = "proto3";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-
 import "reference.proto";
 import "grant.proto";
 import "storage.proto";
 
-package hoard;
+package services;
 
-option go_package = "github.com/monax/hoard/v3";
-
-option (gogoproto.protosizer_all) = true;
+option go_package = "github.com/monax/hoard/v4/services";
 
 service Grant {
     // Seal a Reference to create a Grant

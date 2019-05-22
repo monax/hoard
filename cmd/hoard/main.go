@@ -2,25 +2,22 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"strings"
-
-	"github.com/monax/hoard/v3/config/secrets"
-
-	"os/signal"
-	"syscall"
-
 	"io/ioutil"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v3/cmd"
-	"github.com/monax/hoard/v3/config"
-	"github.com/monax/hoard/v3/config/logging"
-	"github.com/monax/hoard/v3/config/source"
-	"github.com/monax/hoard/v3/config/storage"
-	"github.com/monax/hoard/v3/server"
+	"github.com/monax/hoard/v4/cmd"
+	"github.com/monax/hoard/v4/config"
+	"github.com/monax/hoard/v4/config/logging"
+	"github.com/monax/hoard/v4/config/secrets"
+	"github.com/monax/hoard/v4/config/source"
+	"github.com/monax/hoard/v4/config/storage"
+	"github.com/monax/hoard/v4/server"
 )
 
 func main() {

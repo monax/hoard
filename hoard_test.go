@@ -3,11 +3,11 @@ package hoard
 import (
 	"testing"
 
-	"github.com/monax/hoard/v3/config/secrets"
+	"github.com/monax/hoard/v4/config/secrets"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v3/reference"
-	"github.com/monax/hoard/v3/storage"
+	"github.com/monax/hoard/v4/reference"
+	"github.com/monax/hoard/v4/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +29,7 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	assert.True(t, statInfo.Exists)
 	// Our GCM cipher should be running an overhead of 16 bytes
 	// (no IV, but 16-byte authentication tag)
-	assert.Equal(t, uint64(len(bunsIn))+16, statInfo.Size)
+	assert.Equal(t, uint64(len(bunsIn))+16, statInfo.Size_)
 
 	loc := hrd.Store().Location(ref.Address)
 	assert.Equal(t, "memfs://2768b87bc22a7f0f20eb268937a00d682bc5dc21a62badf1d24c78633436a1b7", loc)
