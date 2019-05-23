@@ -2,6 +2,11 @@
 ## [Unreleased]
 
 
+## [4.0.0] - 2019-05-21
+###Fixed
+- [BUILD] Change hoard.pb.go to services/services.pb.go
+
+
 ## [3.2.1] - 2019-04-24
 ### Fixed
 - [RELEASE] Push latest tag with version tag and perform release on CI
@@ -105,7 +110,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/monax/hoard/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/monax/hoard/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/monax/hoard/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/monax/hoard/compare/v3.0.1...v3.1.0

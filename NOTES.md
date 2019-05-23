@@ -1,3 +1,3 @@
-### Fixed
-- [RELEASE] Push latest tag with version tag and perform release on CI
+###Fixed
+- [BUILD] Change hoard.pb.go to services/services.pb.go
 
