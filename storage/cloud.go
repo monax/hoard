@@ -13,8 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v3/logging"
-	"github.com/monax/hoard/v3/logging/structure"
+	"github.com/monax/hoard/v4/logging"
+	"github.com/monax/hoard/v4/logging/structure"
 	"gocloud.dev/blob"
 	"gocloud.dev/blob/azureblob"
 	"gocloud.dev/blob/gcsblob"
@@ -169,7 +169,7 @@ func (inv *cloudStore) Stat(address []byte) (*StatInfo, error) {
 		"encoded_address", inv.encode(address))
 	return &StatInfo{
 		Exists: true,
-		Size:   uint64(n),
+		Size_:  uint64(n),
 	}, nil
 }
 

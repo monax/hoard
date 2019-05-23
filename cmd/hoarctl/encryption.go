@@ -7,8 +7,8 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v3"
-	"github.com/monax/hoard/v3/reference"
+	"github.com/monax/hoard/v4/reference"
+	"github.com/monax/hoard/v4/services"
 )
 
 // Decrypt does what it says on the tin
@@ -19,12 +19,12 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		encryptedData := readData()
 		plaintext, err := client.encryption.Decrypt(context.Background(),
-			&hoard.ReferenceAndCiphertext{
+			&services.ReferenceAndCiphertext{
 				Reference: &reference.Ref{
 					SecretKey: readBase64(secretKey),
 					Salt:      parseSalt(salt),
 				},
-				Ciphertext: &hoard.Ciphertext{
+				Ciphertext: &services.Ciphertext{
 					EncryptedData: encryptedData,
 				},
 			})
@@ -45,7 +45,7 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 			fatalf("could read bytes from STDIN to store: %v", err)
 		}
 		refAndCiphertext, err := client.encryption.Encrypt(context.Background(),
-			&hoard.Plaintext{
+			&services.Plaintext{
 				Data: data,
 				Salt: parseSalt(salt),
 			})
@@ -63,7 +63,7 @@ func (client *Client) Ref(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		data := readData()
 		refAndCiphertext, err := client.encryption.Encrypt(context.Background(),
-			&hoard.Plaintext{
+			&services.Plaintext{
 				Data: data,
 				Salt: parseSalt(salt),
 			})

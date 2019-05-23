@@ -1,23 +1,23 @@
-package hoard
+package services
 
 import (
 	"context"
 
-	"github.com/monax/hoard/v3/grant"
-
-	"github.com/monax/hoard/v3/reference"
-	"github.com/monax/hoard/v3/storage"
+	"github.com/monax/hoard/v4"
+	"github.com/monax/hoard/v4/grant"
+	"github.com/monax/hoard/v4/reference"
+	"github.com/monax/hoard/v4/storage"
 )
 
 // Here we implement the GRPC Hoard service. It should mostly be plumbing to
 // a DeterministicEncryptedStore (for which hoard.hoard is the canonical example)
 // and also to Grants.
 type grpcService struct {
-	des DeterministicEncryptedStore
-	gs  GrantService
+	des hoard.DeterministicEncryptedStore
+	gs  hoard.GrantService
 }
 
-func NewHoardServer(des DeterministicEncryptedStore, gs GrantService) *grpcService {
+func NewHoardServer(des hoard.DeterministicEncryptedStore, gs hoard.GrantService) *grpcService {
 	return &grpcService{
 		des: des,
 		gs:  gs,

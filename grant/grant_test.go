@@ -4,10 +4,9 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/monax/hoard/v4/config/secrets"
+	"github.com/monax/hoard/v4/reference"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/monax/hoard/v3/config/secrets"
-	"github.com/monax/hoard/v3/reference"
 )
 
 func TestGrants(t *testing.T) {

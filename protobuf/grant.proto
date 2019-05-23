@@ -1,12 +1,8 @@
 syntax = "proto3";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-
 package grant;
 
-option go_package = "github.com/monax/hoard/v3/grant";
-
-option (gogoproto.protosizer_all) = true;
+option go_package = "github.com/monax/hoard/v4/grant";
 
 message Grant {
     // The grantSpec provides sufficient information to decrypt the reference
@@ -17,7 +13,6 @@ message Grant {
 }
 
 message Spec {
-    option (gogoproto.onlyone) = true;
     PlaintextSpec Plaintext = 1;
     SymmetricSpec Symmetric = 2;
     OpenPGPSpec OpenPGP = 3;

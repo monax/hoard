@@ -22,7 +22,7 @@ export GO111MODULE := on
 
 SHELL := /bin/bash
 REPO := $(shell pwd)
-GOFILES := $(shell find . -name '*.pb.go' -prune -o -type f -name '*.go' -print)
+GOFILES := $(shell find . -name '*.pb.go' -prune -o -not -path './vendor/*' -type f -name '*.go' -print)
 
 # Protobuf generated go files
 PROTO_FILES = $(shell find . -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
@@ -67,10 +67,13 @@ commit_hash:
 
 ## compile hoard.proto interface definition
 %.pb.go: %.proto
-	protoc -I protobuf $< --gogo_out=plugins=grpc:${GOPATH}/src
+	@mkdir -p .gopath
+	protoc -I protobuf $< --gogo_out=plugins=grpc:.gopath
 
 .PHONY: protobuf
 protobuf: $(PROTO_GO_FILES)
+	rsync -r .gopath/github.com/monax/hoard/v4/ ./
+	rm -rf .gopath
 
 .PHONY: clean_protobuf
 clean_protobuf:

@@ -94,7 +94,7 @@ func (inv *ipfsStore) Stat(address []byte) (*StatInfo, error) {
 
 	return &StatInfo{
 		Exists: true,
-		Size:   uint64(len(body)),
+		Size_:  uint64(len(body)),
 	}, nil
 }
 

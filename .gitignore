@@ -23,3 +23,5 @@ commit_hash.txt
 node_modules
 
 .vscode/
+vendor/
+.gopath
