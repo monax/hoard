@@ -4,7 +4,7 @@ const path = require('path')
 
 const LOCAL_PATH = path.join(__dirname, './protobuf');
 const PROTO_PATH = path.join(__dirname, '../protobuf');
-const PROTO_FILE = 'hoard.proto';
+const PROTO_FILE = 'services.proto';
 
 const protoLoader = require('@grpc/proto-loader');
 const grpc = require('grpc')
@@ -26,7 +26,7 @@ const HoardClient = function () {};
 
 // HoardClient uses dynamic types and mapping
 const HoardClientDynamic = function (address) {
-    const hoard_proto = grpc.loadPackageDefinition(packageDefinition).hoard;
+    const hoard_proto = grpc.loadPackageDefinition(packageDefinition).services;
     this.cleartextClient = new hoard_proto.Cleartext(address,
         grpc.credentials.createInsecure());
     this.encryptionClient = new hoard_proto.Encryption(address,
