@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/monax/hoard/v4/stores"
+	"github.com/monax/hoard/v5/stores"
 
 	"github.com/cep21/xdgbasedir"
 )

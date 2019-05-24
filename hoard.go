@@ -4,11 +4,11 @@ import (
 	"crypto/sha256"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v4/config"
-	"github.com/monax/hoard/v4/encryption"
-	"github.com/monax/hoard/v4/grant"
-	"github.com/monax/hoard/v4/reference"
-	"github.com/monax/hoard/v4/stores"
+	"github.com/monax/hoard/v5/config"
+	"github.com/monax/hoard/v5/encryption"
+	"github.com/monax/hoard/v5/grant"
+	"github.com/monax/hoard/v5/reference"
+	"github.com/monax/hoard/v5/stores"
 )
 
 type DeterministicEncryptor interface {

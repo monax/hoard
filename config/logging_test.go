@@ -5,7 +5,7 @@ import (
 
 	"bytes"
 
-	"github.com/monax/hoard/v4/logging/structure"
+	"github.com/monax/hoard/v5/logging/structure"
 	"github.com/stretchr/testify/assert"
 )
 

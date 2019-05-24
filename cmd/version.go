@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v4/project"
+	"github.com/monax/hoard/v5/project"
 )
 
 func AddVersionCommand(cmd *cli.Cli) {

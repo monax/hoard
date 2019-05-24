@@ -8,15 +8,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/monax/hoard/v4/stores"
+	"github.com/monax/hoard/v5/stores"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v4/logging"
-	"github.com/monax/hoard/v4/logging/structure"
+	"github.com/monax/hoard/v5/logging"
+	"github.com/monax/hoard/v5/logging/structure"
 	"gocloud.dev/blob"
 	"gocloud.dev/blob/azureblob"
 	"gocloud.dev/blob/gcsblob"

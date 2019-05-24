@@ -7,9 +7,9 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
-	grant "github.com/monax/hoard/v4/grant"
-	reference "github.com/monax/hoard/v4/reference"
-	stores "github.com/monax/hoard/v4/stores"
+	grant "github.com/monax/hoard/v5/grant"
+	reference "github.com/monax/hoard/v5/reference"
+	stores "github.com/monax/hoard/v5/stores"
 	grpc "google.golang.org/grpc"
 	math "math"
 )

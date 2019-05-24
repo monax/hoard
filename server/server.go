@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v4"
-	"github.com/monax/hoard/v4/api"
-	"github.com/monax/hoard/v4/config"
-	"github.com/monax/hoard/v4/logging"
-	"github.com/monax/hoard/v4/logging/loggers"
-	"github.com/monax/hoard/v4/stores"
+	"github.com/monax/hoard/v5"
+	"github.com/monax/hoard/v5/api"
+	"github.com/monax/hoard/v5/config"
+	"github.com/monax/hoard/v5/logging"
+	"github.com/monax/hoard/v5/logging/loggers"
+	"github.com/monax/hoard/v5/stores"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

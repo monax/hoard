@@ -3,7 +3,7 @@ package stores
 import (
 	"fmt"
 
-	"github.com/monax/hoard/v4/sync"
+	"github.com/monax/hoard/v5/sync"
 )
 
 // The number of mutexes that will be available for all possible addresses.

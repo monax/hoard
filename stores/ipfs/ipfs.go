@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/monax/hoard/v4/stores"
+	"github.com/monax/hoard/v5/stores"
 )
 
 type ipfsStore struct {
