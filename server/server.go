@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/monax/hoard/v4"
-	"github.com/monax/hoard/v4/config/secrets"
+	"github.com/monax/hoard/v4/api"
+	"github.com/monax/hoard/v4/config"
 	"github.com/monax/hoard/v4/logging"
 	"github.com/monax/hoard/v4/logging/loggers"
-	"github.com/monax/hoard/v4/services"
-	"github.com/monax/hoard/v4/storage"
+	"github.com/monax/hoard/v4/stores"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -26,7 +26,7 @@ type Server struct {
 	logger     log.Logger
 }
 
-func New(listenURL string, store storage.NamedStore, secretManager secrets.Manager, logger log.Logger) *Server {
+func New(listenURL string, store stores.NamedStore, secretManager config.SecretsManager, logger log.Logger) *Server {
 	return &Server{
 		listenURL: listenURL,
 		hoard:     hoard.NewHoard(store, secretManager, logger),
@@ -55,11 +55,11 @@ func (serv *Server) Serve() error {
 	logging.InfoMsg(serv.logger, "Initialising Hoard server",
 		"store_name", serv.hoard.Name())
 
-	hoardServer := services.NewHoardServer(serv.hoard, serv.hoard)
-	services.RegisterCleartextServer(serv.grpcServer, hoardServer)
-	services.RegisterEncryptionServer(serv.grpcServer, hoardServer)
-	services.RegisterStorageServer(serv.grpcServer, hoardServer)
-	services.RegisterGrantServer(serv.grpcServer, hoardServer)
+	hoardServer := hoard.NewServer(serv.hoard, serv.hoard)
+	api.RegisterCleartextServer(serv.grpcServer, hoardServer)
+	api.RegisterEncryptionServer(serv.grpcServer, hoardServer)
+	api.RegisterStorageServer(serv.grpcServer, hoardServer)
+	api.RegisterGrantServer(serv.grpcServer, hoardServer)
 	// Register reflection service on gRPC server.
 	reflection.Register(serv.grpcServer)
 	// Announce ready

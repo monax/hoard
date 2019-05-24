@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package stores;
+
+option go_package = "github.com/monax/hoard/v4/stores";
+
+message StatInfo {
+    // The address will be the same as the one passed in but is repeated to
+    // make result self-describing
+    bytes Address = 1;
+    // If the blob does not exist this will be false instead of returning an
+    // error
+    bool Exists = 2;
+    // Will be 0 if the blob does not existing (or omitted under protobuf3)
+    uint64 Size = 3;
+    // The externally resolvable location of the encrypted blob. The location
+    // will be hypothetical if the blob does not exist
+    string Location = 4;
+}

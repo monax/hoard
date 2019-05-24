@@ -6,8 +6,8 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
+	"github.com/monax/hoard/v4/api"
 	"github.com/monax/hoard/v4/grant"
-	"github.com/monax/hoard/v4/services"
 )
 
 // PutSeal encrypts and stores data then prints a grant
@@ -29,8 +29,8 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 
 		data := readData()
 		seal, err = client.grant.PutSeal(context.Background(),
-			&services.PlaintextAndGrantSpec{
-				Plaintext: &services.Plaintext{
+			&api.PlaintextAndGrantSpec{
+				Plaintext: &api.Plaintext{
 					Data: data,
 					Salt: parseSalt(salt),
 				},
@@ -61,7 +61,7 @@ func (client *Client) Seal(cmd *cli.Cmd) {
 
 		ref := readReference(address)
 		seal, err := client.grant.Seal(context.Background(),
-			&services.ReferenceAndGrantSpec{
+			&api.ReferenceAndGrantSpec{
 				Reference: ref,
 				GrantSpec: &spec,
 			},
@@ -90,7 +90,7 @@ func (client *Client) Reseal(cmd *cli.Cmd) {
 		}
 
 		ref, err := client.grant.Reseal(context.Background(),
-			&services.GrantAndGrantSpec{
+			&api.GrantAndGrantSpec{
 				Grant:     prev,
 				GrantSpec: &next,
 			})

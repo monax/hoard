@@ -4,7 +4,7 @@
 
 ## [4.0.0] - 2019-05-21
 ###Fixed
-- [BUILD] Change hoard.pb.go to services/services.pb.go
+- [BUILD] Change hoard.pb.go to services/api.pb.go
 
 
 ## [3.2.1] - 2019-04-24

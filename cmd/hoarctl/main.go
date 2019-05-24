@@ -10,13 +10,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/monax/hoard/v4/api"
+
 	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/v4/cmd"
 	"github.com/monax/hoard/v4/config"
 	"github.com/monax/hoard/v4/grant"
 	"github.com/monax/hoard/v4/reference"
 	"github.com/monax/hoard/v4/server"
-	"github.com/monax/hoard/v4/services"
 	"google.golang.org/grpc"
 )
 
@@ -31,10 +32,10 @@ const (
 
 // Client scopes the available hoard clients
 type Client struct {
-	cleartext  services.CleartextClient
-	encryption services.EncryptionClient
-	grant      services.GrantClient
-	storage    services.StorageClient
+	cleartext  api.CleartextClient
+	encryption api.EncryptionClient
+	grant      api.GrantClient
+	storage    api.StorageClient
 }
 
 func main() {
@@ -62,10 +63,10 @@ func main() {
 		if err != nil {
 			fatalf("Could not dial hoard server on %s: %v", *dialURL, err)
 		}
-		client.cleartext = services.NewCleartextClient(conn)
-		client.encryption = services.NewEncryptionClient(conn)
-		client.grant = services.NewGrantClient(conn)
-		client.storage = services.NewStorageClient(conn)
+		client.cleartext = api.NewCleartextClient(conn)
+		client.encryption = api.NewEncryptionClient(conn)
+		client.grant = api.NewGrantClient(conn)
+		client.storage = api.NewStorageClient(conn)
 	}
 
 	cmd.AddVersionCommand(hoarctlApp)

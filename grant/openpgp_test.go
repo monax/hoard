@@ -4,7 +4,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/monax/hoard/v4/config/secrets"
+	"github.com/monax/hoard/v4/config"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,7 @@ func TestOpenPGPGrant(t *testing.T) {
 	keyPrivate, err := ioutil.ReadFile("private.key.asc")
 	assert.NoError(t, err)
 
-	testPGP := secrets.OpenPGPSecret{
+	testPGP := config.OpenPGPSecret{
 		PrivateID: "10449759736975846181",
 		Data:      keyPrivate,
 	}

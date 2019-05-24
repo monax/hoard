@@ -1,3 +1,3 @@
 ###Fixed
-- [BUILD] Change hoard.pb.go to services/services.pb.go
+- [BUILD] Change hoard.pb.go to services/api.pb.go
 
