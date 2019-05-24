@@ -29,10 +29,20 @@ func FullVersion() string {
 // To cut a new release add a release to the front of this slice then run the
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
-	MustDeclareReleases("",
+	MustDeclareReleases(
+		"",
 		``,
+		"5.0.0 - 2019-05-24",
+		`This breaking changes refactors the exported API to make it possible to have a much more minimal import tree. Not all storage backends are imported when depending just on api (containing protobuf generated code) or on hoard/v5 root package which allows, for instance, importing the root package to run an in memory test server without all the storage backend dependencies.
+
+### Changed
+- Renamed services package to api
+- Move services.NewHoardServer to hoard.NewServer
+- Renamed storage package to stores
+- Made ipfs and cloud their own subpackages to avoid massive import tree
+`,
 		"4.0.0 - 2019-05-21",
-		`###Fixed
+		`### Fixed
 - [BUILD] Change hoard.pb.go to services/api.pb.go
 `,
 		"3.2.1 - 2019-04-24",
