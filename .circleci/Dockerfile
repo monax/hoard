@@ -24,6 +24,7 @@ RUN apk add --update --no-cache \
  py-pip
 
 RUN pip install docker-compose
+RUN npm install -g npm-cli-login
 
 RUN curl -OL https://github.com/google/protobuf/releases/download/v${PROTO_VERSION}/protoc-${PROTO_VERSION}-linux-x86_64.zip
 RUN mkdir -p protobuf
@@ -34,7 +35,6 @@ RUN rm -rf protobuf protoc-*
 RUN go get -u golang.org/x/tools/cmd/goimports
 RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN go get -u golang.org/x/lint/golint
-RUN go get -u github.com/goreleaser/goreleaser
 ENV GO111MODULE=on
 
 RUN cd /usr/bin && curl -L https://github.com/goreleaser/goreleaser/releases/download/$GORELEASER_VERSION/goreleaser_Linux_x86_64.tar.gz | tar xz goreleaser
@@ -48,3 +48,4 @@ RUN python ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 RUN curl https://sdk.cloud.google.com | bash
 RUN ls /root/google-cloud-sdk/bin/
 ENV PATH /root/google-cloud-sdk/bin/:$PATH
+

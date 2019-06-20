@@ -175,11 +175,3 @@ build_ci_image:
 .PHONY: push_ci_image
 push_ci_image: build_ci_image
 	docker push ${BUILD_IMAGE}
-
-.PHONY: npm_install
-npm_install:
-	@npm install
-
-.PHONY: npm_publish
-npm_publish:
-	npm publish --access public .

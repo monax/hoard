@@ -4,14 +4,6 @@ set -e
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-function publish {
-    echo "Building and pushing $tag..."
-    $script_dir/build_tool.sh ${tag#v}
-    echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} ${DOCKER_HUB} --password-stdin
-    docker build -t quay.io/monax/hoard:${tag#v} -t quay.io/monax/hoard:latest .
-    docker push quay.io/monax/hoard:${tag#v}
-}
-
 if [[ -z ${DOCKER_USER} || -z ${DOCKER_PASS} ]]; then
     echo '$DOCKER_USER and $DOCKER_PASS not set.'
     exit 1
@@ -39,6 +31,14 @@ if [[ ! ${tag} =~ ${version_regex} ]] ; then
     exit 0
 fi
 
-publish
+echo "Building and pushing $tag..."
+$script_dir/build_tool.sh ${tag#v}
+echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} ${DOCKER_HUB} --password-stdin
+docker build -t quay.io/monax/hoard:${tag#v} -t quay.io/monax/hoard:latest .
+docker push quay.io/monax/hoard:${tag#v}
+
+npm-cli-login
+npm version from-git
+npm publish --access public .
 
 [[ -e notes.md ]] && goreleaser --release-notes notes.md || goreleaser
