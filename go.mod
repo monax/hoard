@@ -1,4 +1,4 @@
-module github.com/monax/hoard/v4
+module github.com/monax/hoard/v5
 
 go 1.12
 

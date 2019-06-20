@@ -11,13 +11,9 @@ import (
 	"github.com/cep21/xdgbasedir"
 	"github.com/go-kit/kit/log"
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v4/cmd"
-	"github.com/monax/hoard/v4/config"
-	"github.com/monax/hoard/v4/config/logging"
-	"github.com/monax/hoard/v4/config/secrets"
-	"github.com/monax/hoard/v4/config/source"
-	"github.com/monax/hoard/v4/config/storage"
-	"github.com/monax/hoard/v4/server"
+	"github.com/monax/hoard/v5/cmd"
+	"github.com/monax/hoard/v5/config"
+	"github.com/monax/hoard/v5/server"
 )
 
 func main() {
@@ -37,7 +33,7 @@ func main() {
 
 	environmentOpt := hoardApp.BoolOpt("e env", false,
 		fmt.Sprintf("Parse the contents of the environment variable %s as a complete JSON config",
-			source.DefaultJSONConfigEnvironmentVariable))
+			config.DefaultJSONConfigEnvironmentVariable))
 
 	// This string spec is parsed by mow.cli and has actual semantic significance
 	// around optionality and ordering of options and arguments
@@ -54,22 +50,22 @@ func main() {
 		var logger log.Logger
 
 		if *loggingOpt {
-			logger, err = logging.LoggerFromLoggingConfig(conf.Logging, os.Stderr)
+			logger, err = config.Logger(conf.Logging, os.Stderr)
 			if err != nil {
 				fatalf("Could not create logging form logging config: %s", err)
 			}
 		}
 
-		store, err := storage.StoreFromStorageConfig(conf.Storage, logger)
+		store, err := StoreFromStorageConfig(conf.Storage, logger)
 		if err != nil {
 			fatalf("Could not configure store from storage config: %s", err)
 		}
 		if *listenAddressOpt != "" {
 			conf.ListenAddress = *listenAddressOpt
 		}
-		symmetricProvider := secrets.ProviderFromConfig(conf.Secrets)
-		openPGPConf := secrets.OpenPGPFromConfig(conf.Secrets)
-		sm := secrets.Manager{Provider: symmetricProvider, OpenPGP: openPGPConf}
+		symmetricProvider := config.NewSymmetricProvider(conf.Secrets)
+		openPGPConf := config.NewOpenPGPSecret(conf.Secrets)
+		sm := config.SecretsManager{Provider: symmetricProvider, OpenPGP: openPGPConf}
 
 		serv := server.New(conf.ListenAddress, store, sm, logger)
 		// Catch interrupt etc
@@ -114,20 +110,20 @@ func main() {
 
 			secretsOpt := configCmd.StringsOpt("s secret", nil, "Pairs of PublicID and Passphrase to use as symmetric secrets in config")
 
-			arg := configCmd.StringArg("CONFIG", "", fmt.Sprintf("Config type to generate, one of: %s",
+			arg := configCmd.StringArg("CONFIG", "", fmt.Sprintf("Storage type to generate, one of: %s",
 				strings.Join(configTypes(), ", ")))
 
 			configCmd.Spec = "[--json | --yaml] | (([--output=<output file>] |  [--init]) [--force]) CONFIG [--secret=<PublicID:Passphrase>...]"
 
 			configCmd.Action = func() {
-				store, err := storage.GetDefaultConfig(*arg)
+				store, err := config.GetDefaultStorage(*arg)
 				if err != nil {
 					fatalf("Error fetching default config for %v: %v", arg, err)
 				}
 				conf.Storage = store
 				if len(*secretsOpt) > 0 {
-					conf.Secrets = &secrets.SecretsConfig{
-						Symmetric: make([]secrets.SymmetricSecret, len(*secretsOpt)),
+					conf.Secrets = &config.Secrets{
+						Symmetric: make([]config.SymmetricSecret, len(*secretsOpt)),
 					}
 					for i, ss := range *secretsOpt {
 						pair := strings.Split(ss, ":")
@@ -149,7 +145,7 @@ func main() {
 				}
 				if *initOpt {
 					configFileName, err := xdgbasedir.GetConfigFileLocation(
-						source.DefaultHoardConfigFileName)
+						config.DefaultHoardConfigFileName)
 					if err != nil {
 						fatalf("Error getting config file location: %s", err)
 					}
@@ -180,12 +176,12 @@ func fatalf(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func hoardConfigCascade(env bool, configFile string) source.ConfigProvider {
-	return source.Cascade(os.Stderr, true,
-		source.Environment(source.DefaultJSONConfigEnvironmentVariable).SetSkip(!env),
-		source.File(configFile).SetSkip(configFile == ""),
-		source.XDGBaseDir(),
-		source.Default())
+func hoardConfigCascade(env bool, configFile string) config.Provider {
+	return config.Cascade(os.Stderr, true,
+		config.Environment(config.DefaultJSONConfigEnvironmentVariable).SetSkip(!env),
+		config.File(configFile).SetSkip(configFile == ""),
+		config.XDGBaseDir(),
+		config.Default())
 }
 
 func writeFile(filename string, data []byte, overwrite bool) error {
@@ -196,7 +192,7 @@ func writeFile(filename string, data []byte, overwrite bool) error {
 }
 
 func configTypes() []string {
-	storageTypes := storage.GetStorageTypes()
+	storageTypes := config.GetStorageTypes()
 	configTypes := make([]string, len(storageTypes))
 	for i, st := range storageTypes {
 		configTypes[i] = string(st)

@@ -4,11 +4,11 @@ import (
 	"crypto/sha256"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v4/config/secrets"
-	"github.com/monax/hoard/v4/encryption"
-	"github.com/monax/hoard/v4/grant"
-	"github.com/monax/hoard/v4/reference"
-	"github.com/monax/hoard/v4/storage"
+	"github.com/monax/hoard/v5/config"
+	"github.com/monax/hoard/v5/encryption"
+	"github.com/monax/hoard/v5/grant"
+	"github.com/monax/hoard/v5/reference"
+	"github.com/monax/hoard/v5/stores"
 )
 
 type DeterministicEncryptor interface {
@@ -26,7 +26,7 @@ type DeterministicEncryptedStore interface {
 	// Encrypt data and put it in underlying storage
 	Put(data, salt []byte) (*reference.Ref, error)
 	// Get the underlying ContentAddressedStore
-	Store() storage.ContentAddressedStore
+	Store() stores.ContentAddressedStore
 }
 
 type GrantService interface {
@@ -42,20 +42,20 @@ type GrantService interface {
 // hoard.proto interface.
 type Hoard struct {
 	name    string
-	store   storage.ContentAddressedStore
-	secrets secrets.Manager
+	store   stores.ContentAddressedStore
+	secrets config.SecretsManager
 	logger  log.Logger
 }
 
-func NewHoard(store storage.NamedStore, secrets secrets.Manager, logger log.Logger) *Hoard {
+func NewHoard(store stores.NamedStore, secrets config.SecretsManager, logger log.Logger) *Hoard {
 	if logger == nil {
 		logger = log.NewNopLogger()
 	}
 
 	return &Hoard{
 		name: store.Name(),
-		store: storage.NewContentAddressedStore(storage.MakeAddresser(sha256.New),
-			storage.NewLoggingStore(storage.NewSyncStore(store), logger)),
+		store: stores.NewContentAddressedStore(stores.MakeAddresser(sha256.New),
+			stores.NewLoggingStore(stores.NewSyncStore(store), logger)),
 		secrets: secrets,
 		logger:  log.With(logger, "scope", "NewHoard"),
 	}
@@ -87,7 +87,7 @@ func (hrd *Hoard) Get(ref *reference.Ref) ([]byte, error) {
 	return data, nil
 }
 
-// Encrypts data and stores it in underlying store and returns the address
+// Encrypts data and storage it in underlying store and returns the address
 func (hrd *Hoard) Put(data, salt []byte) (*reference.Ref, error) {
 	blob, err := encryption.EncryptConvergent(data, salt)
 	if err != nil {
@@ -120,6 +120,6 @@ func (hrd *Hoard) Decrypt(ref *reference.Ref, encryptedData []byte) ([]byte, err
 	return data, nil
 }
 
-func (hrd *Hoard) Store() storage.ContentAddressedStore {
+func (hrd *Hoard) Store() stores.ContentAddressedStore {
 	return hrd.store
 }

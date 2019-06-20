@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/monax/hoard/v4/encryption"
-	"github.com/monax/hoard/v4/reference"
+	"github.com/monax/hoard/v5/encryption"
+	"github.com/monax/hoard/v5/reference"
 	"golang.org/x/crypto/scrypt"
 )
 

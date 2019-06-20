@@ -3,12 +3,12 @@ package grant
 import (
 	"fmt"
 
-	"github.com/monax/hoard/v4/config/secrets"
-	"github.com/monax/hoard/v4/reference"
+	"github.com/monax/hoard/v5/config"
+	"github.com/monax/hoard/v5/reference"
 )
 
 // Seal this reference into a Grant as specified by Spec
-func Seal(secret secrets.Manager, ref *reference.Ref, spec *Spec) (*Grant, error) {
+func Seal(secret config.SecretsManager, ref *reference.Ref, spec *Spec) (*Grant, error) {
 	grt := &Grant{Spec: spec}
 
 	if s := spec.GetPlaintext(); s != nil {
@@ -37,7 +37,7 @@ func Seal(secret secrets.Manager, ref *reference.Ref, spec *Spec) (*Grant, error
 }
 
 // Unseal a Grant exposing its secret reference
-func Unseal(secret secrets.Manager, grt *Grant) (*reference.Ref, error) {
+func Unseal(secret config.SecretsManager, grt *Grant) (*reference.Ref, error) {
 	if s := grt.Spec.GetPlaintext(); s != nil {
 		return PlaintextReference(grt.EncryptedReference), nil
 	} else if s := grt.Spec.GetSymmetric(); s != nil {

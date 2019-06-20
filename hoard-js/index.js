@@ -4,7 +4,7 @@ const path = require('path')
 
 const LOCAL_PATH = path.join(__dirname, './protobuf');
 const PROTO_PATH = path.join(__dirname, '../protobuf');
-const PROTO_FILE = 'services.proto';
+const PROTO_FILE = 'api.proto';
 
 const protoLoader = require('@grpc/proto-loader');
 const grpc = require('grpc')

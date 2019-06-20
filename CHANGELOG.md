@@ -2,9 +2,19 @@
 ## [Unreleased]
 
 
+## [5.0.0] - 2019-05-24
+This breaking changes refactors the exported API to make it possible to have a much more minimal import tree. Not all storage backends are imported when depending just on api (containing protobuf generated code) or on hoard/v5 root package which allows, for instance, importing the root package to run an in memory test server without all the storage backend dependencies.
+
+### Changed
+- Renamed services package to api
+- Move services.NewHoardServer to hoard.NewServer
+- Renamed storage package to stores
+- Made ipfs and cloud their own subpackages to avoid massive import tree
+
+
 ## [4.0.0] - 2019-05-21
-###Fixed
-- [BUILD] Change hoard.pb.go to services/services.pb.go
+### Fixed
+- [BUILD] Change hoard.pb.go to services/api.pb.go
 
 
 ## [3.2.1] - 2019-04-24
@@ -110,7 +120,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/monax/hoard/compare/v4.0.0...v5.0.0
 [4.0.0]: https://github.com/monax/hoard/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/monax/hoard/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/monax/hoard/compare/v3.1.0...v3.2.0

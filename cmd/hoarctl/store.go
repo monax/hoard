@@ -6,8 +6,8 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v4/reference"
-	"github.com/monax/hoard/v4/services"
+	"github.com/monax/hoard/v5/api"
+	"github.com/monax/hoard/v5/reference"
 )
 
 // Cat retrieves encrypted data from store
@@ -17,7 +17,7 @@ func (client *Client) Cat(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		ref := readReference(address)
 		ciphertext, err := client.storage.Pull(context.Background(),
-			&services.Address{Address: ref.Address})
+			&api.Address{Address: ref.Address})
 		if err != nil {
 			fatalf("Error querying data: %v", err)
 		}
@@ -58,7 +58,7 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 		data := readData()
 		// If given address use it
 		address, err := client.storage.Push(context.Background(),
-			&services.Ciphertext{EncryptedData: data})
+			&api.Ciphertext{EncryptedData: data})
 		if err != nil {
 			fatalf("Error querying data: %v", err)
 		}
@@ -73,7 +73,7 @@ func (client *Client) Put(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		data := readData()
 		ref, err := client.cleartext.Put(context.Background(),
-			&services.Plaintext{
+			&api.Plaintext{
 				Data: data,
 				Salt: parseSalt(salt),
 			})
@@ -91,7 +91,7 @@ func (client *Client) Stat(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		ref := readReference(address)
 		statInfo, err := client.storage.Stat(context.Background(),
-			&services.Address{Address: ref.Address})
+			&api.Address{Address: ref.Address})
 		if err != nil {
 			fatalf("Error querying data: %v", err)
 		}

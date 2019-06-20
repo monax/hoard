@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/monax/hoard/v5/config"
+
 	"bytes"
 	"io"
 	"io/ioutil"
 
-	"github.com/monax/hoard/v4/config/secrets"
-	"github.com/monax/hoard/v4/reference"
+	"github.com/monax/hoard/v5/reference"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )
 
 // OpenPGPGrant encrypts and signs a given reference
-func OpenPGPGrant(ref *reference.Ref, public string, keyring *secrets.OpenPGPSecret) ([]byte, error) {
+func OpenPGPGrant(ref *reference.Ref, public string, keyring *config.OpenPGPSecret) ([]byte, error) {
 	if keyring == nil {
 		return nil, fmt.Errorf("cannot encrypt because no private key was provided")
 	}
@@ -73,7 +74,7 @@ func OpenPGPGrant(ref *reference.Ref, public string, keyring *secrets.OpenPGPSec
 }
 
 // OpenPGPReference decrypts a given grant
-func OpenPGPReference(grant []byte, keyring *secrets.OpenPGPSecret) (*reference.Ref, error) {
+func OpenPGPReference(grant []byte, keyring *config.OpenPGPSecret) (*reference.Ref, error) {
 	if keyring == nil {
 		return nil, fmt.Errorf("cannot decrypt because no private key was provided")
 	}

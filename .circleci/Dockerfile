@@ -34,6 +34,7 @@ RUN rm -rf protobuf protoc-*
 RUN go get -u golang.org/x/tools/cmd/goimports
 RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN go get -u golang.org/x/lint/golint
+RUN go get -u github.com/goreleaser/goreleaser
 ENV GO111MODULE=on
 
 RUN cd /usr/bin && curl -L https://github.com/goreleaser/goreleaser/releases/download/$GORELEASER_VERSION/goreleaser_Linux_x86_64.tar.gz | tar xz goreleaser

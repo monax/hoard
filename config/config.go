@@ -6,26 +6,22 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
-	"github.com/monax/hoard/v4/config/logging"
-	"github.com/monax/hoard/v4/config/secrets"
-	"github.com/monax/hoard/v4/config/storage"
 	yaml "gopkg.in/yaml.v2"
 )
 
 const DefaultListenAddress = "tcp://:53431"
 
 var DefaultHoardConfig = NewHoardConfig(DefaultListenAddress,
-	storage.DefaultConfig, logging.DefaultConfig)
+	DefaultStorage, DefaultLogging)
 
 type HoardConfig struct {
 	ListenAddress string
-	Storage       *storage.StorageConfig
-	Logging       *logging.LoggingConfig
-	Secrets       *secrets.SecretsConfig
+	Storage       *Storage
+	Logging       *Logging
+	Secrets       *Secrets
 }
 
-func NewHoardConfig(listenAddress string, storageConfig *storage.StorageConfig,
-	loggingConfig *logging.LoggingConfig) *HoardConfig {
+func NewHoardConfig(listenAddress string, storageConfig *Storage, loggingConfig *Logging) *HoardConfig {
 	return &HoardConfig{
 		ListenAddress: listenAddress,
 		Storage:       storageConfig,
