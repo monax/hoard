@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -53,14 +54,14 @@ func deleteGCSPrefix(bucket, prefix string) {
 		panic(err)
 	}
 
-	client, err := cloudstores.NewClient(ctx, option.WithCredentials(creds))
+	client, err := storage.NewClient(ctx, option.WithCredentials(creds))
 	if err != nil {
 		panic(err)
 	}
 
 	defer client.Close()
 	bkt := client.Bucket(bucket)
-	objs := bkt.Objects(ctx, &cloudstores.Query{Prefix: prefix})
+	objs := bkt.Objects(ctx, &storage.Query{Prefix: prefix})
 	for obj, _ := objs.Next(); obj != nil; obj, _ = objs.Next() {
 		bkt.Object(obj.Name).Delete(ctx)
 	}
