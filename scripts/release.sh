@@ -37,6 +37,7 @@ echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} ${DOCKER_HUB} --pas
 docker build -t quay.io/monax/hoard:${tag#v} -t quay.io/monax/hoard:latest .
 docker push quay.io/monax/hoard:${tag#v}
 
+git config --global user.email "billings@monax.io"
 npm-cli-login
 npm version from-git
 npm publish --access public .
