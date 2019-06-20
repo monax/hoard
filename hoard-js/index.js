@@ -26,7 +26,7 @@ const HoardClient = function () {};
 
 // HoardClient uses dynamic types and mapping
 const HoardClientDynamic = function (address) {
-    const hoard_proto = grpc.loadPackageDefinition(packageDefinition).services;
+    const hoard_proto = grpc.loadPackageDefinition(packageDefinition).api;
     this.cleartextClient = new hoard_proto.Cleartext(address,
         grpc.credentials.createInsecure());
     this.encryptionClient = new hoard_proto.Encryption(address,

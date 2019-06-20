@@ -32,7 +32,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run: make npm_install
+      - run: npm install
       - run: make test_js
 
   test_integration:
