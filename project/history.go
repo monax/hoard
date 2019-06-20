@@ -32,6 +32,10 @@ var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://gi
 	MustDeclareReleases(
 		"",
 		``,
+		"5.0.1 - 2019-06-20",
+		`### Fixed
+- JS client - v5, npm publish
+`,
 		"5.0.0 - 2019-05-24",
 		`This breaking changes refactors the exported API to make it possible to have a much more minimal import tree. Not all storage backends are imported when depending just on api (containing protobuf generated code) or on hoard/v5 root package which allows, for instance, importing the root package to run an in memory test server without all the storage backend dependencies.
 

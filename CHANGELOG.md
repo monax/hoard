@@ -2,6 +2,11 @@
 ## [Unreleased]
 
 
+## [5.0.1] - 2019-06-20
+### Fixed
+- JS client - v5, npm publish
+
+
 ## [5.0.0] - 2019-05-24
 This breaking changes refactors the exported API to make it possible to have a much more minimal import tree. Not all storage backends are imported when depending just on api (containing protobuf generated code) or on hoard/v5 root package which allows, for instance, importing the root package to run an in memory test server without all the storage backend dependencies.
 
@@ -120,7 +125,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v5.0.1...HEAD
+[5.0.1]: https://github.com/monax/hoard/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/monax/hoard/compare/v4.0.0...v5.0.0
 [4.0.0]: https://github.com/monax/hoard/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/monax/hoard/compare/v3.2.0...v3.2.1
