@@ -39,8 +39,8 @@ export BUILD_IMAGE := $(DOCKER_REPO):build
 .PHONY: check
 check:
 	@echo "Checking code for formatting style compliance."
-	@goimports -l -d ${GOFILES}
-	@goimports -l ${GOFILES} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
+	@gofmt -l -d ${GOFILES}
+	@gofmt -l ${GOFILES} | read && echo && echo "Your marmot has found a problem with the formatting style of the code." 1>&2 && exit 1 || true
 
 ## just fix it
 .PHONY: fix
@@ -100,7 +100,7 @@ install:
 
 ## build all targets in github.com/monax/hoard
 .PHONY: build
-build:	check build_hoard build_hoarctl
+build: check build_hoard build_hoarctl
 
 .PHONY: docker_build
 docker_build: commit_hash
@@ -119,9 +119,7 @@ test: check
 
 .PHONY: test_js
 test_js: build install
-	$(eval HID := $(shell hoard config memory -s test:secret_pass | hoard -c- &> /dev/null & echo $$!))
-	npm test
-	kill ${HID}
+	@scripts/test_js.sh
 
 ## run tests including integration tests
 .PHONY:	test_integration
