@@ -87,6 +87,9 @@ const example = async function (plaintextIn) {
 
         plaintext = await hoard.unsealget(grant);
         console.log('Plaintext (Grant): ' + plaintext.Data.toString());
+
+        let addr = await hoard.unsealdelete(grant)
+        console.log('Deleted address: ' + addr.toString())
     }
     catch (err) {
         console.log(err);

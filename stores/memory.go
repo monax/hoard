@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+var _ Store = (*memoryStore)(nil)
+
 type memoryStore struct {
 	memory map[string][]byte
 	mtx    *sync.RWMutex
@@ -22,6 +24,13 @@ func (inv *memoryStore) Put(address []byte, data []byte) ([]byte, error) {
 	inv.memory[string(address)] = data
 	inv.mtx.Unlock()
 	return address, nil
+}
+
+func (inv *memoryStore) Delete(address []byte) error {
+	inv.mtx.Lock()
+	inv.memory[string(address)] = nil
+	inv.mtx.Unlock()
+	return nil
 }
 
 func (inv *memoryStore) Get(address []byte) ([]byte, error) {

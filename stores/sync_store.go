@@ -32,6 +32,18 @@ func NewSyncStore(store NamedStore) *syncStore {
 
 var _ Store = (*syncStore)(nil)
 
+func (inv *syncStore) Put(address []byte, data []byte) ([]byte, error) {
+	inv.mtx.Lock(address)
+	defer inv.mtx.Unlock(address)
+	return inv.store.Put(address, data)
+}
+
+func (inv *syncStore) Delete(address []byte) (err error) {
+	inv.mtx.RLock(address)
+	defer inv.mtx.RUnlock(address)
+	return inv.store.Delete(address)
+}
+
 func (inv *syncStore) Get(address []byte) (data []byte, err error) {
 	inv.mtx.RLock(address)
 	defer inv.mtx.RUnlock(address)
@@ -43,12 +55,6 @@ func (inv *syncStore) Stat(address []byte) (*StatInfo, error) {
 	defer inv.mtx.RUnlock(address)
 	return inv.store.Stat(address)
 
-}
-
-func (inv *syncStore) Put(address []byte, data []byte) ([]byte, error) {
-	inv.mtx.Lock(address)
-	defer inv.mtx.Unlock(address)
-	return inv.store.Put(address, data)
 }
 
 func (inv *syncStore) Location(address []byte) string {

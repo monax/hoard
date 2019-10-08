@@ -40,6 +40,10 @@ func (service *grpcService) Put(ctx context.Context, plaintext *api.Plaintext) (
 	return service.des.Put(plaintext.Data, plaintext.Salt)
 }
 
+func (service *grpcService) Delete(ctx context.Context, addr *api.Address) (*api.Address, error) {
+	return addr, service.des.Store().Delete(addr.Address)
+}
+
 func (service *grpcService) Encrypt(ctx context.Context, plaintext *api.Plaintext) (*api.ReferenceAndCiphertext, error) {
 	ref, encryptedData, err := service.des.Encrypt(plaintext.Data, plaintext.Salt)
 	if err != nil {
@@ -132,4 +136,12 @@ func (service *grpcService) UnsealGet(ctx context.Context, grt *grant.Grant) (*a
 		return nil, err
 	}
 	return service.Get(ctx, ref)
+}
+
+func (service *grpcService) UnsealDelete(ctx context.Context, grt *grant.Grant) (*api.Address, error) {
+	ref, err := service.gs.Unseal(grt)
+	if err != nil {
+		return nil, err
+	}
+	return service.Delete(ctx, &api.Address{Address: ref.Address})
 }
