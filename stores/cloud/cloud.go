@@ -33,6 +33,8 @@ const (
 	GCP   Type = "gcp"
 )
 
+var _ stores.Store = (*cloudStore)(nil)
+
 type cloudStore struct {
 	back     context.Context
 	blob     *blob.Bucket
@@ -131,6 +133,29 @@ func (inv *cloudStore) Put(address, data []byte) ([]byte, error) {
 		"uploaded_bytes", n)
 
 	return address, nil
+}
+
+func (inv *cloudStore) Delete(address []byte) error {
+	writer, err := inv.blob.NewWriter(inv.back, fmt.Sprintf("%s/%s", inv.prefix, inv.encode(address)), nil)
+	if err != nil {
+		return err
+	}
+
+	n, err := writer.Write(nil)
+	if err != nil {
+		return err
+	}
+
+	if err = writer.Close(); err != nil {
+		return err
+	}
+
+	inv.logger.Log("method", "Delete",
+		"location", inv.Location,
+		"address", inv.encode(address),
+		"bytes_written", n)
+
+	return nil
 }
 
 func (inv *cloudStore) Get(address []byte) ([]byte, error) {

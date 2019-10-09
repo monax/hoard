@@ -76,6 +76,19 @@ HoardClient.prototype.unsealget = function (grant) {
     });
 };
 
+HoardClient.prototype.unsealdelete = function (grant) {
+    const client = this.grantClient;
+    return new Promise(function (resolve, reject) {
+        client.unsealDelete(grant, function (err, address) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(address);
+            }
+        });
+    });
+};
+
 HoardClient.prototype.putseal = function (plaintextAndGrantSpec) {
     const client = this.grantClient;
     return new Promise(function (resolve, reject) {
@@ -136,6 +149,19 @@ HoardClient.prototype.pull = function (address) {
                 reject(err);
             } else {
                 resolve(ciphertext);
+            }
+        });
+    });
+};
+
+HoardClient.prototype.delete = function (address) {
+    const client = this.storageClient;
+    return new Promise(function (resolve, reject) {
+        client.delete(address, function (err, address) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(address);
             }
         });
     });

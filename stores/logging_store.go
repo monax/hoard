@@ -31,6 +31,12 @@ func (inv *loggingStore) Put(address []byte, data []byte) ([]byte, error) {
 		formatAddress(address)), err)
 }
 
+func (inv *loggingStore) Delete(address []byte) error {
+	err := inv.store.Delete(address)
+	return logErrorOrSuccess(log.With(inv.logger, "method", "Delete", "address",
+		formatAddress(address)), err)
+}
+
 func (inv *loggingStore) Get(address []byte) ([]byte, error) {
 	data, err := inv.store.Get(address)
 	return data, logErrorOrSuccess(log.With(inv.logger, "method", "Get", "address",

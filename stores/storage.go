@@ -31,6 +31,8 @@ type ReadStore interface {
 type WriteStore interface {
 	// Put data at address
 	Put(address []byte, data []byte) ([]byte, error)
+	// Delete data from address
+	Delete(address []byte) error
 }
 
 type Store interface {
@@ -50,6 +52,8 @@ type ContentAddressedStore interface {
 	Locator
 	// Put the data at its address
 	Put(data []byte) (address []byte, err error)
+	// Delete data from address
+	Delete(address []byte) error
 	// Get the address of some data without putting it at that address
 	Address(data []byte) (address []byte)
 }
@@ -80,6 +84,10 @@ func (cas *contentAddressedStore) Put(data []byte) ([]byte, error) {
 	address := cas.addresser(data)
 	address, err := cas.store.Put(address, data)
 	return address, err
+}
+
+func (cas *contentAddressedStore) Delete(address []byte) error {
+	return cas.store.Delete(address)
 }
 
 func (cas *contentAddressedStore) Get(address []byte) ([]byte, error) {

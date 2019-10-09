@@ -84,6 +84,21 @@ func (client *Client) Put(cmd *cli.Cmd) {
 	}
 }
 
+func (client *Client) Delete(cmd *cli.Cmd) {
+	address := addStringOpt(cmd, "address", addrOpt)
+
+	cmd.Action = func() {
+		ref := readReference(address)
+		_, err := client.storage.Delete(context.Background(),
+			&api.Address{
+				Address: ref.Address,
+			})
+		if err != nil {
+			fatalf("Error deleting data: %v", err)
+		}
+	}
+}
+
 // Stat retrieves info about the stored data
 func (client *Client) Stat(cmd *cli.Cmd) {
 	address := addStringOpt(cmd, "address", addrOpt)

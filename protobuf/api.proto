@@ -24,6 +24,9 @@ service Grant {
 
     // Unseal a Grant and follow the Reference to return a Plaintext
     rpc UnsealGet (grant.Grant) returns (Plaintext);
+
+    // Unseal a Grant and follow the Reference to delete the Plaintext
+    rpc UnsealDelete (grant.Grant) returns (Address);
 }
 
 // Provide plaintext and get plaintext back
@@ -59,6 +62,9 @@ service Storage {
     // Get some information about the encrypted blob stored at an address,
     // including whether it exists.
     rpc Stat (Address) returns (stores.StatInfo);
+
+    // Delete the encrypted blob stored at address
+    rpc Delete (Address) returns (Address);
 }
 
 message GrantAndGrantSpec {

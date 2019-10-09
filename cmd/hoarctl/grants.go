@@ -127,3 +127,16 @@ func (client *Client) UnsealGet(cmd *cli.Cmd) {
 		return
 	}
 }
+
+// UnsealDelete reads a grant and deletes the encrypted data
+func (client *Client) UnsealDelete(cmd *cli.Cmd) {
+	cmd.Action = func() {
+		grt := readGrant()
+
+		_, err := client.grant.UnsealDelete(context.Background(), grt)
+		if err != nil {
+			fatalf("Error unsealing data: %v", err)
+		}
+		return
+	}
+}

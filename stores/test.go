@@ -49,6 +49,7 @@ func testConcurrentContentAddressedStore(t *testing.T, store Store) {
 		go func() {
 			data := bs("data", strconv.FormatInt(n, 2))
 			putGetCAS(t, cas, data)
+			putDeleteCAS(t, cas, data)
 			wg.Done()
 		}()
 	}
@@ -78,6 +79,15 @@ func putGetCAS(t *testing.T, store ContentAddressedStore, data []byte) {
 	retrieved, err := store.Get(address)
 	assert.NoError(t, err, "Should be able to Get data from address")
 	assert.Equal(t, data, retrieved)
+}
+
+func putDeleteCAS(t *testing.T, store ContentAddressedStore, data []byte) {
+	// Put data at address
+	address, err := store.Put(data)
+	assert.NoError(t, err, "Should be able to Put data at address")
+
+	err = store.Delete(address)
+	assert.NoError(t, err, "Should be able to Delete data at address")
 }
 
 func bs(strs ...string) []byte {

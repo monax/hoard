@@ -8,6 +8,8 @@ import (
 	"path"
 )
 
+var _ Store = (*fileSystemStore)(nil)
+
 type fileSystemStore struct {
 	rootDirectory string
 	encoding      AddressEncoding
@@ -22,10 +24,6 @@ func NewFileSystemStore(rootDirectory string, encoding AddressEncoding) (*fileSy
 		rootDirectory: rootDirectory,
 		encoding:      encoding,
 	}, nil
-}
-
-func (inv *fileSystemStore) Put(address []byte, data []byte) ([]byte, error) {
-	return address, ioutil.WriteFile(inv.Path(address), data, 0644)
 }
 
 func (inv *fileSystemStore) Get(address []byte) ([]byte, error) {
@@ -45,6 +43,14 @@ func (inv *fileSystemStore) Stat(address []byte) (*StatInfo, error) {
 		return statInfo, nil
 	}
 	return statInfo, err
+}
+
+func (inv *fileSystemStore) Put(address []byte, data []byte) ([]byte, error) {
+	return address, ioutil.WriteFile(inv.Path(address), data, 0644)
+}
+
+func (inv *fileSystemStore) Delete(address []byte) error {
+	return os.Remove(inv.Path(address))
 }
 
 func (inv *fileSystemStore) Location(address []byte) string {

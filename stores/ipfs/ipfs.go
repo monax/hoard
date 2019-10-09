@@ -12,6 +12,8 @@ import (
 	"github.com/monax/hoard/v5/stores"
 )
 
+var _ stores.Store = (*ipfsStore)(nil)
+
 type ipfsStore struct {
 	host     string
 	encoding stores.AddressEncoding
@@ -61,6 +63,10 @@ func (inv *ipfsStore) Put(address []byte, data []byte) ([]byte, error) {
 
 	// currently, we `add` the blob and read the return address
 	return []byte(m["Name"].(string)), nil
+}
+
+func (inv *ipfsStore) Delete(address []byte) error {
+	return fmt.Errorf("IPFS does not support deleting")
 }
 
 func (inv *ipfsStore) Get(address []byte) ([]byte, error) {
