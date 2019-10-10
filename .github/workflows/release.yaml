@@ -52,6 +52,6 @@ jobs:
         DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
       run: |
         export tag=$(git tag --points-at HEAD)
-        echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} --password-stdin
+        echo ${DOCKER_PASS} | docker login --username ${DOCKER_USER} quay.io --password-stdin
         docker tag ${DOCKER_REPO}:${tag#v} ${DOCKER_REPO}:latest
         docker push ${DOCKER_REPO}
