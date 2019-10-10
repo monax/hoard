@@ -22,7 +22,11 @@ jobs:
     name: NPM 
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
     - uses: actions/checkout@v1
+    - run: npm install -g npm-cli-login
     - name: Publish
       env:
         NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
