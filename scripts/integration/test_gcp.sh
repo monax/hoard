@@ -16,6 +16,11 @@ GCS_PREFIX="test-store"
 # Integration test dir
 cd "$(dirname "$0")"
 
+if [[ -z "$GCLOUD_SERVICE_KEY" ]]; then
+    echo "GCLOUD_SERVICE_KEY must be set" 1>&2
+    exit 1
+fi
+
 read -d '' HOARD_JSON_CONFIG << CONFIG
   {
     "ListenAddress": "tcp://:53431",

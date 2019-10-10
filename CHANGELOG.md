@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+## [5.1.0] - 2019-09-08
+### Added
+- Ability to delete files located at address
+- Stream all files to overcome GRPC message limit
+
+
 ## [5.0.1] - 2019-06-20
 ### Fixed
 - JS client - v5, npm publish
@@ -125,7 +131,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v5.0.1...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v5.1.0...HEAD
+[5.1.0]: https://github.com/monax/hoard/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/monax/hoard/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/monax/hoard/compare/v4.0.0...v5.0.0
 [4.0.0]: https://github.com/monax/hoard/compare/v3.2.1...v4.0.0

@@ -1,3 +1,4 @@
-### Fixed
-- JS client - v5, npm publish
+### Added
+- Ability to delete files located at address
+- Stream all files to overcome GRPC message limit
 
