@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 
 	"github.com/go-kit/kit/log"
+	"github.com/monax/hoard/v5/api"
 	"github.com/monax/hoard/v5/config"
 	"github.com/monax/hoard/v5/encryption"
 	"github.com/monax/hoard/v5/grant"
@@ -34,6 +35,30 @@ type GrantService interface {
 	Seal(ref *reference.Ref, spec *grant.Spec) (*grant.Grant, error)
 	// Unseal a grant by decrypting it and returning the reference
 	Unseal(grt *grant.Grant) (*reference.Ref, error)
+}
+
+type PlaintextReceiver interface {
+	Recv() (*api.Plaintext, error)
+}
+
+type PlaintextSender interface {
+	Send(*api.Plaintext) error
+}
+
+type CiphertextReceiver interface {
+	Recv() (*api.Ciphertext, error)
+}
+
+type CiphertextSender interface {
+	Send(*api.Ciphertext) error
+}
+
+type PlaintextAndGrantSpecReceiver interface {
+	Recv() (*api.PlaintextAndGrantSpec, error)
+}
+
+type PlaintextAndGrantSpecSender interface {
+	Send(*api.PlaintextAndGrantSpec) error
 }
 
 // This is our top level API object providing library acting as a deterministic

@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	cli "github.com/jawher/mow.cli"
+	"github.com/monax/hoard/v5"
 	"github.com/monax/hoard/v5/api"
 	"github.com/monax/hoard/v5/reference"
 )
@@ -18,7 +18,7 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 
 	cmd.Action = func() {
 		encryptedData := readData()
-		plaintext, err := client.encryption.Decrypt(context.Background(),
+		dec, err := client.encryption.Decrypt(context.Background(),
 			&api.ReferenceAndCiphertext{
 				Reference: &reference.Ref{
 					SecretKey: readBase64(secretKey),
@@ -29,29 +29,42 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 				},
 			})
 		if err != nil {
-			fatalf("Error decrypting: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
-		os.Stdout.Write(plaintext.Data)
+
+		data, _, err := hoard.ReceivePlaintext(dec)
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
+
+		os.Stdout.Write(data)
 	}
 }
 
 // Encrypt also does what it says on the tin
 func (client *Client) Encrypt(cmd *cli.Cmd) {
 	salt := addStringOpt(cmd, "salt", saltOpt)
+	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		data, err := ioutil.ReadAll(os.Stdin)
+		validateChunkSize(*chunk)
+
+		data := readData()
+		enc, err := client.encryption.Encrypt(context.Background())
 		if err != nil {
-			fatalf("could read bytes from STDIN to store: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
-		refAndCiphertext, err := client.encryption.Encrypt(context.Background(),
-			&api.Plaintext{
-				Data: data,
-				Salt: parseSalt(salt),
-			})
+
+		err = hoard.SendPlaintext(enc, data, parseSalt(salt), *chunk)
 		if err != nil {
-			fatalf("Error encrypting: %v", err)
+			fatalf("Error sending data: %v", err)
 		}
+
+		refAndCiphertext, err := enc.CloseAndRecv()
+		if err != nil {
+			fatalf("Error closing client: %v", err)
+		}
+
 		os.Stdout.Write(refAndCiphertext.Ciphertext.EncryptedData)
 	}
 }
@@ -59,17 +72,27 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 // Ref encrypts as above, but then packages the data in a ref
 func (client *Client) Ref(cmd *cli.Cmd) {
 	salt := addStringOpt(cmd, "salt", saltOpt)
+	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
+		validateChunkSize(*chunk)
+
 		data := readData()
-		refAndCiphertext, err := client.encryption.Encrypt(context.Background(),
-			&api.Plaintext{
-				Data: data,
-				Salt: parseSalt(salt),
-			})
+		enc, err := client.encryption.Encrypt(context.Background())
 		if err != nil {
-			fatalf("Error generating reference: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
+
+		err = hoard.SendPlaintext(enc, data, parseSalt(salt), *chunk)
+		if err != nil {
+			fatalf("Error sending data: %v", err)
+		}
+
+		refAndCiphertext, err := enc.CloseAndRecv()
+		if err != nil {
+			fatalf("Error closing client: %v", err)
+		}
+
 		fmt.Printf("%s\n", jsonString(refAndCiphertext.Reference))
 	}
 }

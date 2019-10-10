@@ -21,15 +21,17 @@ type Server struct {
 	listenURL  string
 	listener   net.Listener
 	hoard      *hoard.Hoard
+	chunk      int
 	grpcServer *grpc.Server
 	ready      chan struct{}
 	logger     log.Logger
 }
 
-func New(listenURL string, store stores.NamedStore, secretManager config.SecretsManager, logger log.Logger) *Server {
+func New(listenURL string, store stores.NamedStore, secretManager config.SecretsManager, chunkSize int, logger log.Logger) *Server {
 	return &Server{
 		listenURL: listenURL,
 		hoard:     hoard.NewHoard(store, secretManager, logger),
+		chunk:     chunkSize,
 		ready:     make(chan struct{}),
 		logger:    logger,
 	}
@@ -55,7 +57,7 @@ func (serv *Server) Serve() error {
 	logging.InfoMsg(serv.logger, "Initialising Hoard server",
 		"store_name", serv.hoard.Name())
 
-	hoardServer := hoard.NewServer(serv.hoard, serv.hoard)
+	hoardServer := hoard.NewServer(serv.hoard, serv.hoard, serv.chunk)
 	api.RegisterCleartextServer(serv.grpcServer, hoardServer)
 	api.RegisterEncryptionServer(serv.grpcServer, hoardServer)
 	api.RegisterStorageServer(serv.grpcServer, hoardServer)

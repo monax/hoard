@@ -28,6 +28,10 @@ const (
 		"Will be parsed as base64 encoded string if this is possible, " +
 		"otherwise will be interpreted as the bytes of the string itself."
 	secretOpt string = "The secret key to decrypt the data with as base64-encoded string."
+	chunkOpt  string = "Size in bytes to chunk upload data at."
+
+	chunkSize = 64 * 1024 // 64 Kb
+	grpcLimit = 4 * 1024 * 1024
 )
 
 // Client scopes the available hoard clients
@@ -99,6 +103,20 @@ func addStringOpt(cmd *cli.Cmd, arg, desc string) *string {
 	opt := cmd.StringOpt(fmt.Sprintf("%s %s", string(arg[0]), arg), "", desc)
 	cmd.Spec += fmt.Sprintf("[-%s | --%s]", string(arg[0]), arg)
 	return opt
+}
+
+func addIntOpt(cmd *cli.Cmd, arg, desc string, def int) *int {
+	opt := cmd.IntOpt(fmt.Sprintf("%s %s", string(arg[0]), arg), def, desc)
+	cmd.Spec += fmt.Sprintf("[-%s | --%s]", string(arg[0]), arg)
+	return opt
+}
+
+func validateChunkSize(cs int) {
+	if cs == 0 {
+		fatalf("Chunk size cannot be 0")
+	} else if cs > grpcLimit {
+		fatalf("Chunk size cannot be greater than 4Mb")
+	}
 }
 
 func parseSalt(saltString *string) []byte {

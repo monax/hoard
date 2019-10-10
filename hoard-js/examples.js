@@ -29,11 +29,12 @@ const example = async function (plaintextIn) {
         // We can get the plaintext back by `get`ing the grant
         plaintext = await hoard.get(ref);
         console.log('Plaintext (Reference): ' + plaintext.Data.toString());
-        
+
         // This time we'll just encrypt and ask for the result rather than storing it
         let refAndCiphertext = await hoard.encrypt(plaintext);
         // We get a 'hypothetical' reference (since it is not stored) and the ciphertext itself
-        console.log(refAndCiphertext);
+        console.log(hoard.base64ify(refAndCiphertext));
+
         // decrypt is our inverse
         plaintext = await hoard.decrypt(refAndCiphertext);
         console.log('Plaintext (Decrypted): ' + plaintext.Data.toString());
@@ -89,7 +90,7 @@ const example = async function (plaintextIn) {
         console.log('Plaintext (Grant): ' + plaintext.Data.toString());
 
         let addr = await hoard.unsealdelete(grant)
-        console.log('Deleted address: ' + addr.toString())
+        console.log('Deleted address: ' + addr.Address.toString('hex'))
     }
     catch (err) {
         console.log(err);
