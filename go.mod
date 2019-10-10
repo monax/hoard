@@ -20,12 +20,13 @@ require (
 	github.com/monax/relic v2.0.0+incompatible
 	github.com/stretchr/testify v1.4.0
 	gocloud.dev v0.13.0
-	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392
-	golang.org/x/net v0.0.0-20190921015927-1a5e07d1ff72 // indirect
+	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
+	golang.org/x/net v0.0.0-20191009170851-d66e71096ffb // indirect
 	golang.org/x/oauth2 v0.0.0-20190517181255-950ef44c6e07
+	golang.org/x/sys v0.0.0-20191009170203-06d7bd2c5f4f // indirect
 	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/api v0.2.0
-	google.golang.org/genproto v0.0.0-20190916214212-f660b8655731 // indirect
-	google.golang.org/grpc v1.23.1
-	gopkg.in/yaml.v2 v2.2.2
+	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03 // indirect
+	google.golang.org/grpc v1.24.0
+	gopkg.in/yaml.v2 v2.2.4
 )
