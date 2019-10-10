@@ -33,6 +33,7 @@ jobs:
         NPM_USER: ${{ secrets.NPM_USER }}
         NPM_PASS: ${{ secrets.NPM_PASS }}
       run: |
+        git config --global user.name "${NPM_USER}"
         git config --global user.email "${NPM_EMAIL}"
         npm-cli-login
         npm version from-git
