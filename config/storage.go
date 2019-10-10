@@ -32,6 +32,8 @@ type Storage struct {
 	StorageType StorageType
 	// Address encoding name
 	AddressEncoding string
+	// Chunk size for data upload / download
+	ChunkSize int
 	// Embedding a pointer to each type of config struct allows us to access the
 	// relevant one, while at the same time those that are left as nil will be
 	// omitted from being serialised.
@@ -44,6 +46,7 @@ func NewStorage(storageType StorageType, addressEncoding string) *Storage {
 	return &Storage{
 		StorageType:     storageType,
 		AddressEncoding: addressEncoding,
+		ChunkSize:       64 * 1024, // 64 Kb
 	}
 }
 

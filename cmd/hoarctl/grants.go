@@ -6,6 +6,7 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
+	"github.com/monax/hoard/v5"
 	"github.com/monax/hoard/v5/api"
 	"github.com/monax/hoard/v5/grant"
 )
@@ -14,10 +15,10 @@ import (
 func (client *Client) PutSeal(cmd *cli.Cmd) {
 	salt := addStringOpt(cmd, "salt", saltOpt)
 	key := addStringOpt(cmd, "key", keyOpt)
+	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		var seal *grant.Grant
-		var err error
+		validateChunkSize(*chunk)
 
 		spec := grant.Spec{Plaintext: &grant.PlaintextSpec{}}
 		if *key != "" {
@@ -28,20 +29,22 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 		}
 
 		data := readData()
-		seal, err = client.grant.PutSeal(context.Background(),
-			&api.PlaintextAndGrantSpec{
-				Plaintext: &api.Plaintext{
-					Data: data,
-					Salt: parseSalt(salt),
-				},
-				GrantSpec: &spec,
-			},
-		)
-
+		seal, err := client.grant.PutSeal(context.Background())
 		if err != nil {
-			fatalf("Error sealing data: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
-		fmt.Printf("%s\n", jsonString(seal))
+
+		err = hoard.SendPlaintextAndGrantSpec(seal, &spec, data, parseSalt(salt), *chunk)
+		if err != nil {
+			fatalf("Error sending data: %v", err)
+		}
+
+		grant, err := seal.CloseAndRecv()
+		if err != nil {
+			fatalf("Error closing client: %v", err)
+		}
+
+		fmt.Printf("%s\n", jsonString(grant))
 	}
 }
 
@@ -119,12 +122,17 @@ func (client *Client) UnsealGet(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		grt := readGrant()
 
-		plaintext, err := client.grant.UnsealGet(context.Background(), grt)
+		unseal, err := client.grant.UnsealGet(context.Background(), grt)
 		if err != nil {
-			fatalf("Error unsealing data: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
-		os.Stdout.Write(plaintext.Data)
-		return
+
+		data, _, err := hoard.ReceivePlaintext(unseal)
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
+
+		os.Stdout.Write(data)
 	}
 }
 

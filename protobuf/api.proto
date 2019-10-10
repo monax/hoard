@@ -20,10 +20,10 @@ service Grant {
     rpc Reseal (GrantAndGrantSpec) returns (grant.Grant);
 
     // Put a Plaintext and returned the sealed Reference as a Grant
-    rpc PutSeal (PlaintextAndGrantSpec) returns (grant.Grant);
+    rpc PutSeal (stream PlaintextAndGrantSpec) returns (grant.Grant);
 
     // Unseal a Grant and follow the Reference to return a Plaintext
-    rpc UnsealGet (grant.Grant) returns (Plaintext);
+    rpc UnsealGet (grant.Grant) returns (stream Plaintext);
 
     // Unseal a Grant and follow the Reference to delete the Plaintext
     rpc UnsealDelete (grant.Grant) returns (Address);
@@ -33,31 +33,31 @@ service Grant {
 service Cleartext {
     // Push some plaintext data into storage and get its deterministically
     // generated secret reference.
-    rpc Put (Plaintext) returns (reference.Ref);
+    rpc Put (stream Plaintext) returns (reference.Ref);
 
     // Provide a secret reference to an encrypted blob and get the plaintext
     // data back.
-    rpc Get (reference.Ref) returns (Plaintext);
+    rpc Get (reference.Ref) returns (stream Plaintext);
 }
 
 // Deterministic encryption
 service Encryption {
     // Encrypt some data and get its deterministically generated
     // secret reference including its address without storing the data.
-    rpc Encrypt (Plaintext) returns (ReferenceAndCiphertext);
+    rpc Encrypt (stream Plaintext) returns (ReferenceAndCiphertext);
 
     // Decrypt the provided data by supplying it alongside its secret
     // reference. The address is not used for decryption and may be omitted.
-    rpc Decrypt (ReferenceAndCiphertext) returns (Plaintext);
+    rpc Decrypt (ReferenceAndCiphertext) returns (stream Plaintext);
 }
 
 // Interact directly with storage backend
 service Storage {
     // Insert the (presumably) encrypted data provided and get the its address.
-    rpc Push (Ciphertext) returns (Address);
+    rpc Push (stream Ciphertext) returns (Address);
 
     // Retrieve the (presumably) encrypted data stored at address.
-    rpc Pull (Address) returns (Ciphertext);
+    rpc Pull (Address) returns (stream Ciphertext);
 
     // Get some information about the encrypted blob stored at an address,
     // including whether it exists.
@@ -74,9 +74,11 @@ message GrantAndGrantSpec {
 }
 
 message PlaintextAndGrantSpec {
-    Plaintext Plaintext = 1;
-    // The type of grant to output
-    grant.Spec GrantSpec = 2;
+    oneof input {
+        Plaintext Plaintext = 1;
+        // The type of grant to output
+        grant.Spec GrantSpec = 2;
+    }
 }
 
 message ReferenceAndGrantSpec {
@@ -86,8 +88,10 @@ message ReferenceAndGrantSpec {
 }
 
 message Plaintext {
-    bytes Data = 1;
-    bytes Salt = 2;
+    oneof input {
+        bytes Data = 1;
+        bytes Salt = 2;
+    }
 }
 
 message Ciphertext {

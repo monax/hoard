@@ -35,44 +35,38 @@ const HoardClientDynamic = function (address) {
         grpc.credentials.createInsecure());
     this.grantClient = new hoard_proto.Grant(address,
         grpc.credentials.createInsecure());
+    this.chunkSize = 64 * 1024;
 };
 
 HoardClient.prototype.get = function (reference) {
     const client = this.cleartextClient;
     return new Promise(function (resolve, reject) {
-        client.get(reference, function (err, plaintext) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(plaintext);
-            }
-        });
+        const call = client.get(reference);
+        getPlaintext(call, resolve, reject);
     });
 };
 
 HoardClient.prototype.put = function (plaintext) {
     const client = this.cleartextClient;
+    const size = this.chunkSize;
     return new Promise(function (resolve, reject) {
-        client.put(plaintext, function (err, reference) {
-            if (err) {
-                reject(err);
+        const call = client.put(function(error, reference) {
+            if (error) {
+                reject(error);
             } else {
                 resolve(reference);
             }
         });
+        putPlaintext(call, plaintext, size);
+        call.end();
     });
 };
 
 HoardClient.prototype.unsealget = function (grant) {
     const client = this.grantClient;
     return new Promise(function (resolve, reject) {
-        client.unsealGet(grant, function (err, plaintext) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(plaintext);
-            }
-        });
+        const call = client.unsealGet(grant);
+        getPlaintext(call, resolve, reject);
     });
 };
 
@@ -91,65 +85,96 @@ HoardClient.prototype.unsealdelete = function (grant) {
 
 HoardClient.prototype.putseal = function (plaintextAndGrantSpec) {
     const client = this.grantClient;
+    const size = this.chunkSize;
     return new Promise(function (resolve, reject) {
-        client.putSeal(plaintextAndGrantSpec, function (err, grant) {
-            if (err) {
-                reject(err);
+        const call = client.putSeal(function(error, grant) {
+            if (error) {
+                reject(error);
             } else {
                 resolve(grant);
             }
         });
+
+        const spec = plaintextAndGrantSpec.GrantSpec;
+        const salt = plaintextAndGrantSpec.Plaintext.Salt;
+        const data = plaintextAndGrantSpec.Plaintext.Data;
+
+        call.write({GrantSpec: spec});
+        call.write({Plaintext: {Salt: salt}});
+        for (var i=0; i<data.length; i+=size) {
+            if (i+size>data.length) {
+                call.write({Plaintext: {Data: data.slice(i, data.length)}});
+            } else {
+                call.write({Plaintext: {Data: data.slice(i, i+size)}});
+            }
+        }
+        call.end();
     });
 };
 
 HoardClient.prototype.encrypt = function (plaintext) {
     const client = this.encryptionClient;
+    const size = this.chunkSize;
     return new Promise(function (resolve, reject) {
-        client.encrypt(plaintext, function (err, referenceAndCiphertext) {
-            if (err) {
-                reject(err);
+        const call = client.encrypt(function(error, referenceAndCiphertext) {
+            if (error) {
+                reject(error);
             } else {
                 resolve(referenceAndCiphertext);
             }
         });
+        putPlaintext(call, plaintext, size);
+        call.end();
     });
 };
 
 HoardClient.prototype.decrypt = function (referenceAndCiphertext) {
     const client = this.encryptionClient;
     return new Promise(function (resolve, reject) {
-        client.decrypt(referenceAndCiphertext, function (err, plaintext) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(plaintext);
-            }
-        });
+        const call = client.decrypt(referenceAndCiphertext);
+        getPlaintext(call, resolve, reject);
     });
 };
 
 HoardClient.prototype.push = function (ciphertext) {
     const client = this.storageClient;
+    const size = this.chunkSize;
     return new Promise(function (resolve, reject) {
-        client.push(ciphertext, function (err, address) {
-            if (err) {
-                reject(err);
+        const call = client.push(function(error, address) {
+            if (error) {
+                reject(error);
             } else {
                 resolve(address);
             }
         });
+        const data = ciphertext.EncryptedData;
+        for (var i=0; i<data.length; i+=size) {
+            if (i+size>data.length) {
+                call.write({EncryptedData: data.slice(i, data.length)});
+            } else {
+                call.write({EncryptedData: data.slice(i, i+size)});
+            }
+        }
+        call.end();
     });
 };
 
 HoardClient.prototype.pull = function (address) {
     const client = this.storageClient;
     return new Promise(function (resolve, reject) {
-        client.pull(address, function (err, ciphertext) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(ciphertext);
-            }
+        const call = client.pull(address);
+
+        var ciphertext = {EncryptedData: Buffer.alloc(0)};
+        call.on('data', function(data) {
+            ciphertext.EncryptedData = Buffer.concat([ciphertext.EncryptedData, data.EncryptedData]);
+        });
+
+        call.on('error', function(e) {
+            reject(e);
+        });
+
+        call.on('end', function() {
+            resolve(ciphertext);
         });
     });
 };
@@ -193,6 +218,37 @@ HoardClient.prototype.base64ify = function (obj) {
     }
     return newObj;
 };
+
+function putPlaintext(call, plaintext, size) {
+    call.write({Salt: plaintext.Salt})
+    const data = plaintext.Data;
+    for (var i=0; i<data.length; i+=size) {
+        if (i+size>data.length) {
+            call.write({Data: data.slice(i, data.length)});
+        } else {
+            call.write({Data: data.slice(i, i+size)});
+        }
+    }
+}
+
+function getPlaintext(call, resolve, reject) {
+    var plaintext = {Data: Buffer.alloc(0), Salt: Buffer.alloc(0)};
+    call.on('data', function(data) {
+        if (data.input == 'Salt') {
+            plaintext.Salt = Buffer.concat([plaintext.Salt, data.Salt]);
+        } else if (data.input == 'Data') {
+            plaintext.Data = Buffer.concat([plaintext.Data, data.Data]);
+        }
+    });
+
+    call.on('error', function(e) {
+        reject(e);
+    });
+
+    call.on('end', function() {
+        resolve(plaintext);
+    });
+}
 
 HoardClientDynamic.prototype = Object.create(HoardClient.prototype);
 module.exports.Client = HoardClientDynamic;

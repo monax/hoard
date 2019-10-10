@@ -66,8 +66,9 @@ func main() {
 		symmetricProvider := config.NewSymmetricProvider(conf.Secrets)
 		openPGPConf := config.NewOpenPGPSecret(conf.Secrets)
 		sm := config.SecretsManager{Provider: symmetricProvider, OpenPGP: openPGPConf}
+		cs := conf.Storage.ChunkSize
 
-		serv := server.New(conf.ListenAddress, store, sm, logger)
+		serv := server.New(conf.ListenAddress, store, sm, cs, logger)
 		// Catch interrupt etc
 		signalCh := make(chan os.Signal, 1)
 		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)

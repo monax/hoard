@@ -6,6 +6,7 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
+	"github.com/monax/hoard/v5"
 	"github.com/monax/hoard/v5/api"
 	"github.com/monax/hoard/v5/reference"
 )
@@ -16,12 +17,18 @@ func (client *Client) Cat(cmd *cli.Cmd) {
 
 	cmd.Action = func() {
 		ref := readReference(address)
-		ciphertext, err := client.storage.Pull(context.Background(),
+		pull, err := client.storage.Pull(context.Background(),
 			&api.Address{Address: ref.Address})
 		if err != nil {
-			fatalf("Error querying data: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
-		os.Stdout.Write(ciphertext.EncryptedData)
+
+		data, err := hoard.ReceiveCiphertext(pull)
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
+
+		os.Stdout.Write(data)
 	}
 }
 
@@ -44,46 +51,77 @@ func (client *Client) Get(cmd *cli.Cmd) {
 				Salt:      parseSalt(salt),
 			}
 		}
-		plaintext, err := client.cleartext.Get(context.Background(), ref)
+
+		get, err := client.cleartext.Get(context.Background(), ref)
+		if err != nil {
+			fatalf("Error starting client: %v", err)
+		}
+
+		data, _, err := hoard.ReceivePlaintext(get)
 		if err != nil {
 			fatalf("Error retrieving data: %v", err)
 		}
-		os.Stdout.Write(plaintext.Data)
+		os.Stdout.Write(data)
 	}
 }
 
 // Insert data directly into store, preferably pre-encrypted
 func (client *Client) Insert(cmd *cli.Cmd) {
+	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
+
 	cmd.Action = func() {
+		validateChunkSize(*chunk)
+
 		data := readData()
 		// If given address use it
-		address, err := client.storage.Push(context.Background(),
-			&api.Ciphertext{EncryptedData: data})
+		push, err := client.storage.Push(context.Background())
 		if err != nil {
-			fatalf("Error querying data: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
-		fmt.Printf("%s\n", jsonString(address))
+
+		err = hoard.SendCiphertext(push, data, *chunk)
+		if err != nil {
+			fatalf("Error sending data: %v", err)
+		}
+
+		addr, err := push.CloseAndRecv()
+		if err != nil {
+			fatalf("Error closing client: %v", err)
+		}
+
+		fmt.Printf("%s\n", jsonString(addr))
 	}
 }
 
 // Put encrypts data and stores it
 func (client *Client) Put(cmd *cli.Cmd) {
+	// TODO: check if salt is too big
 	salt := addStringOpt(cmd, "salt", saltOpt)
+	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
+		validateChunkSize(*chunk)
+
 		data := readData()
-		ref, err := client.cleartext.Put(context.Background(),
-			&api.Plaintext{
-				Data: data,
-				Salt: parseSalt(salt),
-			})
+		put, err := client.cleartext.Put(context.Background())
 		if err != nil {
-			fatalf("Error storing data: %v", err)
+			fatalf("Error starting client: %v", err)
+		}
+
+		err = hoard.SendPlaintext(put, data, parseSalt(salt), *chunk)
+		if err != nil {
+			fatalf("Error sending data: %v", err)
+		}
+
+		ref, err := put.CloseAndRecv()
+		if err != nil {
+			fatalf("Error closing client: %v", err)
 		}
 		fmt.Printf("%s\n", jsonString(ref))
 	}
 }
 
+// Delete removes the blob located at the provided address
 func (client *Client) Delete(cmd *cli.Cmd) {
 	address := addStringOpt(cmd, "address", addrOpt)
 
