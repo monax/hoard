@@ -11,15 +11,12 @@ import (
 	"github.com/monax/hoard/v6/meta"
 )
 
-// Harold is an extension to the hoard interface to allow
+// This is an extension to the hoard interface to allow
 // stateful retrieval of document objects
 
 // GetDocument retrieves a document from hoard and parses
-// it into a document struct which harold will use to perform
-// it's assembly functionality. During the document parsing
-// sequence we parse the document based upon the API
-// encoding schema.
-// NOTE: if this schema changes harold will break.
+// it into a document struct.
+// NOTE: if this schema changes hoard will break.
 func GetDocument(gs GrantService, grant *grant.Grant) (*meta.Document, []byte, error) {
 	ref, err := gs.Unseal(grant)
 	if err != nil {
@@ -39,10 +36,10 @@ func GetDocument(gs GrantService, grant *grant.Grant) (*meta.Document, []byte, e
 	return doc, ref.GetSalt(), nil
 }
 
-// PostDocument is given a harold document struct which is
+// PostDocument is given a document struct which is
 // then parsed into a document object which matches the encoding
-// system established by Monax API. NOTE that if Monax API changes
-// this encoding scheme this will break everything for harold.
+// system established.
+// NOTE: if this schema changes hoard will break.
 //
 // This function puts and seals the document into hoard's store
 // and returns back the grant which is given from hoard.
@@ -60,26 +57,6 @@ func PostDocument(gs GrantService, document *meta.Document, spec *grant.Spec, sa
 	return gs.Seal(ref, spec)
 }
 
-// PutDocument currently mirrors PostDocument in that we do not
-// have hoard functionality to remove documents. However, in the
-// future when we do have the ability to remove documents then
-// the PutDocument function will remove the given inputGrant in
-// favor of the input document by saving the input document into
-// hoard and removing the input grant. It returns the given grant.
-func PutDocument(gs GrantService, document *meta.Document, spec *grant.Spec, salt []byte, replace *grant.Grant) (*grant.Grant, error) {
-	ref, err := gs.Unseal(replace)
-	if err != nil {
-		return nil, err
-	}
-
-	err = gs.Delete(ref.GetAddress())
-	if err != nil {
-		return nil, err
-	}
-
-	return PostDocument(gs, document, spec, salt)
-}
-
 // parseIntoDocument converts a hoard inode object into a parsed document
 func parseIntoDocument(input []byte) (*meta.Document, error) {
 	document := &meta.Document{}
@@ -91,7 +68,7 @@ func parseIntoDocument(input []byte) (*meta.Document, error) {
 }
 
 // legacyDocumentMeta is a necessary type due to changes in the structure
-// of the meta data used by  harold and the legacy implementations
+// of the meta data used and the legacy implementations
 // predominantly the change from Mime -> MimeType along with AssemblyType
 //  -> AssemblyEngine.
 type legacyDocumentMeta struct {
@@ -103,7 +80,7 @@ type legacyDocumentMeta struct {
 
 // legacyParseIntoDocument is a dead simple function which receives
 // a raw hoard inode and parses that into the structs which can be
-// leveraged within harold. This only remains for very old documents
+// leveraged within hoard. This only remains for very old documents
 // and SHOULD NOT BE REMOVED until at least December, 2022.
 func legacyParseIntoDocument(input []byte) (*meta.Document, error) {
 	buff := bytes.NewBuffer(input)
