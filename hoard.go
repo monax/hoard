@@ -4,61 +4,38 @@ import (
 	"crypto/sha256"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v5/api"
-	"github.com/monax/hoard/v5/config"
-	"github.com/monax/hoard/v5/encryption"
-	"github.com/monax/hoard/v5/grant"
-	"github.com/monax/hoard/v5/reference"
-	"github.com/monax/hoard/v5/stores"
+	"github.com/monax/hoard/v6/config"
+	"github.com/monax/hoard/v6/encryption"
+	"github.com/monax/hoard/v6/grant"
+	"github.com/monax/hoard/v6/reference"
+	"github.com/monax/hoard/v6/stores"
 )
 
-type DeterministicEncryptor interface {
+type EncryptionService interface {
 	// Encrypt data and return it along with reference
 	Encrypt(data, salt []byte) (ref *reference.Ref, encryptedData []byte, err error)
 	// Encrypt data and return it along with reference
 	Decrypt(ref *reference.Ref, encryptedData []byte) (data []byte, err error)
 }
 
-type DeterministicEncryptedStore interface {
-	DeterministicEncryptor
-	// Get encrypted data from underlying storage at address and decrypt it using
-	// secretKey
+type ObjectService interface {
+	EncryptionService
+	// Get encrypted data from underlying storage at address and decrypt it
 	Get(ref *reference.Ref) (data []byte, err error)
 	// Encrypt data and put it in underlying storage
 	Put(data, salt []byte) (*reference.Ref, error)
+	// Delete underlying data obtained by address
+	Delete(address []byte) error
 	// Get the underlying ContentAddressedStore
 	Store() stores.ContentAddressedStore
 }
 
 type GrantService interface {
+	ObjectService
 	// Seal a reference by encrypting it according to a grant spec
 	Seal(ref *reference.Ref, spec *grant.Spec) (*grant.Grant, error)
 	// Unseal a grant by decrypting it and returning the reference
 	Unseal(grt *grant.Grant) (*reference.Ref, error)
-}
-
-type PlaintextReceiver interface {
-	Recv() (*api.Plaintext, error)
-}
-
-type PlaintextSender interface {
-	Send(*api.Plaintext) error
-}
-
-type CiphertextReceiver interface {
-	Recv() (*api.Ciphertext, error)
-}
-
-type CiphertextSender interface {
-	Send(*api.Ciphertext) error
-}
-
-type PlaintextAndGrantSpecReceiver interface {
-	Recv() (*api.PlaintextAndGrantSpec, error)
-}
-
-type PlaintextAndGrantSpecSender interface {
-	Send(*api.PlaintextAndGrantSpec) error
 }
 
 // This is our top level API object providing library acting as a deterministic
@@ -123,6 +100,10 @@ func (hrd *Hoard) Put(data, salt []byte) (*reference.Ref, error) {
 		return nil, err
 	}
 	return reference.New(address, blob.SecretKey, salt), nil
+}
+
+func (hrd *Hoard) Delete(address []byte) error {
+	return hrd.store.Delete(address)
 }
 
 // Encrypt data and get reference

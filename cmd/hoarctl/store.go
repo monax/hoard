@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v5"
-	"github.com/monax/hoard/v5/api"
-	"github.com/monax/hoard/v5/reference"
+	"github.com/monax/hoard/v6"
+	"github.com/monax/hoard/v6/api"
+	"github.com/monax/hoard/v6/reference"
 )
 
 // Cat retrieves encrypted data from store
@@ -72,7 +72,7 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		data := readData()
+		data := readData(os.Stdin)
 		// If given address use it
 		push, err := client.storage.Push(context.Background())
 		if err != nil {
@@ -102,7 +102,7 @@ func (client *Client) Put(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		data := readData()
+		data := readData(os.Stdin)
 		put, err := client.cleartext.Put(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)

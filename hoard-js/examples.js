@@ -91,6 +91,24 @@ const example = async function (plaintextIn) {
 
         let addr = await hoard.unsealdelete(grant)
         console.log('Deleted address: ' + addr.Address.toString('hex'))
+
+        plaintextAndGrantSpecAndMeta = {
+            Meta: {
+                Name: "test"
+            },
+            PlaintextAndGrantSpec: {
+                Plaintext: plaintextIn,
+                GrantSpec: {
+                    Plaintext: {}
+                }
+            }
+        };
+
+        grant = await hoard.upload(plaintextAndGrantSpecAndMeta);
+        console.log(grant);
+
+        plaintextAndMeta = await hoard.download(grant);
+        console.log(plaintextAndMeta);
     }
     catch (err) {
         console.log(err);

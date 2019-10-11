@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v5"
-	"github.com/monax/hoard/v5/api"
-	"github.com/monax/hoard/v5/reference"
+	"github.com/monax/hoard/v6"
+	"github.com/monax/hoard/v6/api"
+	"github.com/monax/hoard/v6/reference"
 )
 
 // Decrypt does what it says on the tin
@@ -17,7 +17,7 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 	salt := addStringOpt(cmd, "salt", saltOpt)
 
 	cmd.Action = func() {
-		encryptedData := readData()
+		encryptedData := readData(os.Stdin)
 		dec, err := client.encryption.Decrypt(context.Background(),
 			&api.ReferenceAndCiphertext{
 				Reference: &reference.Ref{
@@ -49,7 +49,7 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		data := readData()
+		data := readData(os.Stdin)
 		enc, err := client.encryption.Encrypt(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
@@ -77,7 +77,7 @@ func (client *Client) Ref(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		data := readData()
+		data := readData(os.Stdin)
 		enc, err := client.encryption.Encrypt(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)

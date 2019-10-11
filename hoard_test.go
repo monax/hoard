@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v5/config"
-	"github.com/monax/hoard/v5/reference"
-	"github.com/monax/hoard/v5/stores"
+	"github.com/monax/hoard/v6/config"
+	"github.com/monax/hoard/v6/reference"
+	"github.com/monax/hoard/v6/stores"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -10,14 +10,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/monax/hoard/v5/api"
+	"github.com/monax/hoard/v6/api"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v5/cmd"
-	"github.com/monax/hoard/v5/config"
-	"github.com/monax/hoard/v5/grant"
-	"github.com/monax/hoard/v5/reference"
-	"github.com/monax/hoard/v5/server"
+	"github.com/monax/hoard/v6/cmd"
+	"github.com/monax/hoard/v6/config"
+	"github.com/monax/hoard/v6/grant"
+	"github.com/monax/hoard/v6/reference"
+	"github.com/monax/hoard/v6/server"
 	"google.golang.org/grpc"
 )
 
@@ -29,6 +29,7 @@ const (
 		"otherwise will be interpreted as the bytes of the string itself."
 	secretOpt string = "The secret key to decrypt the data with as base64-encoded string."
 	chunkOpt  string = "Size in bytes to chunk upload data at."
+	fileOpt   string = "File to read"
 
 	chunkSize = 64 * 1024 // 64 Kb
 	grpcLimit = 4 * 1024 * 1024
@@ -40,6 +41,7 @@ type Client struct {
 	encryption api.EncryptionClient
 	grant      api.GrantClient
 	storage    api.StorageClient
+	documents  api.DocumentClient
 }
 
 func main() {
@@ -71,6 +73,7 @@ func main() {
 		client.encryption = api.NewEncryptionClient(conn)
 		client.grant = api.NewGrantClient(conn)
 		client.storage = api.NewStorageClient(conn)
+		client.documents = api.NewDocumentClient(conn)
 	}
 
 	cmd.AddVersionCommand(hoarctlApp)
@@ -88,6 +91,9 @@ func main() {
 	hoarctlApp.Command("ref", "Encrypt data from STDIN and return its reference", client.Ref)
 	hoarctlApp.Command("encrypt", "Encrypt data from STDIN and output encrypted data on STDOUT", client.Encrypt)
 	hoarctlApp.Command("decrypt", "Decrypt data from STDIN and output decrypted data on STDOUT", client.Decrypt)
+
+	hoarctlApp.Command("upload", "Read a file and upload to Hoard with metadata", client.Upload)
+	hoarctlApp.Command("download", "Download a file from Hoard with metadata", client.Download)
 
 	hoarctlApp.Command("seal", "Seal some data read from STDIN and return grant on STDOUT", client.Seal)
 	hoarctlApp.Command("unseal", "Unseal grant read from STDIN and print data to STDOUT", client.Unseal)
@@ -139,12 +145,19 @@ func jsonString(v interface{}) string {
 
 }
 
-func readData() []byte {
-	data, err := ioutil.ReadAll(os.Stdin)
+func readData(f *os.File) []byte {
+	data, err := ioutil.ReadAll(f)
 	if err != nil {
-		fatalf("Could not read bytes from STDIN to store: %v", err)
+		fatalf("Could not read bytes to store: %v", err)
 	}
 	return data
+}
+
+func openFile(file *string) (*os.File, error) {
+	if file == nil || *file == "" {
+		return nil, fmt.Errorf("no file given")
+	}
+	return os.Open(*file)
 }
 
 func readReference(address *string) *reference.Ref {

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package stores;
 
-option go_package = "github.com/monax/hoard/v5/stores";
+option go_package = "github.com/monax/hoard/v6/stores";
 
 message StatInfo {
     // The address will be the same as the one passed in but is repeated to

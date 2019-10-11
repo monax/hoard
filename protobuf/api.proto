@@ -1,12 +1,13 @@
 syntax = "proto3";
 
-import "reference.proto";
 import "grant.proto";
+import "meta.proto";
+import "reference.proto";
 import "stores.proto";
 
 package api;
 
-option go_package = "github.com/monax/hoard/v5/api";
+option go_package = "github.com/monax/hoard/v6/api";
 
 service Grant {
     // Seal a Reference to create a Grant
@@ -67,6 +68,14 @@ service Storage {
     rpc Delete (Address) returns (Address);
 }
 
+service Document {
+    // GET a document from Hoard
+    rpc Download(grant.Grant) returns (stream PlaintextAndMeta) {}
+  
+    // POST a document into Hoard
+    rpc Upload(stream PlaintextAndGrantSpecAndMeta) returns(grant.Grant) {}
+}
+
 message GrantAndGrantSpec {
     grant.Grant Grant = 1;
     // The type of grant to output
@@ -78,6 +87,20 @@ message PlaintextAndGrantSpec {
         Plaintext Plaintext = 1;
         // The type of grant to output
         grant.Spec GrantSpec = 2;
+    }
+}
+
+message PlaintextAndMeta {
+    oneof input {
+        meta.Meta Meta = 1;
+        Plaintext Plaintext = 2;
+    }
+}
+
+message PlaintextAndGrantSpecAndMeta {
+    oneof input {
+        meta.Meta Meta = 1;
+        PlaintextAndGrantSpec PlaintextAndGrantSpec = 2;
     }
 }
 
@@ -106,4 +129,3 @@ message ReferenceAndCiphertext {
 message Address {
     bytes Address = 1;
 }
-

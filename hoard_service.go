@@ -4,31 +4,29 @@ import (
 	"context"
 	"io"
 
-	"github.com/monax/hoard/v5/api"
-	"github.com/monax/hoard/v5/grant"
-	"github.com/monax/hoard/v5/reference"
-	"github.com/monax/hoard/v5/stores"
+	"github.com/monax/hoard/v6/api"
+	"github.com/monax/hoard/v6/grant"
+	"github.com/monax/hoard/v6/reference"
+	"github.com/monax/hoard/v6/stores"
 )
 
 // Here we implement the GRPC Hoard service. It should mostly be plumbing to
 // a DeterministicEncryptedStore (for which hoard.hoard is the canonical example)
 // and also to Grants.
-type grpcService struct {
-	des DeterministicEncryptedStore
-	gs  GrantService
-	cs  int
+type hoardService struct {
+	gs GrantService
+	cs int
 }
 
-func NewServer(des DeterministicEncryptedStore, gs GrantService, chunkSize int) *grpcService {
-	return &grpcService{
-		des: des,
-		gs:  gs,
-		cs:  chunkSize,
+func NewHoardServer(gs GrantService, chunkSize int) *hoardService {
+	return &hoardService{
+		gs: gs,
+		cs: chunkSize,
 	}
 }
 
-func (service *grpcService) Get(ref *reference.Ref, srv api.Cleartext_GetServer) error {
-	data, err := service.des.Get(ref)
+func (service *hoardService) Get(ref *reference.Ref, srv api.Cleartext_GetServer) error {
+	data, err := service.gs.Get(ref)
 	if err != nil {
 		return err
 	}
@@ -36,25 +34,25 @@ func (service *grpcService) Get(ref *reference.Ref, srv api.Cleartext_GetServer)
 	return SendPlaintext(srv, data, ref.Salt, service.cs)
 }
 
-func (service *grpcService) Put(srv api.Cleartext_PutServer) error {
+func (service *hoardService) Put(srv api.Cleartext_PutServer) error {
 	data, salt, err := ReceivePlaintext(srv)
 	if err != nil {
 		return err
 	}
-	ref, err := service.des.Put(data, salt)
+	ref, err := service.gs.Put(data, salt)
 	if err != nil {
 		return err
 	}
 	return srv.SendAndClose(ref)
 }
 
-func (service *grpcService) Encrypt(srv api.Encryption_EncryptServer) error {
+func (service *hoardService) Encrypt(srv api.Encryption_EncryptServer) error {
 	data, salt, err := ReceivePlaintext(srv)
 	if err != nil {
 		return err
 	}
 
-	ref, encryptedData, err := service.des.Encrypt(data, salt)
+	ref, encryptedData, err := service.gs.Encrypt(data, salt)
 	if err != nil {
 		return err
 	}
@@ -67,8 +65,8 @@ func (service *grpcService) Encrypt(srv api.Encryption_EncryptServer) error {
 	})
 }
 
-func (service *grpcService) Decrypt(refAndCiphertext *api.ReferenceAndCiphertext, srv api.Encryption_DecryptServer) error {
-	data, err := service.des.Decrypt(refAndCiphertext.Reference, refAndCiphertext.Ciphertext.EncryptedData)
+func (service *hoardService) Decrypt(refAndCiphertext *api.ReferenceAndCiphertext, srv api.Encryption_DecryptServer) error {
+	data, err := service.gs.Decrypt(refAndCiphertext.Reference, refAndCiphertext.Ciphertext.EncryptedData)
 	if err != nil {
 		return err
 	}
@@ -77,13 +75,13 @@ func (service *grpcService) Decrypt(refAndCiphertext *api.ReferenceAndCiphertext
 }
 
 // StorageServer
-func (service *grpcService) Push(srv api.Storage_PushServer) error {
+func (service *hoardService) Push(srv api.Storage_PushServer) error {
 	data, err := ReceiveCiphertext(srv)
 	if err != nil {
 		return err
 	}
 
-	address, err := service.des.Store().Put(data)
+	address, err := service.gs.Store().Put(data)
 	if err != nil {
 		return err
 	}
@@ -93,9 +91,9 @@ func (service *grpcService) Push(srv api.Storage_PushServer) error {
 	})
 }
 
-func (service *grpcService) Pull(address *api.Address, srv api.Storage_PullServer) error {
+func (service *hoardService) Pull(address *api.Address, srv api.Storage_PullServer) error {
 	// Get from the underlying store
-	data, err := service.des.Store().Get(address.Address)
+	data, err := service.gs.Store().Get(address.Address)
 	if err != nil {
 		return err
 	}
@@ -104,33 +102,33 @@ func (service *grpcService) Pull(address *api.Address, srv api.Storage_PullServe
 
 }
 
-func (service *grpcService) Delete(ctx context.Context, addr *api.Address) (*api.Address, error) {
-	return addr, service.des.Store().Delete(addr.Address)
+func (service *hoardService) Delete(ctx context.Context, addr *api.Address) (*api.Address, error) {
+	return addr, service.gs.Store().Delete(addr.Address)
 }
 
-func (service *grpcService) Stat(ctx context.Context, address *api.Address) (*stores.StatInfo, error) {
-	statInfo, err := service.des.Store().Stat(address.Address)
+func (service *hoardService) Stat(ctx context.Context, address *api.Address) (*stores.StatInfo, error) {
+	statInfo, err := service.gs.Store().Stat(address.Address)
 	if err != nil {
 		return nil, err
 	}
 	// For the master API we provide the address and the canonical
 	// location in a StatInfo message
 	statInfo.Address = address.Address
-	statInfo.Location = service.des.Store().Location(address.Address)
+	statInfo.Location = service.gs.Store().Location(address.Address)
 	return statInfo, nil
 }
 
 // GrantServer
 
-func (service *grpcService) Seal(ctx context.Context, arg *api.ReferenceAndGrantSpec) (*grant.Grant, error) {
+func (service *hoardService) Seal(ctx context.Context, arg *api.ReferenceAndGrantSpec) (*grant.Grant, error) {
 	return service.gs.Seal(arg.Reference, arg.GrantSpec)
 }
 
-func (service *grpcService) Unseal(ctx context.Context, grt *grant.Grant) (*reference.Ref, error) {
+func (service *hoardService) Unseal(ctx context.Context, grt *grant.Grant) (*reference.Ref, error) {
 	return service.gs.Unseal(grt)
 }
 
-func (service *grpcService) Reseal(ctx context.Context, arg *api.GrantAndGrantSpec) (*grant.Grant, error) {
+func (service *hoardService) Reseal(ctx context.Context, arg *api.GrantAndGrantSpec) (*grant.Grant, error) {
 	ref, err := service.gs.Unseal(arg.Grant)
 	if err != nil {
 		return nil, err
@@ -138,13 +136,13 @@ func (service *grpcService) Reseal(ctx context.Context, arg *api.GrantAndGrantSp
 	return service.gs.Seal(ref, arg.GrantSpec)
 }
 
-func (service *grpcService) PutSeal(srv api.Grant_PutSealServer) error {
+func (service *hoardService) PutSeal(srv api.Grant_PutSealServer) error {
 	data, salt, spec, err := ReceivePlaintextAndGrantSpec(srv)
 	if err != nil {
 		return err
 	}
 
-	ref, err := service.des.Put(data, salt)
+	ref, err := service.gs.Put(data, salt)
 	if err != nil {
 		return err
 	}
@@ -157,13 +155,13 @@ func (service *grpcService) PutSeal(srv api.Grant_PutSealServer) error {
 	return srv.SendAndClose(grant)
 }
 
-func (service *grpcService) UnsealGet(grt *grant.Grant, srv api.Grant_UnsealGetServer) error {
+func (service *hoardService) UnsealGet(grt *grant.Grant, srv api.Grant_UnsealGetServer) error {
 	ref, err := service.gs.Unseal(grt)
 	if err != nil {
 		return err
 	}
 
-	data, err := service.des.Get(ref)
+	data, err := service.gs.Get(ref)
 	if err != nil {
 		return err
 	}
@@ -171,12 +169,16 @@ func (service *grpcService) UnsealGet(grt *grant.Grant, srv api.Grant_UnsealGetS
 	return SendPlaintext(srv, data, ref.Salt, service.cs)
 }
 
-func (service *grpcService) UnsealDelete(ctx context.Context, grt *grant.Grant) (*api.Address, error) {
+func (service *hoardService) UnsealDelete(ctx context.Context, grt *grant.Grant) (*api.Address, error) {
 	ref, err := service.gs.Unseal(grt)
 	if err != nil {
 		return nil, err
 	}
 	return service.Delete(ctx, &api.Address{Address: ref.Address})
+}
+
+type PlaintextReceiver interface {
+	Recv() (*api.Plaintext, error)
 }
 
 func ReceivePlaintext(srv PlaintextReceiver) ([]byte, []byte, error) {
@@ -198,6 +200,10 @@ func ReceivePlaintext(srv PlaintextReceiver) ([]byte, []byte, error) {
 			data = append(data, x.Data...)
 		}
 	}
+}
+
+type PlaintextSender interface {
+	Send(*api.Plaintext) error
 }
 
 func SendPlaintext(srv PlaintextSender, data, salt []byte, cs int) error {
@@ -222,6 +228,10 @@ func SendPlaintext(srv PlaintextSender, data, salt []byte, cs int) error {
 	return nil
 }
 
+type CiphertextReceiver interface {
+	Recv() (*api.Ciphertext, error)
+}
+
 func ReceiveCiphertext(srv CiphertextReceiver) ([]byte, error) {
 	var data []byte
 	for {
@@ -238,6 +248,10 @@ func ReceiveCiphertext(srv CiphertextReceiver) ([]byte, error) {
 	}
 }
 
+type CiphertextSender interface {
+	Send(*api.Ciphertext) error
+}
+
 func SendCiphertext(srv CiphertextSender, data []byte, cs int) error {
 	out := new(api.Ciphertext)
 	for i := 0; i < len(data); i += cs {
@@ -252,6 +266,10 @@ func SendCiphertext(srv CiphertextSender, data []byte, cs int) error {
 	}
 
 	return nil
+}
+
+type PlaintextAndGrantSpecReceiver interface {
+	Recv() (*api.PlaintextAndGrantSpec, error)
 }
 
 func ReceivePlaintextAndGrantSpec(srv PlaintextAndGrantSpecReceiver) ([]byte, []byte, *grant.Spec, error) {
@@ -279,6 +297,10 @@ func ReceivePlaintextAndGrantSpec(srv PlaintextAndGrantSpecReceiver) ([]byte, []
 			spec = x.GrantSpec
 		}
 	}
+}
+
+type PlaintextAndGrantSpecSender interface {
+	Send(*api.PlaintextAndGrantSpec) error
 }
 
 func SendPlaintextAndGrantSpec(srv PlaintextAndGrantSpecSender, spec *grant.Spec, data, salt []byte, cs int) error {

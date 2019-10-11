@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/monax/hoard/v5/config"
+	"github.com/monax/hoard/v6/config"
 
 	"github.com/stretchr/testify/assert"
 )

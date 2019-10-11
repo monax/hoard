@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v5"
-	"github.com/monax/hoard/v5/api"
-	"github.com/monax/hoard/v5/grant"
+	"github.com/monax/hoard/v6"
+	"github.com/monax/hoard/v6/api"
+	"github.com/monax/hoard/v6/grant"
 )
 
 // PutSeal encrypts and stores data then prints a grant
@@ -28,7 +28,7 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 			}
 		}
 
-		data := readData()
+		data := readData(os.Stdin)
 		seal, err := client.grant.PutSeal(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
