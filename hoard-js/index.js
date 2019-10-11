@@ -35,6 +35,8 @@ const HoardClientDynamic = function (address) {
         grpc.credentials.createInsecure());
     this.grantClient = new hoard_proto.Grant(address,
         grpc.credentials.createInsecure());
+    this.documentClient = new hoard_proto.Document(address,
+        grpc.credentials.createInsecure());    
     this.chunkSize = 64 * 1024;
 };
 
@@ -204,6 +206,74 @@ HoardClient.prototype.stat = function (address) {
         });
     });
 };
+
+HoardClient.prototype.upload = function (plaintextAndGrantSpecAndMeta) {
+    const client = this.documentClient;
+    const size = this.chunkSize;
+    return new Promise(function (resolve, reject) {
+        const call = client.upload(function(error, grant) {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(grant);
+            }
+        });
+
+        const meta = plaintextAndGrantSpecAndMeta.Meta;
+        const document = plaintextAndGrantSpecAndMeta.PlaintextAndGrantSpec;
+        const spec = document.GrantSpec;
+        const data = document.Plaintext.Data;
+        const salt = document.Plaintext.Salt;
+
+        call.write({Meta: meta});
+        call.write({PlaintextAndGrantSpec: {GrantSpec: spec}});
+        call.write({PlaintextAndGrantSpec: {Plaintext: {Salt: salt}}});
+        for (var i=0; i<data.length; i+=size) {
+            if (i+size>data.length) {
+                call.write({PlaintextAndGrantSpec: {Plaintext: {Data: data.slice(i, data.length)}}});
+            } else {
+                call.write({PlaintextAndGrantSpec: {Plaintext: {Data: data.slice(i, i+size)}}});
+            }
+        }
+        call.end();
+    });
+};
+
+HoardClient.prototype.download = function (grant) {
+    const client = this.documentClient;
+    return new Promise(function (resolve, reject) {
+        const call = client.download(grant);
+
+        var plaintextAndMeta = {
+            Meta: {},
+            Plaintext: {
+                Salt: Buffer.alloc(0),
+                Data: Buffer.alloc(0),
+            }
+        };
+
+        call.on('data', function(data) {
+            if (data.input == 'Meta') {
+                plaintextAndMeta.Meta = data.Meta;
+            } else if (data.input == 'Plaintext') {
+                if (data.Plaintext.input == 'Salt') {
+                    plaintextAndMeta.Plaintext.Salt = Buffer.concat([plaintextAndMeta.Plaintext.Salt, data.Plaintext.Salt]);
+                } else if (data.Plaintext.input == 'Data') {
+                    plaintextAndMeta.Plaintext.Data = Buffer.concat([plaintextAndMeta.Plaintext.Data, data.Plaintext.Data]);
+                }
+            }
+        });
+    
+        call.on('error', function(e) {
+            reject(e);
+        });
+    
+        call.on('end', function() {
+            resolve(plaintextAndMeta);
+        });
+    });
+};
+
 
 // Walk over the given object and base64 encode any buffers
 HoardClient.prototype.base64ify = function (obj) {

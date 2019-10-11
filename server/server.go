@@ -57,11 +57,13 @@ func (serv *Server) Serve() error {
 	logging.InfoMsg(serv.logger, "Initialising Hoard server",
 		"store_name", serv.hoard.Name())
 
-	hoardServer := hoard.NewServer(serv.hoard, serv.hoard, serv.chunk)
+	hoardServer := hoard.NewHoardServer(serv.hoard, serv.chunk)
 	api.RegisterCleartextServer(serv.grpcServer, hoardServer)
 	api.RegisterEncryptionServer(serv.grpcServer, hoardServer)
 	api.RegisterStorageServer(serv.grpcServer, hoardServer)
 	api.RegisterGrantServer(serv.grpcServer, hoardServer)
+	api.RegisterDocumentServer(serv.grpcServer, hoardServer)
+
 	// Register reflection service on gRPC server.
 	reflection.Register(serv.grpcServer)
 	// Announce ready

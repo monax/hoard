@@ -1,0 +1,17 @@
+<div class="pagebreakbefore"></div>
+The parties consent to the maintenance of this agreement via electronic methods. The parties to this agreement agree that the provision of electronic signatures shall be considered necessary and sufficient proof of their intent to contract as defined by the laws governing this agreement. The parties acknowledge that some of the evidence, and deliverables which are integral to the successful fulfillment of this agreement shall be tracked within an electronic network known as a "blockchain" at the uniquely identifiable address below
+<br /><br />
+{{ .AgreementAddress }}
+<br /><br />
+<div class="signatures">
+{{- range .Signatures }}
+<table class="signatureBlock">
+<tr><td class="signerName">Signatory:</td><td class="signerNameEntry">{{ .SignersFirstName }} {{ .SignersLastName }}</td></tr>
+<tr><td class="companyName">For:</td><td class="companyNameEntry">{{ .CommpanyName }}</td></tr>
+<tr><td class="signerTitle">Title:</td><td class="signerTitleEntry">{{ .SignersTitle }}</td></tr>
+<tr><td class="companyAddress">Address:</td><td class="companyAddressEntry">{{ .CompanyAddress }}</td></tr>
+<tr><td class="signatureImage">Signed:</td><td class="signatureImageEntry"><img src="{{ .SignatureImage }}" /></td></tr>
+</table>
+{{- end }}
+</div>
+<div class="pagebreakafter"></div>

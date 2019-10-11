@@ -28,7 +28,7 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 			}
 		}
 
-		data := readData()
+		data := readData(os.Stdin)
 		seal, err := client.grant.PutSeal(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
