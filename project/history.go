@@ -32,6 +32,10 @@ var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://gi
 	MustDeclareReleases(
 		"",
 		``,
+		"6.0.0 - 2019-10-11",
+		`### Added
+- Document streaming service
+`,
 		"5.1.0 - 2019-09-08",
 		`### Added
 - Ability to delete files located at address

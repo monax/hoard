@@ -2,6 +2,11 @@
 ## [Unreleased]
 
 
+## [6.0.0] - 2019-10-11
+### Added
+- Document streaming service
+
+
 ## [5.1.0] - 2019-09-08
 ### Added
 - Ability to delete files located at address
@@ -131,7 +136,8 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v5.1.0...HEAD
+[Unreleased]: https://github.com/monax/hoard/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/monax/hoard/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/monax/hoard/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/monax/hoard/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/monax/hoard/compare/v4.0.0...v5.0.0
