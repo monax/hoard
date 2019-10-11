@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/monax/hoard/v5/grant"
-	"github.com/monax/hoard/v5/meta"
+	"github.com/monax/hoard/v6/grant"
+	"github.com/monax/hoard/v6/meta"
 )
 
 // Harold is an extension to the hoard interface to allow

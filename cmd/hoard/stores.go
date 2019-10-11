@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v5/config"
-	"github.com/monax/hoard/v5/stores"
-	"github.com/monax/hoard/v5/stores/cloud"
-	"github.com/monax/hoard/v5/stores/ipfs"
+	"github.com/monax/hoard/v6/config"
+	"github.com/monax/hoard/v6/stores"
+	"github.com/monax/hoard/v6/stores/cloud"
+	"github.com/monax/hoard/v6/stores/ipfs"
 )
 
 func StoreFromStorageConfig(storageConfig *config.Storage, logger log.Logger) (stores.NamedStore, error) {

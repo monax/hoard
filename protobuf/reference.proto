@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package reference;
 
-option go_package = "github.com/monax/hoard/v5/reference";
+option go_package = "github.com/monax/hoard/v6/reference";
 
 message Ref {
     bytes Address = 1;

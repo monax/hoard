@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package meta;
 
-option go_package = "github.com/monax/hoard/v5/meta";
+option go_package = "github.com/monax/hoard/v6/meta";
 
 message Meta {
   string Name = 1;

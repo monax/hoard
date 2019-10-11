@@ -7,7 +7,7 @@ import "stores.proto";
 
 package api;
 
-option go_package = "github.com/monax/hoard/v5/api";
+option go_package = "github.com/monax/hoard/v6/api";
 
 service Grant {
     // Seal a Reference to create a Grant

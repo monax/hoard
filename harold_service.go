@@ -3,9 +3,9 @@ package hoard
 import (
 	"io"
 
-	"github.com/monax/hoard/v5/api"
-	"github.com/monax/hoard/v5/grant"
-	"github.com/monax/hoard/v5/meta"
+	"github.com/monax/hoard/v6/api"
+	"github.com/monax/hoard/v6/grant"
+	"github.com/monax/hoard/v6/meta"
 )
 
 func (service *hoardService) Download(grt *grant.Grant, srv api.Document_DownloadServer) error {

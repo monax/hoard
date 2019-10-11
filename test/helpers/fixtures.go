@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"github.com/monax/hoard/v5/meta"
+	"github.com/monax/hoard/v6/meta"
 )
 
 // -------------------------------------------------------

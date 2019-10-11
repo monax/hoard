@@ -3,8 +3,8 @@ package hoard
 import (
 	"testing"
 
-	"github.com/monax/hoard/v5/meta"
-	"github.com/monax/hoard/v5/test/helpers"
+	"github.com/monax/hoard/v6/meta"
+	"github.com/monax/hoard/v6/test/helpers"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/require"

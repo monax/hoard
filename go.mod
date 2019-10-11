@@ -1,4 +1,4 @@
-module github.com/monax/hoard/v5
+module github.com/monax/hoard/v6
 
 go 1.13
 
@@ -19,7 +19,6 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/h2non/filetype v1.0.10
 	github.com/jawher/mow.cli v1.1.0
-	github.com/monax/hoard v3.0.1+incompatible
 	github.com/monax/relic v2.0.0+incompatible
 	github.com/stretchr/testify v1.4.0
 	gocloud.dev v0.13.0

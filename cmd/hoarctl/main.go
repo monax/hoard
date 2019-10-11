@@ -10,14 +10,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/monax/hoard/v5/api"
+	"github.com/monax/hoard/v6/api"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v5/cmd"
-	"github.com/monax/hoard/v5/config"
-	"github.com/monax/hoard/v5/grant"
-	"github.com/monax/hoard/v5/reference"
-	"github.com/monax/hoard/v5/server"
+	"github.com/monax/hoard/v6/cmd"
+	"github.com/monax/hoard/v6/config"
+	"github.com/monax/hoard/v6/grant"
+	"github.com/monax/hoard/v6/reference"
+	"github.com/monax/hoard/v6/server"
 	"google.golang.org/grpc"
 )
 
