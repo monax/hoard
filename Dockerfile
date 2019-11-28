@@ -2,7 +2,7 @@
 FROM golang:1.12.1-alpine3.9 as builder
 MAINTAINER Monax <support@monax.io>
 
-RUN apk add --update --no-cache  git
+RUN apk add --update --no-cache make git bash
 
 ARG REPO=$GOPATH/src/github.com/monax/hoard
 COPY . $REPO
@@ -10,8 +10,7 @@ WORKDIR $REPO
 
 ENV GO111MODULE=on
 # Build purely static binaries
-RUN go build --ldflags '-extldflags "-static"' -o bin/hoard ./cmd/hoard
-RUN go build --ldflags '-extldflags "-static"' -o bin/hoarctl ./cmd/hoarctl
+RUN make build
 
 # This will be our base container image
 FROM alpine:3.9

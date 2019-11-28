@@ -10,8 +10,8 @@
     "url": "git+https://github.com/monax/hoard.git"
   },
   "dependencies": {
-    "@grpc/proto-loader": "^0.5.1",
-    "grpc": "^1.22.2"
+    "@grpc/proto-loader": "^0.5.3",
+    "grpc": "^1.24.2"
   },
   "files": [
     "hoard-js/",
@@ -33,6 +33,6 @@
   },
   "homepage": "https://github.com/monax/hoard#readme",
   "devDependencies": {
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.2"
   }
 }

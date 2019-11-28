@@ -20,6 +20,10 @@
 
 export GO111MODULE := on
 
+# Gets implicit default GOPATH if not set
+GOPATH?=$(shell go env GOPATH)
+BIN_PATH?=${GOPATH}/bin
+
 SHELL := /bin/bash
 REPO := $(shell pwd)
 GOFILES := $(shell find . -name '*.pb.go' -prune -o -not -path './vendor/*' -type f -name '*.go' -print)
@@ -28,6 +32,8 @@ GOFILES := $(shell find . -name '*.pb.go' -prune -o -not -path './vendor/*' -typ
 PROTO_FILES = $(shell find . -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
 PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
 PROTO_GO_FILES_REAL = $(shell find . -type f -name '*.pb.go' -print)
+
+GO_BUILD_ARGS = -ldflags "-extldflags '-static' -X $(shell go list)/project.commit=$(shell cat commit_hash.txt) -X $(shell go list)/project.date=$(shell date '+%Y-%m-%d')"
 
 export DOCKER_HUB := quay.io
 export DOCKER_REPO := $(DOCKER_HUB)/monax/hoard
@@ -85,18 +91,19 @@ protobuf_deps:
 
 ## build the hoard binary
 .PHONY: build_hoard
-build_hoard:
-	@go build -o bin/hoard ./cmd/hoard
+build_hoard: commit_hash
+	go build $(GO_BUILD_ARGS) -o bin/hoard ./cmd/hoard
 
 ## build the hoard binary
 .PHONY: build_hoarctl
-build_hoarctl:
-	@go build -o bin/hoarctl ./cmd/hoarctl
+build_hoarctl: commit_hash
+	go build $(GO_BUILD_ARGS) -o bin/hoarctl ./cmd/hoarctl
 
 .PHONY: install
-install:
-	@go install ./cmd/hoard
-	@go install ./cmd/hoarctl
+install: build_hoarctl build_hoard
+	mkdir -p ${BIN_PATH}
+	install -T ${REPO}/bin/hoarctl ${BIN_PATH}/hoarctl
+	install -T ${REPO}/bin/hoard ${BIN_PATH}/hoard
 
 ## build all targets in github.com/monax/hoard
 .PHONY: build

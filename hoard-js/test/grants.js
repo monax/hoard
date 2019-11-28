@@ -23,7 +23,7 @@ describe('Should be able to store plaintext under symmetric grant', function () 
         assert.strictEqual(decrypted.Salt.toString('utf8'), salt)
     });
 
-    it('invalid secret id', async function () {
+    it('rejects invalid secret id', async function () {
         let text = 'some stuff'
         let plaintextAndGrantSpec = {
             Plaintext: {
@@ -37,7 +37,9 @@ describe('Should be able to store plaintext under symmetric grant', function () 
             }
         }
         let hoard = new Hoard.Client('localhost:53431');
-        assert.rejects(() => hoard.putseal(plaintextAndGrantSpec), Error,
-            "should fail when PublicID id not known to Hoard");
+        // NOTE: we have no assert.rejects in node 9.7.1 which we currently need to support
+        hoard.putseal(plaintextAndGrantSpec)
+          .then(() => assert.fail("should fail when PublicID id not known to Hoard"))
+          .catch(() => {})//good
     });
 });
