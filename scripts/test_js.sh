@@ -2,7 +2,7 @@
 
 export PATH=$PATH:$(pwd)/bin
 
-hoard config memory -s test:secret_pass | hoard -c- &> /dev/null &
+hoard config memory -s testing-id:secret_pass | hoard -c- &> /dev/null &
 HID=$!
 function finish {
     kill -TERM $HID

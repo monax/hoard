@@ -33,6 +33,8 @@ const (
 	GCP   Type = "gcp"
 )
 
+const GcloudServiceKeyEnvVar = "GCLOUD_SERVICE_KEY"
+
 var _ stores.Store = (*cloudStore)(nil)
 
 type cloudStore struct {
@@ -83,7 +85,7 @@ func NewStore(cloud Type, bucket, prefix, region string, addrenc stores.AddressE
 		conn, err = azureblob.OpenBucket(ctx, p, accountName, bucket, nil)
 
 	case GCP:
-		creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv("GCLOUD_SERVICE_KEY")), "https://www.googleapis.com/auth/cloud-platform")
+		creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv(GcloudServiceKeyEnvVar)), "https://www.googleapis.com/auth/cloud-platform")
 		if err != nil {
 			return nil, err
 		}

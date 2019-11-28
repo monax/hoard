@@ -11,19 +11,23 @@ import (
 
 const DefaultListenAddress = "tcp://:53431"
 
-var DefaultHoardConfig = NewHoardConfig(DefaultListenAddress,
-	DefaultStorage, DefaultLogging)
+const DefaultChunkSize = 1 << 16 // 64 Kb
+
+var DefaultHoardConfig = NewHoardConfig(DefaultListenAddress, DefaultChunkSize, NewDefaultStorage(), DefaultLogging)
 
 type HoardConfig struct {
 	ListenAddress string
-	Storage       *Storage
-	Logging       *Logging
-	Secrets       *Secrets
+	// Chunk size for data upload / download
+	ChunkSize int
+	Storage   *Storage
+	Logging   *Logging
+	Secrets   *Secrets
 }
 
-func NewHoardConfig(listenAddress string, storageConfig *Storage, loggingConfig *Logging) *HoardConfig {
+func NewHoardConfig(listenAddress string, chunkSize int, storageConfig *Storage, loggingConfig *Logging) *HoardConfig {
 	return &HoardConfig{
 		ListenAddress: listenAddress,
+		ChunkSize:     chunkSize,
 		Storage:       storageConfig,
 		Logging:       loggingConfig,
 	}

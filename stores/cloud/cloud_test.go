@@ -5,6 +5,7 @@ package cloud
 import (
 	"context"
 	"encoding/base32"
+	"fmt"
 	"os"
 	"testing"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/monax/hoard/v6/stores"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
@@ -22,7 +24,8 @@ import (
 func TestStoreGCS(t *testing.T) {
 	bucket := "monax-hoard"
 	prefix := "test-store"
-	deleteGCSPrefix(bucket, prefix)
+	err := deleteGCSPrefix(bucket, prefix)
+	require.NoError(t, err)
 	store, err := NewStore(GCP, bucket, prefix, "", base32.StdEncoding, nil)
 	assert.NoError(t, err)
 	stores.RunTests(t, store)
@@ -31,32 +34,34 @@ func TestStoreGCS(t *testing.T) {
 func TestStoreS3(t *testing.T) {
 	bucket := "monax-hoard-test"
 	prefix := "TestS3Store/"
-	deleteS3Prefix(bucket, prefix)
+	err := deleteS3Prefix(bucket, prefix)
+	require.NoError(t, err)
 	store, err := NewStore(AWS, bucket, prefix, "", base32.StdEncoding, nil)
 	assert.NoError(t, err)
 	stores.RunTests(t, store)
 }
 
-func deleteS3Prefix(bucket, prefix string) {
+func deleteS3Prefix(bucket, prefix string) error {
 	deleter := s3manager.NewBatchDelete(session.Must(session.New(aws.NewConfig()), nil))
-	err := deleter.Delete(context.Background(),
+	return deleter.Delete(context.Background(),
 		s3manager.NewDeleteListIterator(deleter.Client,
 			&s3.ListObjectsInput{Bucket: &bucket, Prefix: &prefix}))
-	if err != nil {
-		panic(err)
-	}
 }
 
-func deleteGCSPrefix(bucket, prefix string) {
+func deleteGCSPrefix(bucket, prefix string) error {
 	ctx := context.Background()
-	creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv("GCLOUD_SERVICE_KEY")), "https://www.googleapis.com/auth/cloud-platform")
+	serviceKey := os.Getenv(GcloudServiceKeyEnvVar)
+	if len(serviceKey) == 0 {
+		return fmt.Errorf("environment variable %s not set", GcloudServiceKeyEnvVar)
+	}
+	creds, err := google.CredentialsFromJSON(ctx, []byte(serviceKey), "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("could not parse gcloud credentials: %v", err)
 	}
 
 	client, err := storage.NewClient(ctx, option.WithCredentials(creds))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer client.Close()
@@ -65,4 +70,5 @@ func deleteGCSPrefix(bucket, prefix string) {
 	for obj, _ := objs.Next(); obj != nil; obj, _ = objs.Next() {
 		bkt.Object(obj.Name).Delete(ctx)
 	}
+	return nil
 }

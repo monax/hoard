@@ -32,12 +32,12 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 			fatalf("Error starting client: %v", err)
 		}
 
-		data, _, err := hoard.ReceivePlaintext(dec)
+		plaintext, err := hoard.ReceivePlaintext(dec)
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
 
-		os.Stdout.Write(data)
+		os.Stdout.Write(plaintext.Data)
 	}
 }
 

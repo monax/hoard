@@ -52,7 +52,8 @@ func TestImproperlyDecoding(t *testing.T) {
 	require.Error(t, err)
 }
 
-// DO NOT REMOVE THIS...
+// TODO: Remove this when...
+// [Casey] We can remove that fallback if we ensure that every hoard object conforms to the new encoding system rather than the old.
 func TestProperlyDecodingLegacy(t *testing.T) {
 	docRaw, err := helpers.ReadFixture("rawObject.buffer")
 	require.NoError(t, err)
@@ -68,7 +69,8 @@ func TestProperlyDecodingLegacy(t *testing.T) {
 	require.NotEqual(t, 0, len(doc.Data))
 }
 
-// DO NOT REMOVE THIS...
+// TODO: Remove this when...
+// [Casey] We can remove that fallback if we ensure that every hoard object conforms to the new encoding system rather than the old.
 func TestProperlyDecodingLegacyWithFallThru(t *testing.T) {
 	docRaw, err := helpers.ReadFixture("rawObject.buffer")
 	require.NoError(t, err)

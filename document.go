@@ -7,12 +7,12 @@ import (
 	"fmt"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/monax/hoard/v6/api"
 	"github.com/monax/hoard/v6/grant"
 	"github.com/monax/hoard/v6/meta"
 )
 
-// This is an extension to the hoard interface to allow
-// stateful retrieval of document objects
+// Document extensions to hoard providing conventions for storing documents with their metadata
 
 // GetDocument retrieves a document from hoard and parses
 // it into a document struct.
@@ -43,18 +43,21 @@ func GetDocument(gs GrantService, grant *grant.Grant) (*meta.Document, []byte, e
 //
 // This function puts and seals the document into hoard's store
 // and returns back the grant which is given from hoard.
-func PostDocument(gs GrantService, document *meta.Document, spec *grant.Spec, salt []byte) (*grant.Grant, error) {
-	out, err := proto.Marshal(document)
+func PutDocument(gs GrantService, pgsm *api.PlaintextAndGrantSpecAndMeta) (*grant.Grant, error) {
+	out, err := proto.Marshal(&meta.Document{
+		Meta: pgsm.Meta,
+		Data: pgsm.PlaintextAndGrantSpec.Plaintext.Data,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	ref, err := gs.Put(out, salt)
+	ref, err := gs.Put(out, pgsm.PlaintextAndGrantSpec.Plaintext.Salt)
 	if err != nil {
 		return nil, err
 	}
 
-	return gs.Seal(ref, spec)
+	return gs.Seal(ref, pgsm.PlaintextAndGrantSpec.GrantSpec)
 }
 
 // parseIntoDocument converts a hoard inode object into a parsed document
@@ -78,6 +81,7 @@ type legacyDocumentMeta struct {
 	AssemblyType string
 }
 
+// TODO: [Silas] query Casey on the plan implied by the below...
 // legacyParseIntoDocument is a dead simple function which receives
 // a raw hoard inode and parses that into the structs which can be
 // leveraged within hoard. This only remains for very old documents

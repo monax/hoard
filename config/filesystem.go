@@ -14,16 +14,16 @@ type FileSystemConfig struct {
 }
 
 func NewFileSystemConfig(addressEncoding, rootDirectory string) *Storage {
-	return &Storage{
-		StorageType:     Filesystem,
-		AddressEncoding: addressEncoding,
-		FileSystemConfig: &FileSystemConfig{
-			RootDirectory: rootDirectory,
-		},
+	conf := NewDefaultStorage()
+	conf.StorageType = Filesystem
+	conf.AddressEncoding = addressEncoding
+	conf.FileSystemConfig = &FileSystemConfig{
+		RootDirectory: rootDirectory,
 	}
+	return conf
 }
 
-func DefaultFileSystemConfig() *Storage {
+func NewDefaultFileSystemConfig() *Storage {
 	dataDir, err := xdgbasedir.DataHomeDirectory()
 	if err != nil {
 		panic(fmt.Errorf("could not get XDG data dir: %s", err))

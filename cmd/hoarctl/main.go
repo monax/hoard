@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"time"
 
 	"github.com/monax/hoard/v6/api"
 
@@ -63,7 +63,7 @@ func main() {
 		conn, err = grpc.Dial(*dialURL,
 			grpc.WithInsecure(),
 			// We have to bugger around with this so we can dial an arbitrary net.Conn
-			grpc.WithDialer(func(string, time.Duration) (net.Conn, error) {
+			grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
 				return net.Dial(netProtocol, localAddress)
 			}))
 		if err != nil {

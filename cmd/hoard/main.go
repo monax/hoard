@@ -65,10 +65,8 @@ func main() {
 		}
 		symmetricProvider := config.NewSymmetricProvider(conf.Secrets)
 		openPGPConf := config.NewOpenPGPSecret(conf.Secrets)
-		sm := config.SecretsManager{Provider: symmetricProvider, OpenPGP: openPGPConf}
-		cs := conf.Storage.ChunkSize
-
-		serv := server.New(conf.ListenAddress, store, sm, cs, logger)
+		secretsManager := config.SecretsManager{Provider: symmetricProvider, OpenPGP: openPGPConf}
+		serv := server.New(conf.ListenAddress, store, secretsManager, conf.ChunkSize, logger)
 		// Catch interrupt etc
 		signalCh := make(chan os.Signal, 1)
 		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
@@ -80,7 +78,7 @@ func main() {
 			os.Exit(0)
 		}(signalCh)
 
-		printf("Starting hoard daemon on %s with %s...", conf.ListenAddress,
+		printf("Starting hoard daemon on %s with chunk size %d on %s...", conf.ListenAddress, conf.ChunkSize,
 			store.Name())
 		err = serv.Serve()
 		if err != nil {
@@ -109,19 +107,24 @@ func main() {
 			initOpt := configCmd.BoolOpt("i init", false, "Write file to "+
 				"XDG standard location")
 
+			chunkSizeOpt := configCmd.IntOpt("c chunk-size", config.DefaultChunkSize,
+				"number of bytes on which to split plaintext/ciphertext across message boundaries when streaming")
+
 			secretsOpt := configCmd.StringsOpt("s secret", nil, "Pairs of PublicID and Passphrase to use as symmetric secrets in config")
 
 			arg := configCmd.StringArg("CONFIG", "", fmt.Sprintf("Storage type to generate, one of: %s",
 				strings.Join(configTypes(), ", ")))
 
-			configCmd.Spec = "[--json | --yaml] | (([--output=<output file>] |  [--init]) [--force]) CONFIG [--secret=<PublicID:Passphrase>...]"
+			configCmd.Spec = "[--json | --yaml] | (([--output=<output file>] |  [--init]) [--force]) CONFIG " +
+				"[--secret=<PublicID:Passphrase>...] [--chunk-size=<message chunk size in bytes>]"
 
 			configCmd.Action = func() {
-				store, err := config.GetDefaultStorage(*arg)
+				store, err := config.GetDefaultStorage(config.StorageType(*arg))
 				if err != nil {
 					fatalf("Error fetching default config for %v: %v", arg, err)
 				}
 				conf.Storage = store
+				conf.ChunkSize = *chunkSizeOpt
 				if len(*secretsOpt) > 0 {
 					conf.Secrets = &config.Secrets{
 						Symmetric: make([]config.SymmetricSecret, len(*secretsOpt)),

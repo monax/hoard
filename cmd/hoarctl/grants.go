@@ -20,9 +20,9 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		spec := grant.Spec{Plaintext: &grant.PlaintextSpec{}}
+		spec := &grant.Spec{Plaintext: &grant.PlaintextSpec{}}
 		if *key != "" {
-			spec = grant.Spec{
+			spec = &grant.Spec{
 				Plaintext: nil,
 				Symmetric: &grant.SymmetricSpec{PublicID: *key},
 			}
@@ -34,17 +34,23 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.SendPlaintextAndGrantSpec(seal, &spec, data, parseSalt(salt), *chunk)
+		err = hoard.SendPlaintextAndGrantSpec(seal, &api.PlaintextAndGrantSpec{
+			Plaintext: &api.Plaintext{
+				Data: data,
+				Salt: parseSalt(salt),
+			},
+			GrantSpec: spec,
+		}, *chunk)
 		if err != nil {
 			fatalf("Error sending data: %v", err)
 		}
 
-		grant, err := seal.CloseAndRecv()
+		grt, err := seal.CloseAndRecv()
 		if err != nil {
 			fatalf("Error closing client: %v", err)
 		}
 
-		fmt.Printf("%s\n", jsonString(grant))
+		fmt.Printf("%s\n", jsonString(grt))
 	}
 }
 
@@ -127,12 +133,12 @@ func (client *Client) UnsealGet(cmd *cli.Cmd) {
 			fatalf("Error starting client: %v", err)
 		}
 
-		data, _, err := hoard.ReceivePlaintext(unseal)
+		plaintext, err := hoard.ReceivePlaintext(unseal)
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
 
-		os.Stdout.Write(data)
+		os.Stdout.Write(plaintext.Data)
 	}
 }
 

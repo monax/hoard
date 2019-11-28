@@ -57,11 +57,11 @@ func (client *Client) Get(cmd *cli.Cmd) {
 			fatalf("Error starting client: %v", err)
 		}
 
-		data, _, err := hoard.ReceivePlaintext(get)
+		plaintext, err := hoard.ReceivePlaintext(get)
 		if err != nil {
 			fatalf("Error retrieving data: %v", err)
 		}
-		os.Stdout.Write(data)
+		os.Stdout.Write(plaintext.Data)
 	}
 }
 
