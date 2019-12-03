@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v6"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/meta"
+	"github.com/monax/hoard/v7"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/meta"
 
 	"github.com/h2non/filetype"
 )

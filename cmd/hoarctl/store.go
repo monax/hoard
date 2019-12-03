@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v6"
-	"github.com/monax/hoard/v6/api"
-	"github.com/monax/hoard/v6/reference"
+	"github.com/monax/hoard/v7"
+	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v7/reference"
 )
 
 // Cat retrieves encrypted data from store

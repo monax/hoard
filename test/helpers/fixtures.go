@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"github.com/monax/hoard/v6/meta"
+	"github.com/monax/hoard/v7/meta"
 )
 
 type TestDocData struct {

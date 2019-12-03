@@ -7,9 +7,9 @@ import (
 	"fmt"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/monax/hoard/v6/api"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/meta"
+	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/meta"
 )
 
 // Document extensions to hoard providing conventions for storing documents with their metadata

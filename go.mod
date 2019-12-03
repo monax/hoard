@@ -1,4 +1,4 @@
-module github.com/monax/hoard/v6
+module github.com/monax/hoard/v7
 
 go 1.13
 

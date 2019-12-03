@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/monax/hoard/v6/api"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/meta"
+	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/meta"
 )
 
 type PlaintextReceiver interface {
@@ -194,7 +194,7 @@ func ReceiveDocumentAndGrantSpec(srv DocumentAndGrantReceiver) (*api.PlaintextAn
 		// NOTE: for singular values we adopt the convention of accepting the first one
 		if d.Meta != nil {
 			if accum.Meta != nil {
-				return nil, fmt.Errorf("recevied multiple document meta but there can be at most one")
+				return nil, fmt.Errorf("received multiple document meta but there can be at most one")
 			}
 			accum.Meta = d.Meta
 		}
@@ -227,7 +227,7 @@ func ReceiveDocument(srv DocumentReceiver) (*meta.Document, error) {
 
 		if d.Meta != nil {
 			if accum.Meta != nil {
-				return nil, fmt.Errorf("recevied multiple document meta but there can be at most one")
+				return nil, fmt.Errorf("received multiple document meta but there can be at most one")
 			}
 			accum.Meta = d.Meta
 		}
@@ -245,10 +245,10 @@ func consumePlaintextAndGrantSpec(accum, chunk *api.PlaintextAndGrantSpec) error
 	}
 	if chunk.GrantSpec != nil {
 		if accum.GrantSpec != nil {
-			return fmt.Errorf("recevied multiple grant specs but there can be at most one")
+			return fmt.Errorf("received multiple grant specs but there can be at most one")
 		}
 		if len(accum.Plaintext.Data) > 0 {
-			return fmt.Errorf("recevied grant spec after data but spec must come before all data chunks")
+			return fmt.Errorf("received grant spec after data but spec must come before all data chunks")
 		}
 		accum.GrantSpec = chunk.GrantSpec
 	}
@@ -261,10 +261,10 @@ func consumePlaintext(accum, chunk *api.Plaintext) error {
 	}
 	if len(chunk.Salt) > 0 {
 		if len(accum.Salt) > 0 {
-			return fmt.Errorf("recevied multiple salts but there can be at most one")
+			return fmt.Errorf("received multiple salts but there can be at most one")
 		}
 		if len(accum.Data) > 0 {
-			return fmt.Errorf("recevied salt after data but salt must come before all data chunks")
+			return fmt.Errorf("received salt after data but salt must come before all data chunks")
 		}
 		accum.Salt = chunk.Salt
 	}

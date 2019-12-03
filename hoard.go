@@ -4,11 +4,11 @@ import (
 	"crypto/sha256"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v6/config"
-	"github.com/monax/hoard/v6/encryption"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/reference"
-	"github.com/monax/hoard/v6/stores"
+	"github.com/monax/hoard/v7/config"
+	"github.com/monax/hoard/v7/encryption"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v7/stores"
 )
 
 type EncryptionService interface {

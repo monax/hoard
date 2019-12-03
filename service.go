@@ -3,10 +3,10 @@ package hoard
 import (
 	"context"
 
-	"github.com/monax/hoard/v6/api"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/reference"
-	"github.com/monax/hoard/v6/stores"
+	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v7/stores"
 )
 
 // 1MiB

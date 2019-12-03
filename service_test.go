@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v6/api"
-	"github.com/monax/hoard/v6/config"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/stores"
-	"github.com/monax/hoard/v6/test/helpers"
+	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v7/config"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/stores"
+	"github.com/monax/hoard/v7/test/helpers"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 )

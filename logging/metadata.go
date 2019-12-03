@@ -19,7 +19,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-stack/stack"
-	"github.com/monax/hoard/v6/logging/structure"
+	"github.com/monax/hoard/v7/logging/structure"
 )
 
 const (

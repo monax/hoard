@@ -78,7 +78,7 @@ commit_hash:
 
 .PHONY: protobuf
 protobuf: $(PROTO_GO_FILES)
-	rsync -r .gopath/github.com/monax/hoard/v6/ ./
+	rsync -r .gopath/github.com/monax/hoard/v7/ ./
 	rm -rf .gopath
 
 .PHONY: clean_protobuf
