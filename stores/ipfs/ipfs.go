@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/monax/hoard/v6/stores"
+	"github.com/monax/hoard/v7/stores"
 )
 
 var _ stores.Store = (*ipfsStore)(nil)

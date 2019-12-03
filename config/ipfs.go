@@ -5,16 +5,16 @@ type IPFSConfig struct {
 }
 
 func NewIPFSConfig(addressEncoding, host string) *Storage {
-	return &Storage{
-		StorageType:     IPFS,
-		AddressEncoding: addressEncoding,
-		IPFSConfig: &IPFSConfig{
-			RemoteAPI: host,
-		},
+	conf := NewDefaultStorage()
+	conf.StorageType = IPFS
+	conf.AddressEncoding = addressEncoding
+	conf.IPFSConfig = &IPFSConfig{
+		RemoteAPI: host,
 	}
+	return conf
 }
 
-func DefaultIPFSConfig() *Storage {
+func NewDefaultIPFSConfig() *Storage {
 	return NewIPFSConfig(DefaultAddressEncodingName,
 		"http://:5001",
 	)

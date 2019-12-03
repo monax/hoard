@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/monax/hoard/v6/meta"
+	"github.com/monax/hoard/v7/meta"
 	"github.com/stretchr/testify/require"
 )
 

@@ -8,15 +8,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/monax/hoard/v6/stores"
+	"github.com/monax/hoard/v7/stores"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v6/logging"
-	"github.com/monax/hoard/v6/logging/structure"
+	"github.com/monax/hoard/v7/logging"
+	"github.com/monax/hoard/v7/logging/structure"
 	"gocloud.dev/blob"
 	"gocloud.dev/blob/azureblob"
 	"gocloud.dev/blob/gcsblob"
@@ -32,6 +32,8 @@ const (
 	Azure Type = "azure"
 	GCP   Type = "gcp"
 )
+
+const GcloudServiceKeyEnvVar = "GCLOUD_SERVICE_KEY"
 
 var _ stores.Store = (*cloudStore)(nil)
 
@@ -83,7 +85,7 @@ func NewStore(cloud Type, bucket, prefix, region string, addrenc stores.AddressE
 		conn, err = azureblob.OpenBucket(ctx, p, accountName, bucket, nil)
 
 	case GCP:
-		creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv("GCLOUD_SERVICE_KEY")), "https://www.googleapis.com/auth/cloud-platform")
+		creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv(GcloudServiceKeyEnvVar)), "https://www.googleapis.com/auth/cloud-platform")
 		if err != nil {
 			return nil, err
 		}

@@ -1,20 +1,5 @@
-package helpers
-
-import (
-	"github.com/monax/hoard/v7/meta"
-)
-
-type TestDocData struct {
-	Type    string `json:"type"`
-	RawData []byte `json:"data"`
-}
-
-type DocumentTest struct {
-	Meta meta.Meta   `json:"meta"`
-	Data TestDocData `json:"data"`
-}
-
-const LongText = `La testimonianza degli scrittori arabi al par che de’ diplomi cristiani
+/* eslint-disable no-tabs */
+const LONG_TEXT = `La testimonianza degli scrittori arabi al par che de’ diplomi cristiani
 	/della Sicilia intorno Giorgio di Antiochia, conferma l’autorità civile
 	delli ammiragli, che che si pensi de’ miei supposti su l’origine sua.
 		Questa particolarità del diritto pubblico siciliano alla quale si è
@@ -43,3 +28,7 @@ Statisti: orfani entrambi, maturati precocemente tra le agitazioni
 	e filosofi più che cristiani: Ruggiero primo re e Federigo secondo
 	imperatore; i due sultani battezzati di Sicilia, a’ quali l’Italia dee
 	non piccola parte dell’incivilimento suo.`
+
+module.exports = {
+  LONG_TEXT
+}

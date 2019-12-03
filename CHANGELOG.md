@@ -1,5 +1,14 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
-## [Unreleased]
+## [7.0.0] - 2019-12-02
+This release makes some changes to the Hoard protobuf and service that are backwards compatible for clients - Hoard v6 clients should work with Hoard v7 but hoard-js v7 will not work entirely correctly with Hoard v6 due to removal of oneof.
+
+### Changed
+- [API] Drop use of oneof in protobuf files - allow singleton fields to be sent with streamable fields
+- [API] Enforce that we only receive exactly one salt and grant spec in streams and that they come first
+- [NODEJS] Expose streaming promise client-side API to take advantage of streaming rather than loading entire file into buffer
+
+### Fixed
+- Ignoring Spec if Salt present in single message
 
 
 ## [6.0.0] - 2019-10-11
@@ -136,7 +145,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
-[Unreleased]: https://github.com/monax/hoard/compare/v6.0.0...HEAD
+[7.0.0]: https://github.com/monax/hoard/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/monax/hoard/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/monax/hoard/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/monax/hoard/compare/v5.0.0...v5.0.1

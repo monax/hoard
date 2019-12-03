@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/go-kit/kit/log"
-	"github.com/monax/hoard/v6/logging/structure"
+	"github.com/monax/hoard/v7/logging/structure"
 )
 
 func InfoLogger(logger log.Logger) log.Logger {

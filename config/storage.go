@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/monax/hoard/v6/stores"
+	"github.com/monax/hoard/v7/stores"
 
 	"bytes"
 
@@ -12,7 +12,9 @@ import (
 
 const DefaultAddressEncodingName = stores.Base64EncodingName
 
-var DefaultStorage = NewMemory(DefaultAddressEncodingName)
+func NewDefaultStorage() *Storage {
+	return NewStorage(Memory, DefaultAddressEncodingName)
+}
 
 type StorageType string
 
@@ -32,8 +34,6 @@ type Storage struct {
 	StorageType StorageType
 	// Address encoding name
 	AddressEncoding string
-	// Chunk size for data upload / download
-	ChunkSize int
 	// Embedding a pointer to each type of config struct allows us to access the
 	// relevant one, while at the same time those that are left as nil will be
 	// omitted from being serialised.
@@ -46,7 +46,6 @@ func NewStorage(storageType StorageType, addressEncoding string) *Storage {
 	return &Storage{
 		StorageType:     storageType,
 		AddressEncoding: addressEncoding,
-		ChunkSize:       64 * 1024, // 64 Kb
 	}
 }
 
@@ -61,22 +60,22 @@ func GetStorageTypes() []StorageType {
 	}
 }
 
-func GetDefaultStorage(c string) (*Storage, error) {
-	switch StorageType(c) {
+func GetDefaultStorage(storageType StorageType) (*Storage, error) {
+	switch storageType {
 	case Memory, Unspecified:
-		return DefaultMemory(), nil
+		return NewDefaultMemory(), nil
 	case Filesystem:
-		return DefaultFileSystemConfig(), nil
+		return NewDefaultFileSystemConfig(), nil
 	case IPFS:
-		return DefaultIPFSConfig(), nil
+		return NewDefaultIPFSConfig(), nil
 	case AWS:
-		return DefaultCloud(c), nil
+		return NewDefaultCloud(storageType), nil
 	case Azure:
-		return DefaultCloud(c), nil
+		return NewDefaultCloud(storageType), nil
 	case GCP:
-		return DefaultCloud(c), nil
+		return NewDefaultCloud(storageType), nil
 	default:
-		return nil, fmt.Errorf("did not recognise storage type '%s'", c)
+		return nil, fmt.Errorf("did not recognise storage type '%s'", storageType)
 	}
 }
 

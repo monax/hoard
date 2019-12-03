@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v6"
-	"github.com/monax/hoard/v6/api"
-	"github.com/monax/hoard/v6/reference"
+	"github.com/monax/hoard/v7"
+	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v7/reference"
 )
 
 // Decrypt does what it says on the tin
@@ -32,12 +32,12 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 			fatalf("Error starting client: %v", err)
 		}
 
-		data, _, err := hoard.ReceivePlaintext(dec)
+		plaintext, err := hoard.ReceivePlaintext(dec)
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
 
-		os.Stdout.Write(data)
+		os.Stdout.Write(plaintext.Data)
 	}
 }
 

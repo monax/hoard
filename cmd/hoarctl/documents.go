@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v6"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/meta"
+	"github.com/monax/hoard/v7"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/meta"
 
 	"github.com/h2non/filetype"
 )
@@ -39,7 +39,7 @@ func (client *Client) Upload(cmd *cli.Cmd) {
 		}
 
 		spec := &grant.Spec{Plaintext: &grant.PlaintextSpec{}}
-		err = hoard.SendDocumentAndGrant(upload, &meta.Document{
+		err = hoard.SendDocumentAndGrantSpec(upload, &meta.Document{
 			Meta: &meta.Meta{
 				Name:     file.Name(),
 				MimeType: kind.MIME.Type,
@@ -50,12 +50,12 @@ func (client *Client) Upload(cmd *cli.Cmd) {
 			fatalf("Error sending data: %v", err)
 		}
 
-		grant, err := upload.CloseAndRecv()
+		grt, err := upload.CloseAndRecv()
 		if err != nil {
 			fatalf("Error closing client: %v", err)
 		}
 
-		fmt.Printf("%s\n", jsonString(grant))
+		fmt.Printf("%s\n", jsonString(grt))
 	}
 }
 
@@ -83,7 +83,7 @@ func (client *Client) getFile() *meta.Document {
 		fatalf("Error starting client: %v", err)
 	}
 
-	doc, _, err := hoard.ReceiveDocument(download)
+	doc, err := hoard.ReceiveDocument(download)
 	if err != nil {
 		fatalf("Error sending data: %v", err)
 	}

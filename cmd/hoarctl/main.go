@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -8,16 +9,15 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"time"
 
-	"github.com/monax/hoard/v6/api"
+	"github.com/monax/hoard/v7/api"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v6/cmd"
-	"github.com/monax/hoard/v6/config"
-	"github.com/monax/hoard/v6/grant"
-	"github.com/monax/hoard/v6/reference"
-	"github.com/monax/hoard/v6/server"
+	"github.com/monax/hoard/v7/cmd"
+	"github.com/monax/hoard/v7/config"
+	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v7/server"
 	"google.golang.org/grpc"
 )
 
@@ -63,7 +63,7 @@ func main() {
 		conn, err = grpc.Dial(*dialURL,
 			grpc.WithInsecure(),
 			// We have to bugger around with this so we can dial an arbitrary net.Conn
-			grpc.WithDialer(func(string, time.Duration) (net.Conn, error) {
+			grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
 				return net.Dial(netProtocol, localAddress)
 			}))
 		if err != nil {

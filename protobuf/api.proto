@@ -7,7 +7,7 @@ import "stores.proto";
 
 package api;
 
-option go_package = "github.com/monax/hoard/v6/api";
+option go_package = "github.com/monax/hoard/v7/api";
 
 service Grant {
     // Seal a Reference to create a Grant
@@ -70,10 +70,12 @@ service Storage {
 
 service Document {
     // GET a document from Hoard
-    rpc Download(grant.Grant) returns (stream PlaintextAndMeta) {}
-  
+    rpc Download (grant.Grant) returns (stream PlaintextAndMeta) {
+    }
+
     // POST a document into Hoard
-    rpc Upload(stream PlaintextAndGrantSpecAndMeta) returns(grant.Grant) {}
+    rpc Upload (stream PlaintextAndGrantSpecAndMeta) returns (grant.Grant) {
+    }
 }
 
 message GrantAndGrantSpec {
@@ -83,25 +85,19 @@ message GrantAndGrantSpec {
 }
 
 message PlaintextAndGrantSpec {
-    oneof input {
-        Plaintext Plaintext = 1;
-        // The type of grant to output
-        grant.Spec GrantSpec = 2;
-    }
+    Plaintext Plaintext = 1;
+    // The type of grant to output
+    grant.Spec GrantSpec = 2;
 }
 
 message PlaintextAndMeta {
-    oneof input {
-        meta.Meta Meta = 1;
-        Plaintext Plaintext = 2;
-    }
+    meta.Meta Meta = 1;
+    Plaintext Plaintext = 2;
 }
 
 message PlaintextAndGrantSpecAndMeta {
-    oneof input {
-        meta.Meta Meta = 1;
-        PlaintextAndGrantSpec PlaintextAndGrantSpec = 2;
-    }
+    meta.Meta Meta = 1;
+    PlaintextAndGrantSpec PlaintextAndGrantSpec = 2;
 }
 
 message ReferenceAndGrantSpec {
@@ -111,10 +107,8 @@ message ReferenceAndGrantSpec {
 }
 
 message Plaintext {
-    oneof input {
-        bytes Data = 1;
-        bytes Salt = 2;
-    }
+    bytes Data = 1;
+    bytes Salt = 2;
 }
 
 message Ciphertext {
