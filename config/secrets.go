@@ -1,8 +1,10 @@
 package config
 
 import (
+	b64 "encoding/base64"
 	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 // Secrets lists the configured secrets,
@@ -15,8 +17,8 @@ type Secrets struct {
 
 type SymmetricSecret struct {
 	// An identifier for this secret that will be stored in the clear with the grant
-	PublicID   string
-	Passphrase string
+	PublicID  string
+	SecretKey string
 }
 
 type OpenPGPSecret struct {
@@ -46,13 +48,21 @@ func NoopSymmetricProvider(_ string) ([]byte, error) {
 }
 
 // ProviderFromConfig creates a secret reader from a set of symmetric secrets
-func NewSymmetricProvider(conf *Secrets) SymmetricProvider {
+func NewSymmetricProvider(conf *Secrets, fromEnv bool) (SymmetricProvider, error) {
 	if conf == nil || len(conf.Symmetric) == 0 {
-		return NoopSymmetricProvider
+		return NoopSymmetricProvider, nil
 	}
 	secs := make(map[string][]byte, len(conf.Symmetric))
 	for _, s := range conf.Symmetric {
-		secs[s.PublicID] = []byte(s.Passphrase)
+		if fromEnv {
+			// sometimes we don't want to specify these in the config
+			s.SecretKey = os.Getenv(s.PublicID)
+		}
+		secret, err := b64.StdEncoding.DecodeString(s.SecretKey)
+		if err != nil {
+			return nil, err
+		}
+		secs[s.PublicID] = secret
 	}
 	return func(id string) ([]byte, error) {
 		if id == "" {
@@ -62,7 +72,7 @@ func NewSymmetricProvider(conf *Secrets) SymmetricProvider {
 			return val, nil
 		}
 		return nil, fmt.Errorf("could not find symmetric secret with ID '%s'", id)
-	}
+	}, nil
 }
 
 // OpenPGPFromConfig reads a given PGP keyring

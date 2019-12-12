@@ -1,4 +1,12 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [7.1.0] - 2019-12-12
+### Changed
+- [CMD] Secret keys can now be loaded from the environment
+
+### Fixed
+- [ENCRYPTION] Secret keys are no longer derived at runtime due to high scrypt memory overhead
+
+
 ## [7.0.0] - 2019-12-02
 This release makes some changes to the Hoard protobuf and service that are backwards compatible for clients - Hoard v6 clients should work with Hoard v7 but hoard-js v7 will not work entirely correctly with Hoard v6 due to removal of oneof.
 
@@ -145,6 +153,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[7.1.0]: https://github.com/monax/hoard/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/monax/hoard/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/monax/hoard/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/monax/hoard/compare/v5.0.1...v5.1.0
