@@ -3,9 +3,12 @@ package encryption
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+
+	"golang.org/x/crypto/scrypt"
 )
 
 // There are issues with the proof of security with other nonce sizes so we only use 0 (for convergent) or 12
@@ -175,4 +178,17 @@ func additionalDataForSalt(salt []byte) []byte {
 			"salting procedure: %#v, error: %s", jsonBytes, err))
 	}
 	return jsonBytes
+}
+
+// We bump it a little from the 100ms for interactive logins rule: https://blog.filippo.io/the-scrypt-parameters/
+const scryptSecurityWorkExponent = 16
+
+func DeriveSecretKey(secret, salt []byte) ([]byte, error) {
+	return scrypt.Key(secret, salt, 1<<scryptSecurityWorkExponent, 8, 1, KeySize)
+}
+
+func NewNonce(n int) ([]byte, error) {
+	salt := make([]byte, n)
+	_, err := rand.Read(salt)
+	return salt, err
 }

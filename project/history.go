@@ -30,6 +30,13 @@ func FullVersion() string {
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases(
+		"7.1.0 - 2019-12-12",
+		`### Changed
+- [CMD] Secret keys can now be loaded from the environment
+
+### Fixed
+- [ENCRYPTION] Secret keys are no longer derived at runtime due to high scrypt memory overhead
+`,
 		"7.0.0 - 2019-12-02",
 		`This release makes some changes to the Hoard protobuf and service that are backwards compatible for clients - Hoard v6 clients should work with Hoard v7 but hoard-js v7 will not work entirely correctly with Hoard v6 due to removal of oneof.
 

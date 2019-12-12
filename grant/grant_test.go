@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/monax/hoard/v7/config"
+	"github.com/monax/hoard/v7/encryption"
 	"github.com/monax/hoard/v7/reference"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,9 +42,11 @@ func TestGrants(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, symmetricGrant)
 
+	secret, _ := computeSecretAndSalt(t, []byte("sssshhhh"))
+
 	// SymmetricGrant with correct provider
 	testSecrets.Provider = func(_ string) ([]byte, error) {
-		return []byte("sssshhhh"), nil
+		return secret, nil
 	}
 	symmetricGrant, err = Seal(testSecrets, testRef, &symmetricSpec)
 	assert.NotNil(t, symmetricGrant)
@@ -75,4 +78,12 @@ func testReference() *reference.Ref {
 		1, 2, 3, 4, 5, 6, 7, 8,
 	}
 	return reference.New(address, secretKey, nil)
+}
+
+func computeSecretAndSalt(t *testing.T, data []byte) ([]byte, []byte) {
+	salt, err := encryption.NewNonce(encryption.NonceSize)
+	assert.NoError(t, err)
+	secret, err := encryption.DeriveSecretKey(data, salt)
+	assert.NoError(t, err)
+	return secret, salt
 }
