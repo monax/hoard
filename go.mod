@@ -19,11 +19,16 @@ require (
 	github.com/h2non/filetype v1.0.10
 	github.com/jawher/mow.cli v1.1.0
 	github.com/monax/relic v2.0.0+incompatible
+	github.com/naoina/go-stringutil v0.1.0 // indirect
+	github.com/naoina/toml v0.1.1
+	github.com/pelletier/go-toml v1.6.0
 	github.com/stretchr/testify v1.4.0
+	github.com/test-go/testify v1.1.4
 	gocloud.dev v0.18.0
 	golang.org/x/crypto v0.0.0-20191122220453-ac88ee75c92c
 	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c
 	google.golang.org/api v0.6.0
 	google.golang.org/grpc v1.25.1
+	gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0
 	gopkg.in/yaml.v2 v2.2.7
 )

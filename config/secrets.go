@@ -11,14 +11,62 @@ import (
 // Symmetric secrets are those local to the running daemon
 // and OpenPGP identifies an entity in the given keyring
 type Secrets struct {
-	Symmetric []SymmetricSecret
+	Symmetric []*SymmetricSecret
 	OpenPGP   *OpenPGPSecret
 }
 
 type SymmetricSecret struct {
 	// An identifier for this secret that will be stored in the clear with the grant
-	PublicID  string
-	SecretKey string
+	PublicID string
+	// We expect this to be base64 encoded
+	SecretKey SecretKey
+	// Needed for backwards compatability
+	Passphrase string
+}
+
+// SecretKey allows us to encode yaml and toml as base64
+type SecretKey []byte
+
+// MarshalText should fulfil most serialization interfaces to ensure that the
+// secret key in the config is always base64 encoded
+func (sec SecretKey) MarshalText() ([]byte, error) {
+	data := b64.StdEncoding.EncodeToString(sec)
+	return []byte(data), nil
+}
+
+func (sec *SymmetricSecret) UnmarshalTOML(in interface{}) error {
+	if sec == nil {
+		sec = new(SymmetricSecret)
+	}
+
+	data, _ := in.(map[string]interface{})
+	sec.PublicID, _ = data["PublicID"].(string)
+	sec.Passphrase, _ = data["Passphrase"].(string)
+
+	secret, _ := data["SecretKey"].(string)
+	key, err := b64.StdEncoding.DecodeString(secret)
+	sec.SecretKey = key
+	return err
+}
+
+func (sec *SymmetricSecret) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	if sec == nil {
+		sec = new(SymmetricSecret)
+	}
+
+	secret := &struct {
+		PublicID   string
+		SecretKey  string
+		Passphrase string
+	}{}
+	if err := unmarshal(secret); err != nil {
+		return err
+	}
+	sec.PublicID = secret.PublicID
+	sec.Passphrase = secret.Passphrase
+	key, err := b64.StdEncoding.DecodeString(secret.SecretKey)
+	sec.SecretKey = key
+	return err
 }
 
 type OpenPGPSecret struct {
@@ -34,7 +82,7 @@ type SecretsManager struct {
 	OpenPGP  *OpenPGPSecret
 }
 
-type SymmetricProvider func(secretID string) ([]byte, error)
+type SymmetricProvider func(secretID string) (SymmetricSecret, error)
 
 // NoopSecretManager is an empty secret manager
 var NoopSecretManager = SecretsManager{
@@ -43,8 +91,8 @@ var NoopSecretManager = SecretsManager{
 }
 
 // NoopSymmetricProvider returns an empty provider
-func NoopSymmetricProvider(_ string) ([]byte, error) {
-	return nil, fmt.Errorf("no secrets provided to hoard")
+func NoopSymmetricProvider(_ string) (SymmetricSecret, error) {
+	return SymmetricSecret{}, fmt.Errorf("no secrets provided to hoard")
 }
 
 // ProviderFromConfig creates a secret reader from a set of symmetric secrets
@@ -52,26 +100,27 @@ func NewSymmetricProvider(conf *Secrets, fromEnv bool) (SymmetricProvider, error
 	if conf == nil || len(conf.Symmetric) == 0 {
 		return NoopSymmetricProvider, nil
 	}
-	secs := make(map[string][]byte, len(conf.Symmetric))
+	secs := make(map[string]SymmetricSecret, len(conf.Symmetric))
 	for _, s := range conf.Symmetric {
 		if fromEnv {
 			// sometimes we don't want to specify these in the config
-			s.SecretKey = os.Getenv(s.PublicID)
+			secret := os.Getenv(s.PublicID)
+			s.SecretKey = []byte(secret)
+			s.Passphrase = secret
 		}
-		secret, err := b64.StdEncoding.DecodeString(s.SecretKey)
-		if err != nil {
-			return nil, err
+		secs[s.PublicID] = SymmetricSecret{
+			Passphrase: s.Passphrase,
+			SecretKey:  s.SecretKey,
 		}
-		secs[s.PublicID] = secret
 	}
-	return func(id string) ([]byte, error) {
+	return func(id string) (SymmetricSecret, error) {
 		if id == "" {
-			return nil, fmt.Errorf("empty secret ID passed to provider")
+			return SymmetricSecret{}, fmt.Errorf("empty secret ID passed to provider")
 		}
 		if val, ok := secs[id]; ok {
 			return val, nil
 		}
-		return nil, fmt.Errorf("could not find symmetric secret with ID '%s'", id)
+		return SymmetricSecret{}, fmt.Errorf("could not find symmetric secret with ID '%s'", id)
 	}, nil
 }
 

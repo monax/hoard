@@ -1,4 +1,9 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [7.2.0] - 2019-12-17
+### Fixed
+- Symmetric grants are now versioned to preserve backwards compatability
+
+
 ## [7.1.0] - 2019-12-12
 ### Changed
 - [CMD] Secret keys can now be loaded from the environment
@@ -153,6 +158,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[7.2.0]: https://github.com/monax/hoard/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/monax/hoard/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/monax/hoard/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/monax/hoard/compare/v5.1.0...v6.0.0
