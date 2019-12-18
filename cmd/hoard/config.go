@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	b64 "encoding/base64"
 	"github.com/cep21/xdgbasedir"
 	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/v7/config"
@@ -49,7 +48,7 @@ func Config(cmd *cli.Cmd) {
 		conf.ChunkSize = *chunkSizeOpt
 		if len(*secretsOpt) > 0 {
 			conf.Secrets = &config.Secrets{
-				Symmetric: make([]config.SymmetricSecret, len(*secretsOpt)),
+				Symmetric: make([]*config.SymmetricSecret, len(*secretsOpt)),
 			}
 			for i, ss := range *secretsOpt {
 				pair := strings.Split(ss, ":")
@@ -66,8 +65,9 @@ func Config(cmd *cli.Cmd) {
 					fatalf("could not derive secret key for config: %v", err)
 				}
 
+				conf.Secrets.Symmetric[i] = new(config.SymmetricSecret)
 				conf.Secrets.Symmetric[i].PublicID = pair[0]
-				conf.Secrets.Symmetric[i].SecretKey = b64.StdEncoding.EncodeToString(data)
+				conf.Secrets.Symmetric[i].SecretKey = data
 			}
 		}
 	}

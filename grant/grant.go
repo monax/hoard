@@ -7,9 +7,11 @@ import (
 	"github.com/monax/hoard/v7/reference"
 )
 
+const defaultGrantVersion = 1
+
 // Seal this reference into a Grant as specified by Spec
 func Seal(secret config.SecretsManager, ref *reference.Ref, spec *Spec) (*Grant, error) {
-	grt := &Grant{Spec: spec}
+	grt := &Grant{Spec: spec, Version: defaultGrantVersion}
 
 	if s := spec.GetPlaintext(); s != nil {
 		grt.EncryptedReference = PlaintextGrant(ref)
@@ -18,7 +20,7 @@ func Seal(secret config.SecretsManager, ref *reference.Ref, spec *Spec) (*Grant,
 		if err != nil {
 			return nil, err
 		}
-		encRef, err := SymmetricGrant(ref, secret)
+		encRef, err := SymmetricGrant(ref, secret.SecretKey)
 		if err != nil {
 			return nil, err
 		}
@@ -45,7 +47,12 @@ func Unseal(secret config.SecretsManager, grt *Grant) (*reference.Ref, error) {
 		if err != nil {
 			return nil, err
 		}
-		return SymmetricReference(grt.EncryptedReference, secret)
+		switch grt.GetVersion() {
+		case 0:
+			return SymmetricReferenceV0(grt.EncryptedReference, []byte(secret.Passphrase))
+		default:
+			return SymmetricReferenceV1(grt.EncryptedReference, secret.SecretKey)
+		}
 	} else if s := grt.Spec.GetOpenPGP(); s != nil {
 		return OpenPGPReference(grt.EncryptedReference, secret.OpenPGP)
 	} else {

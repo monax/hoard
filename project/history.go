@@ -30,6 +30,10 @@ func FullVersion() string {
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases(
+		"7.2.0 - 2019-12-17",
+		`### Fixed
+- Symmetric grants are now versioned to preserve backwards compatability
+`,
 		"7.1.0 - 2019-12-12",
 		`### Changed
 - [CMD] Secret keys can now be loaded from the environment

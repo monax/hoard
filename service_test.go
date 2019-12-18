@@ -23,8 +23,8 @@ func TestService(t *testing.T) {
 	secret, err := encryption.DeriveSecretKey([]byte("shhhh"), salt)
 	assert.NoError(t, err)
 	secrets := config.SecretsManager{
-		Provider: func(secretID string) ([]byte, error) {
-			return secret, nil
+		Provider: func(secretID string) (config.SymmetricSecret, error) {
+			return config.SymmetricSecret{SecretKey: secret}, nil
 		},
 	}
 	hrd := NewHoard(stores.NewMemoryStore(), secrets, log.NewNopLogger())
