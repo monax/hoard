@@ -7,6 +7,7 @@ import (
 	"github.com/monax/hoard/v7/api"
 	"github.com/monax/hoard/v7/grant"
 	"github.com/monax/hoard/v7/meta"
+	"github.com/monax/hoard/v7/reference"
 )
 
 type PlaintextReceiver interface {
@@ -29,6 +30,27 @@ func ReceivePlaintext(srv PlaintextReceiver) (*api.Plaintext, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+}
+
+func ReceiveAndPutPlaintext(srv PlaintextReceiver, obj ObjectService, ref *reference.Ref, salt []byte) error {
+	for {
+		accum, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+
+			return err
+		} else if len(accum.Salt) > 0 {
+			return fmt.Errorf("received multiple salts but there can be at most one")
+		}
+
+		ref.Next, err = obj.Put(accum.Data, salt)
+		if err != nil {
+			return err
+		}
+		ref = ref.Next
 	}
 }
 
@@ -82,21 +104,28 @@ type PlaintextAndGrantSpecReceiver interface {
 }
 
 // Receive chunks of plaintext and spec and aggregate into complete objects
-func ReceivePlaintextAndGrantSpec(srv PlaintextAndGrantSpecReceiver) (*api.PlaintextAndGrantSpec, error) {
-	accum := &api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{}}
+func ReceiveAndPutPlaintextAndGrantSpec(srv PlaintextAndGrantSpecReceiver, obj ObjectService, ref *reference.Ref, salt []byte) error {
 	for {
-		g, err := srv.Recv()
+		accum, err := srv.Recv()
 		if err != nil {
 			if err == io.EOF {
-				return accum, nil
+				return nil
 			}
-			return nil, err
+
+			return err
+		} else if accum.GrantSpec != nil {
+			return fmt.Errorf("received multiple grant specs but there can be at most one")
+		} else if accum.Plaintext != nil && len(accum.Plaintext.Salt) > 0 {
+			return fmt.Errorf("received multiple salts but there can be at most one")
+		} else if accum.Plaintext == nil {
+			accum.Plaintext = new(api.Plaintext)
 		}
 
-		err = consumePlaintextAndGrantSpec(accum, g)
+		ref.Next, err = obj.Put(accum.Plaintext.Data, salt)
 		if err != nil {
-			return nil, err
+			return err
 		}
+		ref = ref.Next
 	}
 }
 
@@ -106,16 +135,9 @@ type PlaintextAndGrantSpecSender interface {
 
 // Send some plaintext and spec to a service in chunks
 func SendPlaintextAndGrantSpec(srv PlaintextAndGrantSpecSender, pgs *api.PlaintextAndGrantSpec, chunkSize int) error {
-	err := srv.Send(&api.PlaintextAndGrantSpec{GrantSpec: pgs.GrantSpec})
+	err := srv.Send(&api.PlaintextAndGrantSpec{GrantSpec: pgs.GrantSpec, Plaintext: &api.Plaintext{Salt: pgs.Plaintext.Salt}})
 	if err != nil {
 		return err
-	}
-
-	if len(pgs.Plaintext.Salt) > 0 {
-		err = srv.Send(&api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{Salt: pgs.Plaintext.Salt}})
-		if err != nil {
-			return err
-		}
 	}
 
 	return sendChunks(pgs.Plaintext.Data, chunkSize, func(chunk []byte) error {

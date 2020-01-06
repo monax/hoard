@@ -70,12 +70,10 @@ service Storage {
 
 service Document {
     // GET a document from Hoard
-    rpc Download (grant.Grant) returns (stream PlaintextAndMeta) {
-    }
+    rpc Download (grant.Grant) returns (stream PlaintextAndMeta);
 
     // POST a document into Hoard
-    rpc Upload (stream PlaintextAndGrantSpecAndMeta) returns (grant.Grant) {
-    }
+    rpc Upload (stream PlaintextAndGrantSpecAndMeta) returns (grant.Grant);
 }
 
 message GrantAndGrantSpec {

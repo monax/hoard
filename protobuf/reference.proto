@@ -8,5 +8,6 @@ message Ref {
     bytes Address = 1;
     bytes SecretKey = 2;
     bytes Salt = 3;
+    Ref Next = 4;
 }
 

@@ -2,6 +2,7 @@ package hoard
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/monax/hoard/v7/api"
 	"github.com/monax/hoard/v7/grant"
@@ -31,24 +32,49 @@ func NewService(grantService GrantService, chunkSize int) *Service {
 }
 
 func (service *Service) Get(ref *reference.Ref, srv api.Cleartext_GetServer) error {
-	data, err := service.grantService.Get(ref)
+	err := srv.Send(&api.Plaintext{Salt: ref.Salt})
 	if err != nil {
 		return err
 	}
 
-	return SendPlaintext(srv, data, ref.Salt, service.chunkSize)
+	for r := ref; r != nil; r = r.GetNext() {
+		data, err := service.grantService.Get(r)
+		if err != nil {
+			return err
+		}
+		err = sendPlaintext(srv, data, service.chunkSize)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func sendPlaintext(srv PlaintextSender, data []byte, chunkSize int) error {
+	return sendChunks(data, chunkSize, func(chunk []byte) error {
+		return srv.Send(&api.Plaintext{Data: chunk})
+	})
 }
 
 func (service *Service) Put(srv api.Cleartext_PutServer) error {
-	plaintext, err := ReceivePlaintext(srv)
+	accum, err := srv.Recv()
 	if err != nil {
 		return err
 	}
-	ref, err := service.grantService.Put(plaintext.Data, plaintext.Salt)
+
+	salt := accum.GetSalt()
+	head, err := service.grantService.Put(accum.Data, salt)
 	if err != nil {
 		return err
 	}
-	return srv.SendAndClose(ref)
+
+	err = ReceiveAndPutPlaintext(srv, service.grantService, head, salt)
+	if err != nil {
+		return err
+	}
+
+	return srv.SendAndClose(head)
 }
 
 func (service *Service) Encrypt(srv api.Encryption_EncryptServer) error {
@@ -80,6 +106,7 @@ func (service *Service) Decrypt(refAndCiphertext *api.ReferenceAndCiphertext, sr
 }
 
 // StorageServer
+
 func (service *Service) Push(srv api.Storage_PushServer) error {
 	data, err := ReceiveCiphertext(srv)
 	if err != nil {
@@ -104,7 +131,6 @@ func (service *Service) Pull(address *api.Address, srv api.Storage_PullServer) e
 	}
 
 	return SendCiphertext(srv, data, service.chunkSize)
-
 }
 
 func (service *Service) Delete(ctx context.Context, address *api.Address) (*api.Address, error) {
@@ -142,17 +168,34 @@ func (service *Service) Reseal(ctx context.Context, arg *api.GrantAndGrantSpec) 
 }
 
 func (service *Service) PutSeal(srv api.Grant_PutSealServer) error {
-	pgs, err := ReceivePlaintextAndGrantSpec(srv)
+	accum, err := srv.Recv()
 	if err != nil {
 		return err
 	}
 
-	ref, err := service.grantService.Put(pgs.Plaintext.Data, pgs.Plaintext.Salt)
+	spec := accum.GetGrantSpec()
+	if spec == nil {
+		return fmt.Errorf("no specification received in first message")
+	}
+
+	plaintext := accum.GetPlaintext()
+
+	var salt []byte
+	if plaintext != nil {
+		salt = plaintext.GetSalt()
+	}
+
+	head, err := service.grantService.Put(plaintext.GetData(), salt)
 	if err != nil {
 		return err
 	}
 
-	grt, err := service.grantService.Seal(ref, pgs.GrantSpec)
+	err = ReceiveAndPutPlaintextAndGrantSpec(srv, service.grantService, head, salt)
+	if err != nil {
+		return err
+	}
+
+	grt, err := service.grantService.Seal(head, spec)
 	if err != nil {
 		return err
 	}
@@ -166,12 +209,7 @@ func (service *Service) UnsealGet(grt *grant.Grant, srv api.Grant_UnsealGetServe
 		return err
 	}
 
-	data, err := service.grantService.Get(ref)
-	if err != nil {
-		return err
-	}
-
-	return SendPlaintext(srv, data, ref.Salt, service.chunkSize)
+	return service.Get(ref, srv)
 }
 
 func (service *Service) UnsealDelete(ctx context.Context, grt *grant.Grant) (*api.Address, error) {
