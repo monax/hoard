@@ -2,6 +2,7 @@ package hoard
 
 import (
 	"context"
+	"io"
 
 	"github.com/monax/hoard/v7/api"
 	"github.com/monax/hoard/v7/grant"
@@ -52,34 +53,54 @@ func (service *Service) Put(srv api.Cleartext_PutServer) error {
 }
 
 func (service *Service) Encrypt(srv api.Encryption_EncryptServer) error {
-	plaintext, err := ReceivePlaintext(srv)
-	if err != nil {
-		return err
-	}
+	for {
+		plaintext, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
 
-	ref, encryptedData, err := service.grantService.Encrypt(plaintext.Data, plaintext.Salt)
-	if err != nil {
-		return err
-	}
+			return err
+		}
 
-	return srv.SendAndClose(&api.ReferenceAndCiphertext{
-		Reference: ref,
-		Ciphertext: &api.Ciphertext{
-			EncryptedData: encryptedData,
-		},
-	})
+		ref, encryptedData, err := service.grantService.Encrypt(plaintext.Data, plaintext.Salt)
+		if err != nil {
+			return err
+		}
+
+		srv.Send(&api.ReferenceAndCiphertext{
+			Reference: ref,
+			Ciphertext: &api.Ciphertext{
+				EncryptedData: encryptedData,
+			},
+		})
+	}
+	return nil
 }
 
-func (service *Service) Decrypt(refAndCiphertext *api.ReferenceAndCiphertext, srv api.Encryption_DecryptServer) error {
-	data, err := service.grantService.Decrypt(refAndCiphertext.Reference, refAndCiphertext.Ciphertext.EncryptedData)
-	if err != nil {
-		return err
-	}
+func (service *Service) Decrypt(srv api.Encryption_DecryptServer) error {
+	for {
+		refAndCiphertext, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
 
-	return SendPlaintext(srv, data, refAndCiphertext.Reference.GetSalt(), service.chunkSize)
+			return err
+		}
+
+		data, err := service.grantService.Decrypt(refAndCiphertext.Reference, refAndCiphertext.Ciphertext.EncryptedData)
+		if err != nil {
+			return err
+		}
+
+		srv.Send(&api.Plaintext{Data: data, Salt: refAndCiphertext.Reference.Salt})
+	}
+	return nil
 }
 
 // StorageServer
+
 func (service *Service) Push(srv api.Storage_PushServer) error {
 	data, err := ReceiveCiphertext(srv)
 	if err != nil {

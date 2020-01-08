@@ -45,11 +45,11 @@ service Cleartext {
 service Encryption {
     // Encrypt some data and get its deterministically generated
     // secret reference including its address without storing the data.
-    rpc Encrypt (stream Plaintext) returns (ReferenceAndCiphertext);
+    rpc Encrypt (stream Plaintext) returns (stream ReferenceAndCiphertext);
 
     // Decrypt the provided data by supplying it alongside its secret
     // reference. The address is not used for decryption and may be omitted.
-    rpc Decrypt (ReferenceAndCiphertext) returns (stream Plaintext);
+    rpc Decrypt (stream ReferenceAndCiphertext) returns (stream Plaintext);
 }
 
 // Interact directly with storage backend
