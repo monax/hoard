@@ -1,8 +1,12 @@
-name: main
-on: [push, pull_request]
+name: unit
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+
 jobs:
   test:
-    name: Test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-go@v1
@@ -19,7 +23,6 @@ jobs:
     - run: make test_js 
 
   docker:
-    name: Docker
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
