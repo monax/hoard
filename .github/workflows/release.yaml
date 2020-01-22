@@ -6,7 +6,6 @@ on:
 
 jobs:
   go:
-    name: GoReleaser
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -19,7 +18,6 @@ jobs:
       if: success()
 
   js:
-    name: NPM 
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-node@v1
@@ -40,7 +38,6 @@ jobs:
         npm publish --access public .
       
   docker:
-    name: Docker
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1

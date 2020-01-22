@@ -1,5 +1,7 @@
 # Hoard
 
+![](https://github.com/monax/hoard/workflows/unit/badge.svg)
+
 Hoard is a stateless, deterministically encrypted, content-addressed object store.
 
 ![hoarding marmot](docs/images/hoard.jpg)

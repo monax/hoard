@@ -1,0 +1,21 @@
+name: integration
+on:
+  push:
+    branches:    
+      - master
+
+jobs:
+  cover:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+      id: go
+    - uses: actions/checkout@v1
+    - run: |
+        echo $GCLOUD_SERVICE_KEY > /tmp/gcloud-service-key.json
+        gcloud auth activate-service-account --key-file=/tmp/gcloud-service-key.json
+        make test_integration
+      env:
+        GCLOUD_SERVICE_KEY: ${{ secrets.GCLOUD_SERVICE_KEY }}
