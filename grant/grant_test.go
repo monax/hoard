@@ -14,7 +14,7 @@ import (
 )
 
 func TestGrants(t *testing.T) {
-	testRef := testReference()
+	testRefs := testReferences()
 
 	keyPrivate, err := ioutil.ReadFile("private.key.asc")
 	assert.NoError(t, err)
@@ -26,16 +26,16 @@ func TestGrants(t *testing.T) {
 	testSecrets := newSecretsManager(nil, &testPGP)
 
 	plaintextSpec := Spec{Plaintext: &PlaintextSpec{}}
-	plaintextGrant, err := Seal(testSecrets, testRef, &plaintextSpec)
+	plaintextGrant, err := Seal(testSecrets, testRefs, &plaintextSpec)
 	assert.NoError(t, err)
-	assert.Equal(t, testRef.Address, reference.FromPlaintext(string(plaintextGrant.EncryptedReference)).Address)
-	assert.Equal(t, testRef.SecretKey, reference.FromPlaintext(string(plaintextGrant.EncryptedReference)).SecretKey)
+	assert.Equal(t, testRefs[0].Address, reference.RepeatedFromPlaintext(string(plaintextGrant.EncryptedReferences))[0].Address)
+	assert.Equal(t, testRefs[0].SecretKey, reference.RepeatedFromPlaintext(string(plaintextGrant.EncryptedReferences))[0].SecretKey)
 	plaintextRef, err := Unseal(testSecrets, plaintextGrant)
-	assert.Equal(t, testRef, plaintextRef)
+	assert.Equal(t, testRefs, plaintextRef)
 
 	// SymmetricGrant with empty provider
 	symmetricSpec := Spec{Symmetric: &SymmetricSpec{PublicID: "test"}}
-	symmetricGrant, err := Seal(testSecrets, testRef, &symmetricSpec)
+	symmetricGrant, err := Seal(testSecrets, testRefs, &symmetricSpec)
 	assert.Error(t, err)
 	assert.Nil(t, symmetricGrant)
 
@@ -45,19 +45,19 @@ func TestGrants(t *testing.T) {
 	testSecrets.Provider = func(_ string) (config.SymmetricSecret, error) {
 		return config.SymmetricSecret{SecretKey: secret}, nil
 	}
-	symmetricGrant, err = Seal(testSecrets, testRef, &symmetricSpec)
+	symmetricGrant, err = Seal(testSecrets, testRefs, &symmetricSpec)
 	assert.NotNil(t, symmetricGrant)
 	assert.NoError(t, err)
 	symmetricRef, err := Unseal(testSecrets, symmetricGrant)
-	assert.Equal(t, testRef, symmetricRef)
+	assert.Equal(t, testRefs, symmetricRef)
 	assert.NoError(t, err)
 
 	// OpenPGPGrant encrypt / decrypt with local keypair
 	openpgpSpec := Spec{OpenPGP: &OpenPGPSpec{}}
-	openpgpGrant, err := Seal(testSecrets, testRef, &openpgpSpec)
+	openpgpGrant, err := Seal(testSecrets, testRefs, &openpgpSpec)
 	assert.NoError(t, err)
 	openpgpRef, err := Unseal(testSecrets, openpgpGrant)
-	assert.Equal(t, testRef, openpgpRef)
+	assert.Equal(t, testRefs, openpgpRef)
 	assert.NoError(t, err)
 }
 
@@ -97,8 +97,8 @@ func TestUnsealV0Grant(t *testing.T) {
 			Spec: &Spec{
 				Symmetric: &SymmetricSpec{PublicID: tt.id},
 			},
-			EncryptedReference: ciphertext,
-			Version:            0,
+			EncryptedReferences: ciphertext,
+			Version:             0,
 		})
 		require.NoError(t, err)
 	}
@@ -116,7 +116,7 @@ func newSecretsManager(secrets map[string]string, pgp *config.OpenPGPSecret) con
 	}
 }
 
-func testReference() *reference.Ref {
+func testReferences() reference.Refs {
 	address := []byte{
 		1, 2, 3, 4, 5, 6, 7, 1,
 		1, 2, 3, 4, 5, 6, 7, 1,
@@ -129,7 +129,7 @@ func testReference() *reference.Ref {
 		1, 2, 3, 4, 5, 6, 7, 8,
 		1, 2, 3, 4, 5, 6, 7, 8,
 	}
-	return reference.New(address, secretKey, nil)
+	return reference.Refs{reference.New(address, secretKey, nil)}
 }
 
 func deriveSecret(t *testing.T, data []byte) []byte {

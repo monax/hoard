@@ -41,7 +41,6 @@ type Client struct {
 	encryption api.EncryptionClient
 	grant      api.GrantClient
 	storage    api.StorageClient
-	documents  api.DocumentClient
 }
 
 func main() {
@@ -73,7 +72,6 @@ func main() {
 		client.encryption = api.NewEncryptionClient(conn)
 		client.grant = api.NewGrantClient(conn)
 		client.storage = api.NewStorageClient(conn)
-		client.documents = api.NewDocumentClient(conn)
 	}
 
 	cmd.AddVersionCommand(hoarctlApp)
@@ -91,9 +89,6 @@ func main() {
 	hoarctlApp.Command("ref", "Encrypt data from STDIN and return its reference", client.Ref)
 	hoarctlApp.Command("encrypt", "Encrypt data from STDIN and output encrypted data on STDOUT", client.Encrypt)
 	hoarctlApp.Command("decrypt", "Decrypt data from STDIN and output decrypted data on STDOUT", client.Decrypt)
-
-	hoarctlApp.Command("upload", "Read a file and upload to Hoard with metadata", client.Upload)
-	hoarctlApp.Command("download", "Download a file from Hoard with metadata", client.Download)
 
 	hoarctlApp.Command("seal", "Seal some data read from STDIN and return grant on STDOUT", client.Seal)
 	hoarctlApp.Command("unseal", "Unseal grant read from STDIN and print data to STDOUT", client.Unseal)
@@ -171,6 +166,15 @@ func readReference(address *string) *reference.Ref {
 		fatalf("Could not read reference from STDIN: %v", err)
 	}
 	return ref
+}
+
+func readReferences() reference.Refs {
+	refs := make(reference.Refs, 0)
+	err := parseObject(os.Stdin, &refs)
+	if err != nil {
+		fatalf("Could not read references from STDIN: %v", err)
+	}
+	return refs
 }
 
 func readGrant() *grant.Grant {

@@ -38,6 +38,14 @@ func TestReferencePlaintextDeterministic(t *testing.T) {
 			"\"Nonce\":\"bm9uY2U=\""+
 			"}",
 		testReference(([]byte)("salt")).Plaintext(([]byte)("nonce")))
+
+	assert.Equal(t,
+		"{\"Refs\":[{\"Address\":\"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=\","+
+			"\"SecretKey\":\"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=\","+
+			"\"Salt\":\"c2FsdA==\"}],"+
+			"\"Nonce\":\"bm9uY2U=\""+
+			"}",
+		Refs{testReference(([]byte)("salt"))}.Plaintext(([]byte)("nonce")))
 }
 
 func TestReferencePlaintext(t *testing.T) {

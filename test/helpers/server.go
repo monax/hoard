@@ -14,7 +14,6 @@ type service interface {
 	api.EncryptionServer
 	api.StorageServer
 	api.GrantServer
-	api.DocumentServer
 }
 
 // Provided with a HoardService executes runner in the context of a client-server connection over test buffer connection
@@ -28,7 +27,6 @@ func RunWithTestServer(ctx context.Context, service service,
 	api.RegisterEncryptionServer(grpcServer, service)
 	api.RegisterStorageServer(grpcServer, service)
 	api.RegisterGrantServer(grpcServer, service)
-	api.RegisterDocumentServer(grpcServer, service)
 
 	const bufferSize = 1 << 20
 	l := bufconn.Listen(bufferSize)

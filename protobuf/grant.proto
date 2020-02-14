@@ -8,7 +8,7 @@ message Grant {
     // The grantSpec provides sufficient information to decrypt the reference
     // if hoard has access to the requisite secret
     Spec Spec = 1;
-    bytes EncryptedReference = 2;
+    bytes EncryptedReferences = 2;
     int32 Version = 3;
 }
 

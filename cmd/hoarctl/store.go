@@ -6,62 +6,65 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v7"
+	hoard "github.com/monax/hoard/v7"
 	"github.com/monax/hoard/v7/api"
-	"github.com/monax/hoard/v7/reference"
 )
 
 // Cat retrieves encrypted data from store
 func (client *Client) Cat(cmd *cli.Cmd) {
-	address := addStringOpt(cmd, "address", addrOpt)
-
 	cmd.Action = func() {
-		ref := readReference(address)
-		pull, err := client.storage.Pull(context.Background(),
-			&api.Address{Address: ref.Address})
+		refs := readReferences()
+
+		pull, err := client.storage.Pull(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		data, err := hoard.ReceiveCiphertext(pull)
+		for _, ref := range refs {
+			if err = pull.Send(&api.Address{Address: ref.Address}); err != nil {
+				fatalf("Error sending data: %v", err)
+			}
+		}
+		if err = pull.CloseSend(); err != nil {
+			fatalf("Error closing send: %v", err)
+		}
+
+		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
+			ciphertext, err := pull.Recv()
+			return ciphertext.GetEncryptedData(), err
+		})
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
-
-		os.Stdout.Write(data)
 	}
 }
 
 // Get retrieves and decrypts data from store
 func (client *Client) Get(cmd *cli.Cmd) {
-	address := addStringOpt(cmd, "address", addrOpt)
-	secretKey := addStringOpt(cmd, "key", secretOpt)
-	salt := addStringOpt(cmd, "salt", saltOpt)
-
 	cmd.Action = func() {
-		// If given address then try to read reference from arguments and option
-		ref := readReference(address)
-		if ref.SecretKey == nil {
-			if secretKey == nil || *secretKey == "" {
-				fatalf("A secret key must be provided in order to decrypt")
-			}
-			ref = &reference.Ref{
-				Address:   readBase64(address),
-				SecretKey: readBase64(secretKey),
-				Salt:      parseSalt(salt),
-			}
-		}
+		refs := readReferences()
 
-		get, err := client.cleartext.Get(context.Background(), ref)
+		get, err := client.cleartext.Get(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		plaintext, err := hoard.ReceivePlaintext(get)
-		if err != nil {
-			fatalf("Error retrieving data: %v", err)
+		for _, ref := range refs {
+			if err = get.Send(ref); err != nil {
+				fatalf("Error sending data: %v", err)
+			}
 		}
-		os.Stdout.Write(plaintext.Data)
+		if err = get.CloseSend(); err != nil {
+			fatalf("Error closing send: %v", err)
+		}
+
+		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
+			plaintext, err := get.Recv()
+			return plaintext.GetBody(), err
+		})
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
 	}
 }
 
@@ -72,24 +75,28 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		data := readData(os.Stdin)
 		// If given address use it
 		push, err := client.storage.Push(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.SendCiphertext(push, data, *chunk)
+		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
+			return push.Send(&api.Ciphertext{EncryptedData: data})
+		})
 		if err != nil {
 			fatalf("Error sending data: %v", err)
 		}
-
-		addr, err := push.CloseAndRecv()
-		if err != nil {
-			fatalf("Error closing client: %v", err)
+		if err = push.CloseSend(); err != nil {
+			fatalf("Error closing send: %v", err)
 		}
 
-		fmt.Printf("%s\n", jsonString(addr))
+		addrs, err := hoard.ReceiveAllAddresses(push)
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
+
+		fmt.Printf("%s\n", jsonString(addrs))
 	}
 }
 
@@ -102,22 +109,33 @@ func (client *Client) Put(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		data := readData(os.Stdin)
 		put, err := client.cleartext.Put(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.SendPlaintext(put, data, parseSalt(salt), *chunk)
+		err = put.Send(&api.Plaintext{Head: &api.Header{Salt: parseSalt(salt)}})
 		if err != nil {
-			fatalf("Error sending data: %v", err)
+			fatalf("Error sending head: %v", err)
 		}
 
-		ref, err := put.CloseAndRecv()
+		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
+			return put.Send(&api.Plaintext{Body: data})
+		})
 		if err != nil {
-			fatalf("Error closing client: %v", err)
+			fatalf("Error sending body: %v", err)
 		}
-		fmt.Printf("%s\n", jsonString(ref))
+
+		if err = put.CloseSend(); err != nil {
+			fatalf("Error closing send: %v", err)
+		}
+
+		refs, err := hoard.ReceiveAllReferences(put)
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
+
+		fmt.Printf("%s\n", jsonString(refs))
 	}
 }
 

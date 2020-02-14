@@ -1,16 +1,12 @@
 package helpers
 
-import (
-	"github.com/monax/hoard/v7/meta"
-)
-
 type TestDocData struct {
 	Type    string `json:"type"`
 	RawData []byte `json:"data"`
 }
 
 type DocumentTest struct {
-	Meta meta.Meta   `json:"meta"`
+	// Meta meta.Meta   `json:"meta"`
 	Data TestDocData `json:"data"`
 }
 

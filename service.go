@@ -2,6 +2,7 @@ package hoard
 
 import (
 	"context"
+	"io"
 
 	"github.com/monax/hoard/v7/api"
 	"github.com/monax/hoard/v7/grant"
@@ -9,10 +10,10 @@ import (
 	"github.com/monax/hoard/v7/stores"
 )
 
-// 1MiB
+// MaxChunkSize = 1MiB
 const MaxChunkSize = 1 << 20
 
-// Here we implement the GRPC Hoard service. It should mostly be plumbing to
+// Service implements the GRPC Hoard service. It should mostly be plumbing to
 // a DeterministicEncryptedStore (for which hoard.hoard is the canonical example)
 // and also to Grants.
 type Service struct {
@@ -30,94 +31,171 @@ func NewService(grantService GrantService, chunkSize int) *Service {
 	}
 }
 
-func (service *Service) Get(ref *reference.Ref, srv api.Cleartext_GetServer) error {
-	data, err := service.grantService.Get(ref)
-	if err != nil {
-		return err
-	}
+// Get decrypted data from the store
+func (service *Service) Get(srv api.Cleartext_GetServer) error {
+	for {
+		ref, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
 
-	return SendPlaintext(srv, data, ref.Salt, service.chunkSize)
+			return err
+		}
+
+		if err = SendPlaintext(service.grantService, srv, ref); err != nil {
+			return err
+		}
+	}
 }
 
+// Put encrypted data in the store
 func (service *Service) Put(srv api.Cleartext_PutServer) error {
-	plaintext, err := ReceivePlaintext(srv)
+	head, err := consumeHeadFromPlaintext(srv.Recv())
 	if err != nil {
 		return err
 	}
-	ref, err := service.grantService.Put(plaintext.Data, plaintext.Salt)
-	if err != nil {
-		return err
+
+	var accumulator []byte
+	for {
+		plaintext, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return service.putPlaintext(accumulator, head.GetSalt(), func(ref *reference.Ref) error {
+					return srv.Send(ref)
+				})
+			}
+
+			return err
+		}
+
+		accumulator, err = consumeBodyFromPlaintext(plaintext, accumulator, service.chunkSize, func(chunk []byte) error {
+			return service.putPlaintext(chunk, head.GetSalt(), func(ref *reference.Ref) error {
+				return srv.Send(ref)
+			})
+		})
+		if err != nil {
+			return err
+		}
 	}
-	return srv.SendAndClose(ref)
 }
 
+// Encrypt data and return ciphertext
 func (service *Service) Encrypt(srv api.Encryption_EncryptServer) error {
-	plaintext, err := ReceivePlaintext(srv)
+	head, err := consumeHeadFromPlaintext(srv.Recv())
 	if err != nil {
 		return err
 	}
 
-	ref, encryptedData, err := service.grantService.Encrypt(plaintext.Data, plaintext.Salt)
-	if err != nil {
-		return err
-	}
+	for {
+		plaintext, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
 
-	return srv.SendAndClose(&api.ReferenceAndCiphertext{
-		Reference: ref,
-		Ciphertext: &api.Ciphertext{
-			EncryptedData: encryptedData,
-		},
-	})
+			return err
+		}
+
+		ref, encryptedData, err := service.grantService.Encrypt(plaintext.Body, head.GetSalt())
+		if err != nil {
+			return err
+		}
+
+		if err = srv.Send(&api.ReferenceAndCiphertext{
+			Reference: ref,
+			Ciphertext: &api.Ciphertext{
+				EncryptedData: encryptedData,
+			},
+		}); err != nil {
+			return err
+		}
+	}
 }
 
-func (service *Service) Decrypt(refAndCiphertext *api.ReferenceAndCiphertext, srv api.Encryption_DecryptServer) error {
-	data, err := service.grantService.Decrypt(refAndCiphertext.Reference, refAndCiphertext.Ciphertext.EncryptedData)
-	if err != nil {
-		return err
-	}
+// Decrypt ciphertext and return plaintext
+func (service *Service) Decrypt(srv api.Encryption_DecryptServer) error {
+	for {
+		refAndCiphertext, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
 
-	return SendPlaintext(srv, data, refAndCiphertext.Reference.GetSalt(), service.chunkSize)
+			return err
+		}
+
+		data, err := service.grantService.Decrypt(refAndCiphertext.Reference, refAndCiphertext.Ciphertext.EncryptedData)
+		if err != nil {
+			return err
+		}
+
+		if err = srv.Send(&api.Plaintext{Body: data}); err != nil {
+			return err
+		}
+	}
 }
 
 // StorageServer
+
+// Push ciphertext directly to store
 func (service *Service) Push(srv api.Storage_PushServer) error {
-	data, err := ReceiveCiphertext(srv)
-	if err != nil {
-		return err
-	}
+	for {
+		ciphertext, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
 
-	address, err := service.grantService.Store().Put(data)
-	if err != nil {
-		return err
-	}
+			return err
+		}
 
-	return srv.SendAndClose(&api.Address{
-		Address: address,
-	})
+		addr, err := service.grantService.Store().Put(ciphertext.EncryptedData)
+		if err != nil {
+			return err
+		}
+
+		if err = srv.Send(&api.Address{Address: addr}); err != nil {
+			return err
+		}
+	}
 }
 
-func (service *Service) Pull(address *api.Address, srv api.Storage_PullServer) error {
-	// Get from the underlying store
-	data, err := service.grantService.Store().Get(address.Address)
-	if err != nil {
-		return err
+// Pull gets ciphertext directly from the store
+func (service *Service) Pull(srv api.Storage_PullServer) error {
+	for {
+		addr, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+
+			return err
+		}
+
+		data, err := service.grantService.Store().Get(addr.Address)
+		if err != nil {
+			return err
+		}
+
+		if err = srv.Send(&api.Ciphertext{EncryptedData: data}); err != nil {
+			return err
+		}
 	}
-
-	return SendCiphertext(srv, data, service.chunkSize)
-
 }
 
+// Delete removes the data located at the address
 func (service *Service) Delete(ctx context.Context, address *api.Address) (*api.Address, error) {
 	return address, service.grantService.Store().Delete(address.Address)
 }
 
+// Stat checks the data stored at the given address
 func (service *Service) Stat(ctx context.Context, address *api.Address) (*stores.StatInfo, error) {
 	statInfo, err := service.grantService.Store().Stat(address.Address)
 	if err != nil {
 		return nil, err
 	}
-	// For the master API we provide the address and the canonical
-	// location in a StatInfo message
+	// provide the address and the canonical location
 	statInfo.Address = address.Address
 	statInfo.Location = service.grantService.Store().Location(address.Address)
 	return statInfo, nil
@@ -125,82 +203,132 @@ func (service *Service) Stat(ctx context.Context, address *api.Address) (*stores
 
 // GrantServer
 
-func (service *Service) Seal(ctx context.Context, arg *api.ReferenceAndGrantSpec) (*grant.Grant, error) {
-	return service.grantService.Seal(arg.Reference, arg.GrantSpec)
+// Seal puts refs in a shareable grant
+func (service *Service) Seal(srv api.Grant_SealServer) error {
+	refs, spec, err := receiveReferencesAndGrantSpec(srv)
+	if err != nil {
+		return err
+	}
+
+	grt, err := service.grantService.Seal(refs, spec)
+	if err != nil {
+		return err
+	}
+
+	return srv.SendAndClose(grt)
 }
 
-func (service *Service) Unseal(ctx context.Context, grt *grant.Grant) (*reference.Ref, error) {
-	return service.grantService.Unseal(grt)
+// Unseal gets the refs stored in a grant
+func (service *Service) Unseal(grt *grant.Grant, srv api.Grant_UnsealServer) error {
+	refs, err := service.grantService.Unseal(grt)
+	if err != nil {
+		return err
+	}
+
+	for _, ref := range refs {
+		if err = srv.Send(ref); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
+// Reseal changes how the references in a grant are stored
 func (service *Service) Reseal(ctx context.Context, arg *api.GrantAndGrantSpec) (*grant.Grant, error) {
-	ref, err := service.grantService.Unseal(arg.Grant)
+	refs, err := service.grantService.Unseal(arg.Grant)
 	if err != nil {
 		return nil, err
 	}
-	return service.grantService.Seal(ref, arg.GrantSpec)
+	return service.grantService.Seal(refs, arg.GrantSpec)
 }
 
+// PutSeal encrypts and seals plaintext
 func (service *Service) PutSeal(srv api.Grant_PutSealServer) error {
-	pgs, err := ReceivePlaintextAndGrantSpec(srv)
+	spec, head, err := consumeHeadFromPlaintextAndGrantSpec(srv.Recv())
 	if err != nil {
 		return err
 	}
 
-	ref, err := service.grantService.Put(pgs.Plaintext.Data, pgs.Plaintext.Salt)
-	if err != nil {
-		return err
-	}
+	var refs reference.Refs
+	var accumulator []byte
+	for {
+		ptgs, err := srv.Recv()
+		if err != nil {
+			if err == io.EOF {
+				err := service.putPlaintext(accumulator, head.GetSalt(), func(ref *reference.Ref) error {
+					refs = append(refs, ref)
+					return nil
+				})
+				if err != nil {
+					return err
+				}
 
-	grt, err := service.grantService.Seal(ref, pgs.GrantSpec)
-	if err != nil {
-		return err
-	}
+				grt, err := service.grantService.Seal(refs, spec)
+				if err != nil {
+					return err
+				}
+				return srv.SendAndClose(grt)
+			}
 
-	return srv.SendAndClose(grt)
+			return err
+		}
+
+		accumulator, err = consumeBodyFromPlaintextAndGrantSpec(ptgs, accumulator, service.chunkSize, func(chunk []byte) error {
+			return service.putPlaintext(chunk, head.GetSalt(), func(ref *reference.Ref) error {
+				refs = append(refs, ref)
+				return nil
+			})
+		})
+		if err != nil {
+			return err
+		}
+	}
 }
 
+// UnsealGet decrypts and gets plaintext associated with a grant
 func (service *Service) UnsealGet(grt *grant.Grant, srv api.Grant_UnsealGetServer) error {
-	ref, err := service.grantService.Unseal(grt)
+	refs, err := service.grantService.Unseal(grt)
 	if err != nil {
 		return err
 	}
 
-	data, err := service.grantService.Get(ref)
-	if err != nil {
-		return err
+	for _, ref := range refs {
+		if err = SendPlaintext(service.grantService, srv, ref); err != nil {
+			return err
+		}
 	}
-
-	return SendPlaintext(srv, data, ref.Salt, service.chunkSize)
+	return nil
 }
 
-func (service *Service) UnsealDelete(ctx context.Context, grt *grant.Grant) (*api.Address, error) {
-	ref, err := service.grantService.Unseal(grt)
+// UnsealDelete gets the references stored in a grant and deletes them
+func (service *Service) UnsealDelete(grt *grant.Grant, srv api.Grant_UnsealDeleteServer) error {
+	refs, err := service.grantService.Unseal(grt)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return service.Delete(ctx, &api.Address{Address: ref.Address})
+
+	for _, ref := range refs {
+		addr, err := service.Delete(srv.Context(), &api.Address{Address: ref.Address})
+		if err != nil {
+			return err
+		}
+		if err = srv.Send(addr); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (service *Service) Download(grt *grant.Grant, srv api.Document_DownloadServer) error {
-	doc, salt, err := GetDocument(service.grantService, grt)
+func (service *Service) putPlaintext(data, salt []byte, cb func(*reference.Ref) error) error {
+	if data == nil {
+		return nil
+	}
+
+	ref, err := service.grantService.Put(data, salt)
 	if err != nil {
 		return err
 	}
 
-	return SendDocument(srv, doc, salt, service.chunkSize)
-}
-
-func (service *Service) Upload(srv api.Document_UploadServer) error {
-	pgsm, err := ReceiveDocumentAndGrantSpec(srv)
-	if err != nil {
-		return err
-	}
-
-	grt, err := PutDocument(service.grantService, pgsm)
-	if err != nil {
-		return err
-	}
-
-	return srv.SendAndClose(grt)
+	return cb(ref)
 }

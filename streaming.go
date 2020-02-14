@@ -6,283 +6,245 @@ import (
 
 	"github.com/monax/hoard/v7/api"
 	"github.com/monax/hoard/v7/grant"
-	"github.com/monax/hoard/v7/meta"
+	"github.com/monax/hoard/v7/reference"
 )
-
-type PlaintextReceiver interface {
-	Recv() (*api.Plaintext, error)
-}
-
-func ReceivePlaintext(srv PlaintextReceiver) (*api.Plaintext, error) {
-	accum := new(api.Plaintext)
-	for {
-		plaintext, err := srv.Recv()
-		if err != nil {
-			if err == io.EOF {
-				return accum, nil
-			}
-
-			return nil, err
-		}
-
-		err = consumePlaintext(accum, plaintext)
-		if err != nil {
-			return nil, err
-		}
-	}
-}
 
 type PlaintextSender interface {
 	Send(*api.Plaintext) error
 }
 
-func SendPlaintext(srv PlaintextSender, data, salt []byte, chunkSize int) error {
-	err := srv.Send(&api.Plaintext{Salt: salt})
+// SendPlaintext gets the plaintext for a given reference and sends it to the client
+func SendPlaintext(store ObjectService, srv PlaintextSender, ref *reference.Ref) error {
+	data, err := store.Get(ref)
 	if err != nil {
 		return err
 	}
 
-	return sendChunks(data, chunkSize, func(chunk []byte) error {
-		return srv.Send(&api.Plaintext{Data: chunk})
-	})
+	return srv.Send(&api.Plaintext{Body: data, Head: &api.Header{Salt: ref.Salt}})
 }
 
-type CiphertextReceiver interface {
-	Recv() (*api.Ciphertext, error)
-}
+func receiveReferencesAndGrantSpec(srv api.Grant_SealServer) (reference.Refs, *grant.Spec, error) {
+	var refs reference.Refs
+	spec, err := consumeHeadFromReferenceAndGrantSpec(srv.Recv())
+	if err != nil {
+		return nil, nil, err
+	}
 
-func ReceiveCiphertext(srv CiphertextReceiver) ([]byte, error) {
-	var data []byte
 	for {
-		c, err := srv.Recv()
+		refAndSpec, err := srv.Recv()
 		if err != nil {
 			if err == io.EOF {
-				return data, nil
+				return refs, spec, nil
+			}
+			return nil, nil, err
+		}
+
+		if s := refAndSpec.GrantSpec; s != nil {
+			return nil, nil, fmt.Errorf("received multiple grant specs but there can be at most one")
+		}
+
+		refs = append(refs, refAndSpec.Reference)
+	}
+}
+
+func consumeHeadFromReferenceAndGrantSpec(rgs *api.ReferenceAndGrantSpec, err error) (*grant.Spec, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	spec := rgs.GetGrantSpec()
+	if spec == nil {
+		return nil, fmt.Errorf("grant spec expected in first message")
+	}
+
+	return spec, nil
+}
+
+func consumeHeadFromPlaintextAndGrantSpec(ptgs *api.PlaintextAndGrantSpec, err error) (*grant.Spec, *api.Header, error) {
+	head, err := consumeHeadFromPlaintext(ptgs.GetPlaintext(), err)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	spec := ptgs.GetGrantSpec()
+	if spec == nil {
+		return nil, nil, fmt.Errorf("grant spec expected in first message")
+	}
+
+	return spec, head, nil
+}
+
+func consumeHeadFromPlaintext(pt *api.Plaintext, err error) (*api.Header, error) {
+	if err != nil {
+		return nil, err
+	} else if len(pt.GetBody()) > 0 {
+		return nil, fmt.Errorf("no data expected in first message")
+	}
+
+	return pt.GetHead(), nil
+}
+
+func consumeBodyFromPlaintextAndGrantSpec(ptgs *api.PlaintextAndGrantSpec, acc []byte, chunkSize int, cb func([]byte) error) ([]byte, error) {
+	leftover, err := consumeBodyFromPlaintext(ptgs.GetPlaintext(), acc, chunkSize, cb)
+	if err != nil {
+		return nil, err
+	} else if ptgs.GetGrantSpec() != nil {
+		return nil, fmt.Errorf("received multiple grant specs but there can be at most one")
+	}
+
+	return leftover, nil
+}
+
+func consumeBodyFromPlaintext(pt *api.Plaintext, acc []byte, chunkSize int, cb func([]byte) error) ([]byte, error) {
+	if pt.GetHead() != nil {
+		return nil, fmt.Errorf("received multiple headers but there can be at most one")
+	}
+
+	limit := chunkSize - len(acc)
+	data := pt.GetBody()
+
+	if len(data) < limit {
+		return append(acc, data...), nil
+	} else if len(data) == limit {
+		chunk := make([]byte, chunkSize)
+		copy(chunk, append(acc, data...))
+		return nil, cb(chunk)
+	}
+
+	// TODO: investigate dirty write
+	chunk := make([]byte, chunkSize)
+	copy(chunk, acc)
+	copy(chunk, data[len(acc):limit])
+
+	leftover := make([]byte, len(data)-limit)
+	copy(leftover, data[limit:])
+
+	if err := cb(chunk); err != nil {
+		return nil, err
+	}
+
+	index := 0
+	for index = 0; index < len(leftover)-chunkSize; index += chunkSize {
+		next := make([]byte, chunkSize)
+		copy(next, leftover[index:index+chunkSize])
+		if err := cb(next); err != nil {
+			return nil, err
+		}
+	}
+
+	next := make([]byte, len(leftover[index:]))
+	copy(next, leftover[index:])
+	return next, nil
+}
+
+func ReceiveAllPlaintexts(cli interface {
+	Recv() (*api.Plaintext, error)
+}) (*api.Plaintext, error) {
+	plaintext := new(api.Plaintext)
+
+	for {
+		pt, err := cli.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return plaintext, nil
 			}
 
 			return nil, err
 		}
 
-		data = append(data, c.EncryptedData...)
+		plaintext.Body = append(plaintext.Body, pt.GetBody()...)
+		if plaintext.Head == nil {
+			plaintext.Head = pt.GetHead()
+		}
 	}
 }
 
-type CiphertextSender interface {
-	Send(*api.Ciphertext) error
-}
+func ReceiveAllReferences(cli interface {
+	Recv() (*reference.Ref, error)
+}) (reference.Refs, error) {
+	refs := make(reference.Refs, 0)
 
-func SendCiphertext(srv CiphertextSender, data []byte, chunkSize int) error {
-	return sendChunks(data, chunkSize, func(chunk []byte) error {
-		return srv.Send(&api.Ciphertext{EncryptedData: chunk})
-	})
-}
-
-type PlaintextAndGrantSpecReceiver interface {
-	Recv() (*api.PlaintextAndGrantSpec, error)
-}
-
-// Receive chunks of plaintext and spec and aggregate into complete objects
-func ReceivePlaintextAndGrantSpec(srv PlaintextAndGrantSpecReceiver) (*api.PlaintextAndGrantSpec, error) {
-	accum := &api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{}}
 	for {
-		g, err := srv.Recv()
+		ref, err := cli.Recv()
 		if err != nil {
 			if err == io.EOF {
-				return accum, nil
+				return refs, nil
 			}
+
 			return nil, err
 		}
 
-		err = consumePlaintextAndGrantSpec(accum, g)
+		refs = append(refs, ref)
+	}
+}
+
+func ReceiveAllAddresses(cli interface {
+	Recv() (*api.Address, error)
+}) ([]*api.Address, error) {
+	addrs := make([]*api.Address, 0)
+
+	for {
+		addr, err := cli.Recv()
 		if err != nil {
+			if err == io.EOF {
+				return addrs, nil
+			}
+
 			return nil, err
 		}
+
+		addrs = append(addrs, addr)
 	}
 }
 
-type PlaintextAndGrantSpecSender interface {
-	Send(*api.PlaintextAndGrantSpec) error
-}
-
-// Send some plaintext and spec to a service in chunks
-func SendPlaintextAndGrantSpec(srv PlaintextAndGrantSpecSender, pgs *api.PlaintextAndGrantSpec, chunkSize int) error {
-	err := srv.Send(&api.PlaintextAndGrantSpec{GrantSpec: pgs.GrantSpec})
-	if err != nil {
-		return err
-	}
-
-	if len(pgs.Plaintext.Salt) > 0 {
-		err = srv.Send(&api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{Salt: pgs.Plaintext.Salt}})
+// StreamFileFrom provides a convenience wrapper over an io.Reader
+func StreamFileFrom(reader io.Reader, chunkSize int, sender func(chunk []byte) error) error {
+	out := make([]byte, chunkSize)
+	for {
+		n, err := reader.Read(out)
 		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+
+			return err
+		}
+
+		if err = sender(out[:n]); err != nil {
 			return err
 		}
 	}
-
-	return sendChunks(pgs.Plaintext.Data, chunkSize, func(chunk []byte) error {
-		return srv.Send(&api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{Data: chunk}})
-	})
 }
 
-type DocumentSender interface {
-	Send(*api.PlaintextAndMeta) error
-}
-
-func SendDocument(srv DocumentSender, doc *meta.Document, salt []byte, chunkSize int) error {
-	err := srv.Send(&api.PlaintextAndMeta{Meta: doc.Meta})
-	if err != nil {
-		return err
-	}
-
-	err = srv.Send(&api.PlaintextAndMeta{Plaintext: &api.Plaintext{Salt: salt}})
-	if err != nil {
-		return err
-	}
-
-	return sendChunks(doc.Data, chunkSize, func(chunk []byte) error {
-		return srv.Send(&api.PlaintextAndMeta{Plaintext: &api.Plaintext{Data: chunk}})
-	})
-}
-
-type DocumentAndGrantSender interface {
-	Send(*api.PlaintextAndGrantSpecAndMeta) error
-}
-
-func SendDocumentAndGrantSpec(srv DocumentAndGrantSender, doc *meta.Document, salt []byte, spec *grant.Spec, chunkSize int) error {
-	err := srv.Send(&api.PlaintextAndGrantSpecAndMeta{Meta: doc.Meta})
-	if err != nil {
-		return err
-	}
-
-	err = srv.Send(&api.PlaintextAndGrantSpecAndMeta{
-		PlaintextAndGrantSpec: &api.PlaintextAndGrantSpec{GrantSpec: spec},
-	})
-	if err != nil {
-		return err
-	}
-
-	err = srv.Send(&api.PlaintextAndGrantSpecAndMeta{
-		PlaintextAndGrantSpec: &api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{Salt: salt}},
-	})
-	if err != nil {
-		return err
-	}
-
-	return sendChunks(doc.Data, chunkSize, func(chunk []byte) error {
-		return srv.Send(&api.PlaintextAndGrantSpecAndMeta{
-			PlaintextAndGrantSpec: &api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{Data: chunk}},
-		})
-	})
-}
-
-type DocumentAndGrantReceiver interface {
-	Recv() (*api.PlaintextAndGrantSpecAndMeta, error)
-}
-
-func ReceiveDocumentAndGrantSpec(srv DocumentAndGrantReceiver) (*api.PlaintextAndGrantSpecAndMeta, error) {
-	accum := &api.PlaintextAndGrantSpecAndMeta{
-		PlaintextAndGrantSpec: &api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{}},
-	}
+// StreamFileTo provides a convenience wrapper over an io.Writer
+func StreamFileTo(writer io.Writer, receiver func() ([]byte, error)) error {
 	for {
-		d, err := srv.Recv()
+		chunk, err := receiver()
 		if err != nil {
 			if err == io.EOF {
-				return accum, nil
-			}
-			return nil, err
-		}
-
-		// NOTE: for singular values we adopt the convention of accepting the first one
-		if d.Meta != nil {
-			if accum.Meta != nil {
-				return nil, fmt.Errorf("received multiple document meta but there can be at most one")
-			}
-			accum.Meta = d.Meta
-		}
-
-		err = consumePlaintextAndGrantSpec(accum.PlaintextAndGrantSpec, d.PlaintextAndGrantSpec)
-		if err != nil {
-			return nil, err
-		}
-	}
-}
-
-type DocumentReceiver interface {
-	Recv() (*api.PlaintextAndMeta, error)
-}
-
-func ReceiveDocument(srv DocumentReceiver) (*meta.Document, error) {
-	accum := &api.PlaintextAndMeta{
-		Plaintext: &api.Plaintext{},
-	}
-
-	for {
-		d, err := srv.Recv()
-		if err != nil {
-			if err == io.EOF {
-				return &meta.Document{Meta: accum.Meta, Data: accum.Plaintext.Data}, nil
+				return nil
 			}
 
-			return nil, err
-		}
-
-		if d.Meta != nil {
-			if accum.Meta != nil {
-				return nil, fmt.Errorf("received multiple document meta but there can be at most one")
-			}
-			accum.Meta = d.Meta
-		}
-
-		err = consumePlaintext(accum.Plaintext, d.Plaintext)
-		if err != nil {
-			return nil, err
-		}
-	}
-}
-
-func consumePlaintextAndGrantSpec(accum, chunk *api.PlaintextAndGrantSpec) error {
-	if chunk == nil {
-		return nil
-	}
-	if chunk.GrantSpec != nil {
-		if accum.GrantSpec != nil {
-			return fmt.Errorf("received multiple grant specs but there can be at most one")
-		}
-		if len(accum.Plaintext.Data) > 0 {
-			return fmt.Errorf("received grant spec after data but spec must come before all data chunks")
-		}
-		accum.GrantSpec = chunk.GrantSpec
-	}
-	return consumePlaintext(accum.Plaintext, chunk.Plaintext)
-}
-
-func consumePlaintext(accum, chunk *api.Plaintext) error {
-	if chunk == nil {
-		return nil
-	}
-	if len(chunk.Salt) > 0 {
-		if len(accum.Salt) > 0 {
-			return fmt.Errorf("received multiple salts but there can be at most one")
-		}
-		if len(accum.Data) > 0 {
-			return fmt.Errorf("received salt after data but salt must come before all data chunks")
-		}
-		accum.Salt = chunk.Salt
-	}
-	accum.Data = append(accum.Data, chunk.Data...)
-	return nil
-}
-
-func sendChunks(data []byte, chunkSize int, sender func(chunk []byte) error) error {
-	var err error
-	for i := 0; i < len(data); i += chunkSize {
-		if i+chunkSize > len(data) {
-			err = sender(data[i:])
-		} else {
-			err = sender(data[i : i+chunkSize])
-		}
-		if err != nil {
 			return err
 		}
+
+		n, err := writer.Write(chunk)
+		if err != nil {
+			return err
+		} else if n != len(chunk) {
+			return fmt.Errorf("failed to write data")
+		}
 	}
-	return nil
+}
+
+// ReadStream returns an interface when it is non-nil
+func ReadStream(receiver func() (interface{}, error)) (interface{}, error) {
+	for {
+		chunk, err := receiver()
+		if err != nil {
+			return nil, err
+		} else if chunk != nil {
+			return chunk, nil
+		}
+	}
 }

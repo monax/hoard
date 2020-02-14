@@ -62,7 +62,6 @@ func (serv *Server) Serve() error {
 	api.RegisterEncryptionServer(serv.grpcServer, hoardService)
 	api.RegisterStorageServer(serv.grpcServer, hoardService)
 	api.RegisterGrantServer(serv.grpcServer, hoardService)
-	api.RegisterDocumentServer(serv.grpcServer, hoardService)
 
 	// Register reflection service on gRPC server.
 	reflection.Register(serv.grpcServer)
