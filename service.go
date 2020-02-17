@@ -4,11 +4,14 @@ import (
 	"context"
 	"io"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/monax/hoard/v7/api"
 	"github.com/monax/hoard/v7/grant"
 	"github.com/monax/hoard/v7/reference"
 	"github.com/monax/hoard/v7/stores"
 )
+
+const defaultRefVersionForHeader = 1
 
 // MaxChunkSize = 1MiB
 const MaxChunkSize = 1 << 20
@@ -43,7 +46,12 @@ func (service *Service) Get(srv api.Cleartext_GetServer) error {
 			return err
 		}
 
-		if err = SendPlaintext(service.grantService, srv, ref); err != nil {
+		data, err := service.grantService.Get(ref)
+		if err != nil {
+			return err
+		}
+
+		if err = SendPlaintext(data, srv, ref.GetVersion()); err != nil {
 			return err
 		}
 	}
@@ -53,6 +61,12 @@ func (service *Service) Get(srv api.Cleartext_GetServer) error {
 func (service *Service) Put(srv api.Cleartext_PutServer) error {
 	head, err := consumeHeadFromPlaintext(srv.Recv())
 	if err != nil {
+		return err
+	}
+
+	if err = service.putHeader(head, func(ref *reference.Ref) error {
+		return srv.Send(ref)
+	}); err != nil {
 		return err
 	}
 
@@ -87,6 +101,12 @@ func (service *Service) Encrypt(srv api.Encryption_EncryptServer) error {
 		return err
 	}
 
+	if err = service.encHeader(head, func(rct *api.ReferenceAndCiphertext) error {
+		return srv.Send(rct)
+	}); err != nil {
+		return err
+	}
+
 	for {
 		plaintext, err := srv.Recv()
 		if err != nil {
@@ -97,7 +117,7 @@ func (service *Service) Encrypt(srv api.Encryption_EncryptServer) error {
 			return err
 		}
 
-		ref, encryptedData, err := service.grantService.Encrypt(plaintext.Body, head.GetSalt())
+		ref, encryptedData, err := service.grantService.Encrypt(plaintext.GetBody(), head.GetSalt())
 		if err != nil {
 			return err
 		}
@@ -130,7 +150,7 @@ func (service *Service) Decrypt(srv api.Encryption_DecryptServer) error {
 			return err
 		}
 
-		if err = srv.Send(&api.Plaintext{Body: data}); err != nil {
+		if err = SendPlaintext(data, srv, refAndCiphertext.Reference.GetVersion()); err != nil {
 			return err
 		}
 	}
@@ -251,6 +271,13 @@ func (service *Service) PutSeal(srv api.Grant_PutSealServer) error {
 	}
 
 	var refs reference.Refs
+	if err = service.putHeader(head, func(ref *reference.Ref) error {
+		refs = append(refs, ref)
+		return nil
+	}); err != nil {
+		return err
+	}
+
 	var accumulator []byte
 	for {
 		ptgs, err := srv.Recv()
@@ -294,7 +321,12 @@ func (service *Service) UnsealGet(grt *grant.Grant, srv api.Grant_UnsealGetServe
 	}
 
 	for _, ref := range refs {
-		if err = SendPlaintext(service.grantService, srv, ref); err != nil {
+		data, err := service.grantService.Get(ref)
+		if err != nil {
+			return err
+		}
+
+		if err = SendPlaintext(data, srv, ref.GetVersion()); err != nil {
 			return err
 		}
 	}
@@ -318,6 +350,41 @@ func (service *Service) UnsealDelete(grt *grant.Grant, srv api.Grant_UnsealDelet
 		}
 	}
 	return nil
+}
+
+func (service *Service) encHeader(head *api.Header, cb func(*api.ReferenceAndCiphertext) error) error {
+	data, err := proto.Marshal(head)
+	if err != nil {
+		return err
+	}
+
+	ref, encryptedData, err := service.grantService.Encrypt(data, head.GetSalt())
+	if err != nil {
+		return err
+	}
+	ref.Version = defaultRefVersionForHeader
+
+	return cb(&api.ReferenceAndCiphertext{
+		Reference: ref,
+		Ciphertext: &api.Ciphertext{
+			EncryptedData: encryptedData,
+		},
+	})
+}
+
+func (service *Service) putHeader(head *api.Header, cb func(*reference.Ref) error) error {
+	data, err := proto.Marshal(head)
+	if err != nil {
+		return err
+	}
+
+	ref, err := service.grantService.Put(data, head.GetSalt())
+	if err != nil {
+		return err
+	}
+	ref.Version = defaultRefVersionForHeader
+
+	return cb(ref)
 }
 
 func (service *Service) putPlaintext(data, salt []byte, cb func(*reference.Ref) error) error {

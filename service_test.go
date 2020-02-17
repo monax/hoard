@@ -51,7 +51,7 @@ func TestService(t *testing.T) {
 
 				refs, err := ReceiveAllReferences(putStream)
 				require.NoError(t, err)
-				expected := len(data) / chunkSize
+				expected := len(data)/chunkSize + 1
 				if len(data)%chunkSize > 0 {
 					expected++
 				}

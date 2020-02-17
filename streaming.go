@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/monax/hoard/v7/api"
 	"github.com/monax/hoard/v7/grant"
 	"github.com/monax/hoard/v7/reference"
@@ -14,13 +15,17 @@ type PlaintextSender interface {
 }
 
 // SendPlaintext gets the plaintext for a given reference and sends it to the client
-func SendPlaintext(store ObjectService, srv PlaintextSender, ref *reference.Ref) error {
-	data, err := store.Get(ref)
-	if err != nil {
-		return err
+func SendPlaintext(data []byte, srv PlaintextSender, version int32) error {
+	if version == defaultRefVersionForHeader {
+		head := new(api.Header)
+		err := proto.Unmarshal(data, head)
+		if err != nil {
+			return err
+		}
+		return srv.Send(&api.Plaintext{Head: head})
 	}
 
-	return srv.Send(&api.Plaintext{Body: data, Head: &api.Header{Salt: ref.Salt}})
+	return srv.Send(&api.Plaintext{Body: data})
 }
 
 func receiveReferencesAndGrantSpec(srv api.Grant_SealServer) (reference.Refs, *grant.Spec, error) {
