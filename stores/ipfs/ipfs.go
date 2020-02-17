@@ -66,6 +66,7 @@ func (inv *ipfsStore) Put(address []byte, data []byte) ([]byte, error) {
 }
 
 func (inv *ipfsStore) Delete(address []byte) error {
+	// TODO: unpin?
 	return fmt.Errorf("IPFS does not support deleting")
 }
 
