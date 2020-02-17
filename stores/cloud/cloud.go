@@ -138,24 +138,14 @@ func (inv *cloudStore) Put(address, data []byte) ([]byte, error) {
 }
 
 func (inv *cloudStore) Delete(address []byte) error {
-	writer, err := inv.blob.NewWriter(inv.back, fmt.Sprintf("%s/%s", inv.prefix, inv.encode(address)), nil)
+	err := inv.blob.Delete(inv.back, fmt.Sprintf("%s/%s", inv.prefix, inv.encode(address)))
 	if err != nil {
-		return err
-	}
-
-	n, err := writer.Write(nil)
-	if err != nil {
-		return err
-	}
-
-	if err = writer.Close(); err != nil {
 		return err
 	}
 
 	inv.logger.Log("method", "Delete",
 		"location", inv.Location,
-		"address", inv.encode(address),
-		"bytes_written", n)
+		"address", inv.encode(address))
 
 	return nil
 }

@@ -28,7 +28,7 @@ func (inv *memoryStore) Put(address []byte, data []byte) ([]byte, error) {
 
 func (inv *memoryStore) Delete(address []byte) error {
 	inv.mtx.Lock()
-	inv.memory[string(address)] = nil
+	delete(inv.memory, string(address))
 	inv.mtx.Unlock()
 	return nil
 }

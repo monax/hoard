@@ -82,8 +82,13 @@ func (cas *contentAddressedStore) Address(data []byte) []byte {
 
 func (cas *contentAddressedStore) Put(data []byte) ([]byte, error) {
 	address := cas.addresser(data)
-	address, err := cas.store.Put(address, data)
-	return address, err
+	info, err := cas.Stat(address)
+	if err != nil {
+		return nil, err
+	} else if info.Exists {
+		return address, nil
+	}
+	return cas.store.Put(address, data)
 }
 
 func (cas *contentAddressedStore) Delete(address []byte) error {
