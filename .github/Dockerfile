@@ -39,11 +39,6 @@ ENV GO111MODULE=on
 
 RUN cd /usr/bin && curl -L https://github.com/goreleaser/goreleaser/releases/download/$GORELEASER_VERSION/goreleaser_Linux_x86_64.tar.gz | tar xz goreleaser
 
-# install aws auth binaries
-RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-RUN unzip awscli-bundle.zip
-RUN python ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
-
 # install gcloud auth binaries
 RUN curl https://sdk.cloud.google.com | bash
 RUN ls /root/google-cloud-sdk/bin/

@@ -10,10 +10,6 @@ import (
 	"testing"
 
 	"cloud.google.com/go/storage"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/monax/hoard/v7/stores"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,23 +25,6 @@ func TestStoreGCS(t *testing.T) {
 	store, err := NewStore(GCP, bucket, prefix, "", base32.StdEncoding, nil)
 	assert.NoError(t, err)
 	stores.RunTests(t, store)
-}
-
-func TestStoreS3(t *testing.T) {
-	bucket := "monax-hoard-test"
-	prefix := "TestS3Store/"
-	err := deleteS3Prefix(bucket, prefix)
-	require.NoError(t, err)
-	store, err := NewStore(AWS, bucket, prefix, "", base32.StdEncoding, nil)
-	assert.NoError(t, err)
-	stores.RunTests(t, store)
-}
-
-func deleteS3Prefix(bucket, prefix string) error {
-	deleter := s3manager.NewBatchDelete(session.Must(session.New(aws.NewConfig()), nil))
-	return deleter.Delete(context.Background(),
-		s3manager.NewDeleteListIterator(deleter.Client,
-			&s3.ListObjectsInput{Bucket: &bucket, Prefix: &prefix}))
 }
 
 func deleteGCSPrefix(bucket, prefix string) error {
