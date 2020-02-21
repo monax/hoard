@@ -1,4 +1,4 @@
-name: integration
+name: master
 on:
   push:
     branches:    
@@ -10,7 +10,23 @@ jobs:
     steps:
     - uses: actions/setup-go@v1
       with:
-        go-version: 1.12
+        go-version: 1.13
+      id: go
+    - uses: actions/checkout@v1
+    - run: make test
+      env:
+        GO_TEST_ARGS: "-coverprofile=coverage.txt -covermode=atomic"
+    - uses: codecov/codecov-action@v1.0.2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.txt
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
       id: go
     - uses: actions/checkout@v1
     - run: |

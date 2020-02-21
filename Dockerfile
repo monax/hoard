@@ -1,5 +1,5 @@
 # We use a multistage build to avoid bloating our deployment image with build dependencies
-FROM golang:1.12.1-alpine3.9 as builder
+FROM golang:1.13-alpine3.11 as builder
 MAINTAINER Monax <support@monax.io>
 
 RUN apk add --update --no-cache make git bash

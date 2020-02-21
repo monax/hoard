@@ -1,6 +1,11 @@
 # Hoard
 
-![](https://github.com/monax/hoard/workflows/unit/badge.svg)
+[![CI](https://github.com/monax/hoard/workflows/master/badge.svg)](https://launch-editor.github.com/actions?workflowID=master&event=push&nwo=monax%hoard)
+[![version](https://img.shields.io/github/tag/monax/hoard.svg)](https://github.com/monax/hoard/releases/latest)
+[![GoDoc](https://godoc.org/github.com/hoard?status.png)](https://pkg.go.dev/github.com/monax/hoard)
+[![license](https://img.shields.io/github/license/monax/hoard.svg)](LICENSE.md)
+[![LoC](https://tokei.rs/b1/github/monax/hoard?category=lines)](https://github.com/monax/hoard)
+[![codecov](https://codecov.io/gh/monax/hoard/branch/master/graph/badge.svg)](https://codecov.io/gh/monax/hoard)
 
 Hoard is a stateless, deterministically encrypted, content-addressed object store.
 
