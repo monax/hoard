@@ -3,7 +3,7 @@
 ![master](https://github.com/monax/hoard/workflows/master/badge.svg)
 [![version](https://img.shields.io/github/tag/monax/hoard.svg)](https://github.com/monax/hoard/releases/latest)
 [![GoDoc](https://godoc.org/github.com/hoard?status.png)](https://pkg.go.dev/github.com/monax/hoard)
-[![license](https://img.shields.io/github/license/monax/hoard.svg)](LICENSE.md)
+[![license](https://img.shields.io/github/license/monax/hoard.svg)](LICENSE)
 [![LoC](https://tokei.rs/b1/github/monax/hoard?category=lines)](https://github.com/monax/hoard)
 [![codecov](https://codecov.io/gh/monax/hoard/branch/master/graph/badge.svg)](https://codecov.io/gh/monax/hoard)
 
