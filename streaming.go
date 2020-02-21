@@ -119,7 +119,7 @@ func consumeBodyFromPlaintext(pt *api.Plaintext, acc []byte, chunkSize int, cb f
 	// TODO: investigate dirty write
 	chunk := make([]byte, chunkSize)
 	copy(chunk, acc)
-	copy(chunk, data[len(acc):limit])
+	copy(chunk[len(acc):], data[:limit])
 
 	leftover := make([]byte, len(data)-limit)
 	copy(leftover, data[limit:])

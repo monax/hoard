@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "downlevelIteration": true,
+    "allowJs": false,
+    "declaration": true,
+    "target": "es5",
+    "preserveSymlinks": true,
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules",
+  ]
+}

@@ -1,24 +1,29 @@
 {
   "name": "@monax/hoard",
   "description": "Hoard client library",
-  "main": "hoard-js/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "mocha hoard-js/test"
+    "build": "rm -rf dist && tsc --build",
+    "test": "mocha -r ts-node/register src/test/*"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/monax/hoard.git"
   },
   "dependencies": {
-    "@grpc/proto-loader": "^0.5.3",
-    "grpc": "^1.24.2"
+    "@types/google-protobuf": "^3.7.2",
+    "@types/mocha": "^5.2.7",
+    "grpc": "^1.24.2",
+    "grpc-tools": "^1.8.1",
+    "ts-node": "^8.5.4",
+    "ts-protoc-gen": "^0.12.0",
+    "typescript": "^3.7.4"
   },
   "mocha": {
     "bail": true
   },
   "files": [
-    "hoard-js/",
-    "protobuf/"
+    "dist/"
   ],
   "keywords": [
     "hoard",
