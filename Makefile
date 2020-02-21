@@ -122,7 +122,7 @@ build_dist:
 
 .PHONY:	test
 test: check
-	@scripts/bin_wrapper.sh go test -v ./...
+	@scripts/bin_wrapper.sh go test -v ./... ${GO_TEST_ARGS}
 
 .PHONY: test_js
 test_js: build install
