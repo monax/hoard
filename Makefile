@@ -132,7 +132,6 @@ test_js: build install
 .PHONY:	test_integration
 test_integration: check
 	@go test -v -tags integration ./...
-	# @scripts/integration/test_aws.sh
 	@scripts/integration/test_gcp.sh
 	@scripts/integration/test_ipfs.sh
 
