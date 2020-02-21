@@ -28,26 +28,41 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 			}
 		}
 
-		data := readData(os.Stdin)
-		seal, err := client.grant.PutSeal(context.Background())
+		putseal, err := client.grant.PutSeal(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.SendPlaintextAndGrantSpec(seal, &api.PlaintextAndGrantSpec{
+		err = putseal.Send(&api.PlaintextAndGrantSpec{
 			Plaintext: &api.Plaintext{
-				Data: data,
-				Salt: parseSalt(salt),
+				Head: &api.Header{
+					Salt: parseSalt(salt),
+				},
 			},
 			GrantSpec: spec,
-		}, *chunk)
+		})
 		if err != nil {
-			fatalf("Error sending data: %v", err)
+			fatalf("Error sending head: %v", err)
 		}
 
-		grt, err := seal.CloseAndRecv()
+		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
+			return putseal.Send(&api.PlaintextAndGrantSpec{
+				Plaintext: &api.Plaintext{
+					Body: data,
+				},
+			})
+		})
 		if err != nil {
-			fatalf("Error closing client: %v", err)
+			fatalf("Error sending body: %v", err)
+		}
+
+		if err = putseal.CloseSend(); err != nil {
+			fatalf("Error closing send: %v", err)
+		}
+
+		grt, err := putseal.CloseAndRecv()
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
 		}
 
 		fmt.Printf("%s\n", jsonString(grt))
@@ -56,7 +71,6 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 
 // Seal reads encrypted data then prints a grant
 func (client *Client) Seal(cmd *cli.Cmd) {
-	address := addStringOpt(cmd, "address", addrOpt)
 	key := addStringOpt(cmd, "key", keyOpt)
 
 	cmd.Action = func() {
@@ -68,18 +82,30 @@ func (client *Client) Seal(cmd *cli.Cmd) {
 			}
 		}
 
-		ref := readReference(address)
-		seal, err := client.grant.Seal(context.Background(),
-			&api.ReferenceAndGrantSpec{
+		refs := readReferences()
+		seal, err := client.grant.Seal(context.Background())
+		if err != nil {
+			fatalf("Error starting client: %v", err)
+		}
+
+		for _, ref := range refs {
+			if err = seal.Send(&api.ReferenceAndGrantSpec{
 				Reference: ref,
 				GrantSpec: &spec,
-			},
-		)
-
-		if err != nil {
-			fatalf("Error sealing data: %v", err)
+			}); err != nil {
+				fatalf("Error sending data: %v", err)
+			}
 		}
-		fmt.Printf("%s\n", jsonString(seal))
+		if err = seal.CloseSend(); err != nil {
+			fatalf("Error closing send: %v", err)
+		}
+
+		grt, err := seal.CloseAndRecv()
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
+
+		fmt.Printf("%s\n", jsonString(grt))
 	}
 }
 
@@ -98,7 +124,7 @@ func (client *Client) Reseal(cmd *cli.Cmd) {
 			}
 		}
 
-		ref, err := client.grant.Reseal(context.Background(),
+		grt, err := client.grant.Reseal(context.Background(),
 			&api.GrantAndGrantSpec{
 				Grant:     prev,
 				GrantSpec: &next,
@@ -107,7 +133,7 @@ func (client *Client) Reseal(cmd *cli.Cmd) {
 		if err != nil {
 			fatalf("Error resealing data: %v", err)
 		}
-		fmt.Printf("%s\n", jsonString(ref))
+		fmt.Printf("%s\n", jsonString(grt))
 	}
 }
 
@@ -115,11 +141,21 @@ func (client *Client) Reseal(cmd *cli.Cmd) {
 func (client *Client) Unseal(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		grt := readGrant()
-		ref, err := client.grant.Unseal(context.Background(), grt)
+		unseal, err := client.grant.Unseal(context.Background(), grt)
 		if err != nil {
-			fatalf("Error unsealing data: %v", err)
+			fatalf("Error starting client: %v", err)
 		}
-		fmt.Printf("%s\n", jsonString(ref))
+
+		if err = unseal.CloseSend(); err != nil {
+			fatalf("Error closing send: %v", err)
+		}
+
+		refs, err := hoard.ReceiveAllReferences(unseal)
+		if err != nil {
+			fatalf("Error receiving data: %v", err)
+		}
+
+		fmt.Printf("%s\n", jsonString(refs))
 	}
 }
 
@@ -128,17 +164,18 @@ func (client *Client) UnsealGet(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		grt := readGrant()
 
-		unseal, err := client.grant.UnsealGet(context.Background(), grt)
+		unsealget, err := client.grant.UnsealGet(context.Background(), grt)
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		plaintext, err := hoard.ReceivePlaintext(unseal)
+		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
+			plaintext, err := unsealget.Recv()
+			return plaintext.GetBody(), err
+		})
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
-
-		os.Stdout.Write(plaintext.Data)
 	}
 }
 
@@ -146,11 +183,9 @@ func (client *Client) UnsealGet(cmd *cli.Cmd) {
 func (client *Client) UnsealDelete(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		grt := readGrant()
-
 		_, err := client.grant.UnsealDelete(context.Background(), grt)
 		if err != nil {
 			fatalf("Error unsealing data: %v", err)
 		}
-		return
 	}
 }

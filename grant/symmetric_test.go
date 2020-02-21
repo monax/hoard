@@ -11,10 +11,10 @@ import (
 )
 
 func TestSymmetricGrant(t *testing.T) {
-	ref := &reference.Ref{
+	ref := reference.Refs{&reference.Ref{
 		Address:   []byte("adddressss"),
 		SecretKey: []byte("other secret"),
-	}
+	}}
 	grt, err := SymmetricGrant(ref, nil)
 	assert.Error(t, err)
 	assert.Nil(t, grt)
@@ -28,7 +28,7 @@ func TestSymmetricGrant(t *testing.T) {
 	grt, err = SymmetricGrant(ref, secret)
 	assert.NoError(t, err)
 	assert.NotNil(t, grt)
-	refOut, err := SymmetricReferenceV1(grt, secret)
+	refOut, err := SymmetricReferenceV2(grt, secret)
 	assert.NoError(t, err)
 	assert.Equal(t, ref, refOut)
 

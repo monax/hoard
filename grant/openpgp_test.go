@@ -10,7 +10,7 @@ import (
 )
 
 func TestOpenPGPGrant(t *testing.T) {
-	testRef := testReference()
+	testRefs := testReferences()
 
 	keyPublic, err := ioutil.ReadFile("public.key.asc")
 	assert.NoError(t, err)
@@ -23,35 +23,35 @@ func TestOpenPGPGrant(t *testing.T) {
 	}
 
 	// Create grant from public
-	grant, err := OpenPGPGrant(testRef, string(keyPublic), &testPGP)
+	grant, err := OpenPGPGrant(testRefs, string(keyPublic), &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
-	ref, err := OpenPGPReference(grant, &testPGP)
+	ref, err := OpenPGPReferenceV2(grant, &testPGP)
 	assert.NoError(t, err)
-	assert.EqualValues(t, testRef, ref)
+	assert.EqualValues(t, testRefs, ref)
 
 	// Create grant from private
-	grant, err = OpenPGPGrant(testRef, string(keyPrivate), &testPGP)
+	grant, err = OpenPGPGrant(testRefs, string(keyPrivate), &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
-	ref, err = OpenPGPReference(grant, &testPGP)
+	ref, err = OpenPGPReferenceV2(grant, &testPGP)
 	assert.NoError(t, err)
-	assert.EqualValues(t, testRef, ref)
+	assert.EqualValues(t, testRefs, ref)
 
 	// Create grant from signer
-	grant, err = OpenPGPGrant(testRef, "", &testPGP)
+	grant, err = OpenPGPGrant(testRefs, "", &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
-	ref, err = OpenPGPReference(grant, &testPGP)
+	ref, err = OpenPGPReferenceV2(grant, &testPGP)
 	assert.NoError(t, err)
-	assert.EqualValues(t, testRef, ref)
+	assert.EqualValues(t, testRefs, ref)
 
-	ref, err = OpenPGPReference(grant, nil)
+	ref, err = OpenPGPReferenceV0(grant, nil)
 	assert.Errorf(t, err, "hoard is not currently configured to use openpgp")
 
-	grant, err = OpenPGPGrant(testRef, string(keyPublic), nil)
+	grant, err = OpenPGPGrant(testRefs, string(keyPublic), nil)
 	assert.Errorf(t, err, "hoard is not currently configured to use openpgp")
 }

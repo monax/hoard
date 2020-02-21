@@ -17,7 +17,7 @@ import (
 )
 
 // OpenPGPGrant encrypts and signs a given reference
-func OpenPGPGrant(ref *reference.Ref, public string, keyring *config.OpenPGPSecret) ([]byte, error) {
+func OpenPGPGrant(refs reference.Refs, public string, keyring *config.OpenPGPSecret) ([]byte, error) {
 	if keyring == nil {
 		return nil, fmt.Errorf("cannot encrypt because no private key was provided")
 	}
@@ -63,7 +63,7 @@ func OpenPGPGrant(ref *reference.Ref, public string, keyring *config.OpenPGPSecr
 		return nil, fmt.Errorf("could not set up openpgp encryption: %s", err)
 	}
 
-	_, err = io.WriteString(plaintextWriter, ref.Plaintext(nil))
+	_, err = io.WriteString(plaintextWriter, refs.Plaintext(nil))
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +73,8 @@ func OpenPGPGrant(ref *reference.Ref, public string, keyring *config.OpenPGPSecr
 	return buf.Bytes(), nil
 }
 
-// OpenPGPReference decrypts a given grant
-func OpenPGPReference(grant []byte, keyring *config.OpenPGPSecret) (*reference.Ref, error) {
+// openPGPReference decrypts a given grant
+func openPGPReference(grant []byte, keyring *config.OpenPGPSecret) ([]byte, error) {
 	if keyring == nil {
 		return nil, fmt.Errorf("cannot decrypt because no private key was provided")
 	}
@@ -108,5 +108,28 @@ func OpenPGPReference(grant []byte, keyring *config.OpenPGPSecret) (*reference.R
 		return nil, errors.New("unknown message signature")
 	}
 
-	return reference.FromPlaintext(string(bs)), nil
+	return bs, nil
+
+}
+
+func OpenPGPReferenceV0(grant []byte, keyring *config.OpenPGPSecret) (reference.Refs, error) {
+	data, err := openPGPReference(grant, keyring)
+	if err != nil {
+		return nil, err
+	}
+
+	return reference.Refs{reference.FromPlaintext(string(data))}, nil
+}
+
+func OpenPGPReferenceV1(grant []byte, keyring *config.OpenPGPSecret) (reference.Refs, error) {
+	return OpenPGPReferenceV0(grant, keyring)
+}
+
+func OpenPGPReferenceV2(grant []byte, keyring *config.OpenPGPSecret) (reference.Refs, error) {
+	data, err := openPGPReference(grant, keyring)
+	if err != nil {
+		return nil, err
+	}
+
+	return reference.RepeatedFromPlaintext(string(data)), nil
 }

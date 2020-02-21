@@ -5,11 +5,19 @@ import (
 )
 
 // PlaintextGrant returns an encoded reference
-func PlaintextGrant(ref *reference.Ref) []byte {
-	return []byte(ref.Plaintext(nil))
+func PlaintextGrant(refs reference.Refs) []byte {
+	return []byte(refs.Plaintext(nil))
 }
 
-// PlaintextReference decodes the grant
-func PlaintextReference(ciphertext []byte) *reference.Ref {
-	return reference.FromPlaintext(string(ciphertext))
+// PlaintextReferenceV0 decodes the grant
+func PlaintextReferenceV0(ciphertext []byte) reference.Refs {
+	return reference.Refs{reference.FromPlaintext(string(ciphertext))}
+}
+
+func PlaintextReferenceV1(ciphertext []byte) reference.Refs {
+	return PlaintextReferenceV0(ciphertext)
+}
+
+func PlaintextReferenceV2(ciphertext []byte) reference.Refs {
+	return reference.RepeatedFromPlaintext(string(ciphertext))
 }

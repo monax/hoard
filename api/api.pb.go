@@ -8,7 +8,6 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	grant "github.com/monax/hoard/v7/grant"
-	meta "github.com/monax/hoard/v7/meta"
 	reference "github.com/monax/hoard/v7/reference"
 	stores "github.com/monax/hoard/v7/stores"
 	grpc "google.golang.org/grpc"
@@ -26,7 +25,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type GrantAndGrantSpec struct {
 	Grant *grant.Grant `protobuf:"bytes,1,opt,name=Grant,proto3" json:"Grant,omitempty"`
@@ -122,98 +121,6 @@ func (m *PlaintextAndGrantSpec) GetGrantSpec() *grant.Spec {
 	return nil
 }
 
-type PlaintextAndMeta struct {
-	Meta                 *meta.Meta `protobuf:"bytes,1,opt,name=Meta,proto3" json:"Meta,omitempty"`
-	Plaintext            *Plaintext `protobuf:"bytes,2,opt,name=Plaintext,proto3" json:"Plaintext,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
-}
-
-func (m *PlaintextAndMeta) Reset()         { *m = PlaintextAndMeta{} }
-func (m *PlaintextAndMeta) String() string { return proto.CompactTextString(m) }
-func (*PlaintextAndMeta) ProtoMessage()    {}
-func (*PlaintextAndMeta) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{2}
-}
-func (m *PlaintextAndMeta) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PlaintextAndMeta.Unmarshal(m, b)
-}
-func (m *PlaintextAndMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PlaintextAndMeta.Marshal(b, m, deterministic)
-}
-func (m *PlaintextAndMeta) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PlaintextAndMeta.Merge(m, src)
-}
-func (m *PlaintextAndMeta) XXX_Size() int {
-	return xxx_messageInfo_PlaintextAndMeta.Size(m)
-}
-func (m *PlaintextAndMeta) XXX_DiscardUnknown() {
-	xxx_messageInfo_PlaintextAndMeta.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_PlaintextAndMeta proto.InternalMessageInfo
-
-func (m *PlaintextAndMeta) GetMeta() *meta.Meta {
-	if m != nil {
-		return m.Meta
-	}
-	return nil
-}
-
-func (m *PlaintextAndMeta) GetPlaintext() *Plaintext {
-	if m != nil {
-		return m.Plaintext
-	}
-	return nil
-}
-
-type PlaintextAndGrantSpecAndMeta struct {
-	Meta                  *meta.Meta             `protobuf:"bytes,1,opt,name=Meta,proto3" json:"Meta,omitempty"`
-	PlaintextAndGrantSpec *PlaintextAndGrantSpec `protobuf:"bytes,2,opt,name=PlaintextAndGrantSpec,proto3" json:"PlaintextAndGrantSpec,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}               `json:"-"`
-	XXX_unrecognized      []byte                 `json:"-"`
-	XXX_sizecache         int32                  `json:"-"`
-}
-
-func (m *PlaintextAndGrantSpecAndMeta) Reset()         { *m = PlaintextAndGrantSpecAndMeta{} }
-func (m *PlaintextAndGrantSpecAndMeta) String() string { return proto.CompactTextString(m) }
-func (*PlaintextAndGrantSpecAndMeta) ProtoMessage()    {}
-func (*PlaintextAndGrantSpecAndMeta) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{3}
-}
-func (m *PlaintextAndGrantSpecAndMeta) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PlaintextAndGrantSpecAndMeta.Unmarshal(m, b)
-}
-func (m *PlaintextAndGrantSpecAndMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PlaintextAndGrantSpecAndMeta.Marshal(b, m, deterministic)
-}
-func (m *PlaintextAndGrantSpecAndMeta) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PlaintextAndGrantSpecAndMeta.Merge(m, src)
-}
-func (m *PlaintextAndGrantSpecAndMeta) XXX_Size() int {
-	return xxx_messageInfo_PlaintextAndGrantSpecAndMeta.Size(m)
-}
-func (m *PlaintextAndGrantSpecAndMeta) XXX_DiscardUnknown() {
-	xxx_messageInfo_PlaintextAndGrantSpecAndMeta.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_PlaintextAndGrantSpecAndMeta proto.InternalMessageInfo
-
-func (m *PlaintextAndGrantSpecAndMeta) GetMeta() *meta.Meta {
-	if m != nil {
-		return m.Meta
-	}
-	return nil
-}
-
-func (m *PlaintextAndGrantSpecAndMeta) GetPlaintextAndGrantSpec() *PlaintextAndGrantSpec {
-	if m != nil {
-		return m.PlaintextAndGrantSpec
-	}
-	return nil
-}
-
 type ReferenceAndGrantSpec struct {
 	Reference *reference.Ref `protobuf:"bytes,1,opt,name=Reference,proto3" json:"Reference,omitempty"`
 	// The type of grant to output
@@ -227,7 +134,7 @@ func (m *ReferenceAndGrantSpec) Reset()         { *m = ReferenceAndGrantSpec{} }
 func (m *ReferenceAndGrantSpec) String() string { return proto.CompactTextString(m) }
 func (*ReferenceAndGrantSpec) ProtoMessage()    {}
 func (*ReferenceAndGrantSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{4}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{2}
 }
 func (m *ReferenceAndGrantSpec) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReferenceAndGrantSpec.Unmarshal(m, b)
@@ -261,9 +168,71 @@ func (m *ReferenceAndGrantSpec) GetGrantSpec() *grant.Spec {
 	return nil
 }
 
+type Header struct {
+	Salt                 []byte   `protobuf:"bytes,1,opt,name=Salt,proto3" json:"Salt,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
+	Type                 string   `protobuf:"bytes,3,opt,name=Type,proto3" json:"Type,omitempty"`
+	Tags                 []string `protobuf:"bytes,4,rep,name=Tags,proto3" json:"Tags,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Header) Reset()         { *m = Header{} }
+func (m *Header) String() string { return proto.CompactTextString(m) }
+func (*Header) ProtoMessage()    {}
+func (*Header) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{3}
+}
+func (m *Header) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Header.Unmarshal(m, b)
+}
+func (m *Header) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Header.Marshal(b, m, deterministic)
+}
+func (m *Header) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Header.Merge(m, src)
+}
+func (m *Header) XXX_Size() int {
+	return xxx_messageInfo_Header.Size(m)
+}
+func (m *Header) XXX_DiscardUnknown() {
+	xxx_messageInfo_Header.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Header proto.InternalMessageInfo
+
+func (m *Header) GetSalt() []byte {
+	if m != nil {
+		return m.Salt
+	}
+	return nil
+}
+
+func (m *Header) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Header) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *Header) GetTags() []string {
+	if m != nil {
+		return m.Tags
+	}
+	return nil
+}
+
 type Plaintext struct {
-	Data                 []byte   `protobuf:"bytes,1,opt,name=Data,proto3" json:"Data,omitempty"`
-	Salt                 []byte   `protobuf:"bytes,2,opt,name=Salt,proto3" json:"Salt,omitempty"`
+	Body                 []byte   `protobuf:"bytes,1,opt,name=Body,proto3" json:"Body,omitempty"`
+	Head                 *Header  `protobuf:"bytes,3,opt,name=Head,proto3" json:"Head,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -273,7 +242,7 @@ func (m *Plaintext) Reset()         { *m = Plaintext{} }
 func (m *Plaintext) String() string { return proto.CompactTextString(m) }
 func (*Plaintext) ProtoMessage()    {}
 func (*Plaintext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{5}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{4}
 }
 func (m *Plaintext) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Plaintext.Unmarshal(m, b)
@@ -293,16 +262,16 @@ func (m *Plaintext) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Plaintext proto.InternalMessageInfo
 
-func (m *Plaintext) GetData() []byte {
+func (m *Plaintext) GetBody() []byte {
 	if m != nil {
-		return m.Data
+		return m.Body
 	}
 	return nil
 }
 
-func (m *Plaintext) GetSalt() []byte {
+func (m *Plaintext) GetHead() *Header {
 	if m != nil {
-		return m.Salt
+		return m.Head
 	}
 	return nil
 }
@@ -318,7 +287,7 @@ func (m *Ciphertext) Reset()         { *m = Ciphertext{} }
 func (m *Ciphertext) String() string { return proto.CompactTextString(m) }
 func (*Ciphertext) ProtoMessage()    {}
 func (*Ciphertext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{6}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{5}
 }
 func (m *Ciphertext) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Ciphertext.Unmarshal(m, b)
@@ -357,7 +326,7 @@ func (m *ReferenceAndCiphertext) Reset()         { *m = ReferenceAndCiphertext{}
 func (m *ReferenceAndCiphertext) String() string { return proto.CompactTextString(m) }
 func (*ReferenceAndCiphertext) ProtoMessage()    {}
 func (*ReferenceAndCiphertext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{7}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{6}
 }
 func (m *ReferenceAndCiphertext) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReferenceAndCiphertext.Unmarshal(m, b)
@@ -402,7 +371,7 @@ func (m *Address) Reset()         { *m = Address{} }
 func (m *Address) String() string { return proto.CompactTextString(m) }
 func (*Address) ProtoMessage()    {}
 func (*Address) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{8}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{7}
 }
 func (m *Address) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Address.Unmarshal(m, b)
@@ -432,9 +401,8 @@ func (m *Address) GetAddress() []byte {
 func init() {
 	proto.RegisterType((*GrantAndGrantSpec)(nil), "api.GrantAndGrantSpec")
 	proto.RegisterType((*PlaintextAndGrantSpec)(nil), "api.PlaintextAndGrantSpec")
-	proto.RegisterType((*PlaintextAndMeta)(nil), "api.PlaintextAndMeta")
-	proto.RegisterType((*PlaintextAndGrantSpecAndMeta)(nil), "api.PlaintextAndGrantSpecAndMeta")
 	proto.RegisterType((*ReferenceAndGrantSpec)(nil), "api.ReferenceAndGrantSpec")
+	proto.RegisterType((*Header)(nil), "api.Header")
 	proto.RegisterType((*Plaintext)(nil), "api.Plaintext")
 	proto.RegisterType((*Ciphertext)(nil), "api.Ciphertext")
 	proto.RegisterType((*ReferenceAndCiphertext)(nil), "api.ReferenceAndCiphertext")
@@ -444,47 +412,44 @@ func init() {
 func init() { proto.RegisterFile("api.proto", fileDescriptor_00212fb1f9d3bf1c) }
 
 var fileDescriptor_00212fb1f9d3bf1c = []byte{
-	// 631 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x55, 0x5d, 0x6f, 0xd3, 0x30,
-	0x14, 0x9d, 0xbb, 0xd0, 0xd2, 0xdb, 0xc0, 0x86, 0xa5, 0x4d, 0x55, 0xf8, 0x0e, 0xd3, 0x56, 0x3e,
-	0x94, 0x56, 0xad, 0x40, 0xbc, 0xf0, 0x30, 0x56, 0x34, 0xf1, 0x80, 0x14, 0xb9, 0xda, 0x0b, 0x12,
-	0x12, 0x6e, 0xe3, 0xb6, 0x91, 0xd2, 0x24, 0x4a, 0x1c, 0x36, 0x5e, 0x10, 0x3f, 0x81, 0xbf, 0xc0,
-	0x23, 0xff, 0x12, 0xd9, 0x71, 0xf3, 0xd9, 0xc1, 0xfa, 0x54, 0xfb, 0xf8, 0x1c, 0xdf, 0x7b, 0xcf,
-	0xbd, 0x4e, 0xa1, 0x4d, 0x43, 0xd7, 0x0a, 0xa3, 0x80, 0x07, 0x78, 0x97, 0x86, 0xae, 0xd1, 0x59,
-	0x44, 0xd4, 0xe7, 0x29, 0x62, 0xc0, 0x8a, 0x71, 0xaa, 0xd6, 0x7b, 0x11, 0x9b, 0xb3, 0x88, 0xf9,
-	0x33, 0xa6, 0x00, 0x3d, 0xe6, 0x41, 0xc4, 0xe2, 0x74, 0x67, 0x4e, 0xe1, 0xde, 0xb9, 0x50, 0x9e,
-	0xfa, 0x8e, 0xfc, 0x9d, 0x84, 0x6c, 0x86, 0x4d, 0xb8, 0x25, 0x37, 0x5d, 0xf4, 0x04, 0xf5, 0x3a,
-	0x43, 0xdd, 0x4a, 0x2f, 0x97, 0x18, 0x49, 0x8f, 0xf0, 0x73, 0x68, 0x67, 0x82, 0x6e, 0x43, 0xf2,
-	0x3a, 0x8a, 0x27, 0x20, 0x92, 0x9f, 0x9a, 0x21, 0x1c, 0xd8, 0x1e, 0x75, 0x7d, 0xce, 0xae, 0xca,
-	0x71, 0x5e, 0x41, 0x3b, 0x3b, 0x50, 0xb1, 0xee, 0x5a, 0xa2, 0xb0, 0x0c, 0x25, 0x39, 0x61, 0x9b,
-	0x88, 0x5f, 0x61, 0xbf, 0x18, 0xf1, 0x13, 0xe3, 0x14, 0x3f, 0x02, 0x4d, 0xfc, 0xaa, 0x38, 0x60,
-	0x49, 0x8f, 0x04, 0x42, 0x24, 0x5e, 0x4e, 0xa6, 0xf1, 0x9f, 0x64, 0xcc, 0x5f, 0x08, 0x1e, 0x6c,
-	0x2c, 0xea, 0xa6, 0xe1, 0xec, 0x6b, 0x4c, 0x51, 0xa1, 0x8d, 0x72, 0xe8, 0x22, 0x83, 0x6c, 0x16,
-	0x0a, 0x9b, 0xc9, 0xba, 0xd7, 0x55, 0x9b, 0xb3, 0x83, 0xcc, 0xe6, 0x7c, 0x2c, 0x08, 0x9b, 0x93,
-	0x9c, 0xb0, 0x8d, 0xcd, 0xa3, 0x82, 0x65, 0x18, 0x83, 0x36, 0xa6, 0xaa, 0x60, 0x9d, 0xc8, 0xb5,
-	0xc0, 0x26, 0xd4, 0x4b, 0xed, 0xd4, 0x89, 0x5c, 0x9b, 0x43, 0x80, 0x33, 0x37, 0x5c, 0xb2, 0x48,
-	0xaa, 0x8e, 0xe0, 0xce, 0x07, 0x7f, 0x16, 0x7d, 0x0f, 0x39, 0x73, 0x0a, 0xf2, 0x32, 0x68, 0x5e,
-	0xc2, 0x61, 0xb1, 0xb4, 0x82, 0x7e, 0xbb, 0xda, 0xfa, 0xc5, 0xd8, 0xaa, 0xb8, 0x3d, 0xe9, 0x74,
-	0x0e, 0x93, 0x02, 0xc5, 0x7c, 0x06, 0xad, 0x53, 0xc7, 0x89, 0x58, 0x1c, 0xe3, 0x6e, 0xb6, 0x54,
-	0x39, 0xae, 0xb7, 0xc3, 0xdf, 0x0d, 0xf5, 0x5e, 0xf0, 0x00, 0xb4, 0x09, 0xa3, 0x1e, 0x4e, 0xbb,
-	0xb7, 0xb1, 0x1b, 0x46, 0xe9, 0x35, 0xe1, 0x63, 0x68, 0x5e, 0xf8, 0xb1, 0xd0, 0x94, 0x70, 0xa3,
-	0x52, 0x04, 0xb6, 0xa0, 0x49, 0x98, 0xe4, 0x1d, 0xca, 0xbb, 0x6b, 0x8f, 0xb6, 0x72, 0xef, 0x6b,
-	0x68, 0xd9, 0x09, 0x2f, 0x24, 0xb3, 0x71, 0x66, 0xca, 0xa2, 0x1e, 0xc2, 0x2f, 0xa1, 0x9d, 0xa6,
-	0x73, 0xce, 0x78, 0x2d, 0xa3, 0xd2, 0x35, 0x03, 0x84, 0x5f, 0x80, 0x9e, 0x92, 0xc7, 0xcc, 0x63,
-	0x9c, 0x55, 0xf8, 0xba, 0xe4, 0xaf, 0x3d, 0xfa, 0x02, 0xed, 0x33, 0x8f, 0xd1, 0xb4, 0x69, 0x27,
-	0xb0, 0x6b, 0x27, 0x1c, 0x57, 0x6e, 0xac, 0xd6, 0xdc, 0x43, 0x82, 0x28, 0x12, 0xa9, 0x1c, 0xd4,
-	0x53, 0x19, 0xfe, 0x44, 0x00, 0x6a, 0x64, 0xdc, 0xc0, 0xc7, 0x6f, 0xa1, 0xa5, 0x76, 0xb5, 0x20,
-	0xf7, 0x6b, 0xad, 0xc9, 0xdb, 0xdd, 0x43, 0x42, 0x39, 0x66, 0xa9, 0xf2, 0x5f, 0xcc, 0x0d, 0x29,
-	0xfc, 0x41, 0xd0, 0x9a, 0xf0, 0x20, 0xa2, 0x0b, 0x86, 0x4f, 0x40, 0xb3, 0x93, 0x78, 0x89, 0xab,
-	0xb3, 0x55, 0x36, 0x45, 0x16, 0xa8, 0xd9, 0x89, 0x27, 0x9a, 0x5f, 0xc0, 0x8d, 0xaa, 0x6c, 0x80,
-	0xf0, 0x31, 0x68, 0x13, 0x4e, 0x79, 0x85, 0xb8, 0x6f, 0xa9, 0x8f, 0xb9, 0x38, 0xfb, 0xe8, 0xcf,
-	0x03, 0x7c, 0x04, 0xcd, 0xac, 0x1b, 0x45, 0x66, 0xb9, 0x1b, 0x3f, 0xe0, 0xf6, 0x38, 0x98, 0x25,
-	0x2b, 0xe6, 0x73, 0x3c, 0x12, 0xeb, 0x4b, 0xdf, 0x0b, 0xa8, 0x53, 0xe9, 0xe0, 0x41, 0x6d, 0x70,
-	0xc4, 0x97, 0xcb, 0xdc, 0x19, 0x20, 0xfc, 0x0e, 0x9a, 0x17, 0xa1, 0x94, 0x3c, 0xbd, 0x7e, 0xba,
-	0x94, 0xa0, 0x3c, 0x64, 0xe6, 0x4e, 0x0f, 0xbd, 0x7f, 0xfc, 0xf9, 0xe1, 0xc2, 0xe5, 0xcb, 0x64,
-	0x6a, 0xcd, 0x82, 0x55, 0x7f, 0x15, 0xf8, 0xf4, 0xaa, 0xbf, 0x0c, 0x68, 0xe4, 0xf4, 0xbf, 0xbd,
-	0xe9, 0xd3, 0xd0, 0x9d, 0x36, 0xe5, 0xbf, 0xd3, 0xe8, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xd0,
-	0xb9, 0xe4, 0x03, 0xe7, 0x06, 0x00, 0x00,
+	// 586 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0x5f, 0x8b, 0xd3, 0x4e,
+	0x14, 0x25, 0xdb, 0xfc, 0x5a, 0x72, 0xdb, 0x9f, 0xab, 0x03, 0x2e, 0x25, 0x22, 0xbb, 0xc4, 0x45,
+	0x2a, 0x2e, 0x69, 0x89, 0x88, 0xb0, 0x4f, 0xee, 0x6e, 0x65, 0xf5, 0x45, 0xca, 0x54, 0x41, 0x7c,
+	0x9b, 0x36, 0xb7, 0x6d, 0x20, 0x4d, 0xc2, 0x64, 0xaa, 0xdb, 0x77, 0xbf, 0x8b, 0x4f, 0x7e, 0x47,
+	0x99, 0xc9, 0x34, 0x7f, 0xa6, 0x45, 0xe8, 0x53, 0x66, 0xce, 0x3d, 0x73, 0xee, 0xb9, 0x77, 0xee,
+	0x04, 0x1c, 0x96, 0x45, 0x7e, 0xc6, 0x53, 0x91, 0x92, 0x16, 0xcb, 0x22, 0xb7, 0xbb, 0xe4, 0x2c,
+	0x11, 0x05, 0xe2, 0x9e, 0x72, 0x5c, 0x20, 0xc7, 0x64, 0x8e, 0x1a, 0xe8, 0xe5, 0x22, 0xe5, 0x98,
+	0x17, 0x3b, 0x6f, 0x06, 0x4f, 0xee, 0x25, 0xfb, 0x26, 0x09, 0xd5, 0x77, 0x9a, 0xe1, 0x9c, 0x78,
+	0xf0, 0x9f, 0xda, 0xf4, 0xad, 0x0b, 0x6b, 0xd0, 0x0d, 0x7a, 0x7e, 0x21, 0xa8, 0x30, 0x5a, 0x84,
+	0xc8, 0x2b, 0x70, 0xca, 0x03, 0xfd, 0x13, 0xc5, 0xeb, 0x6a, 0x9e, 0x84, 0x68, 0x15, 0xf5, 0x32,
+	0x78, 0x3a, 0x89, 0x59, 0x94, 0x08, 0x7c, 0x68, 0xe6, 0xb9, 0x02, 0xa7, 0x0c, 0xe8, 0x5c, 0x8f,
+	0x7c, 0x59, 0x4c, 0x89, 0xd2, 0x8a, 0x70, 0x64, 0x46, 0xba, 0x2b, 0xdb, 0xcc, 0x58, 0x06, 0xca,
+	0x8c, 0x55, 0x87, 0x28, 0x2e, 0x68, 0x45, 0x38, 0x26, 0xe3, 0x37, 0x68, 0x7f, 0x44, 0x16, 0x22,
+	0x27, 0x04, 0xec, 0x29, 0x8b, 0x8b, 0x7a, 0x7a, 0x54, 0xad, 0x25, 0xf6, 0x99, 0xad, 0x51, 0x69,
+	0x38, 0x54, 0xad, 0x25, 0xf6, 0x65, 0x9b, 0x61, 0xbf, 0x55, 0x60, 0x72, 0xad, 0x30, 0xb6, 0xcc,
+	0xfb, 0xf6, 0x45, 0x4b, 0x61, 0x6c, 0x99, 0x7b, 0xef, 0x6b, 0x4d, 0x92, 0x84, 0xdb, 0x34, 0xdc,
+	0xee, 0xc4, 0xe5, 0x9a, 0x9c, 0x83, 0x2d, 0x53, 0x2b, 0x21, 0x69, 0x50, 0x36, 0xb0, 0xf0, 0x42,
+	0x55, 0xc0, 0x0b, 0x00, 0xee, 0xa2, 0x6c, 0x85, 0x5c, 0x49, 0x5c, 0xc2, 0xff, 0x1f, 0x92, 0x39,
+	0xdf, 0x66, 0x02, 0xc3, 0x31, 0x13, 0x4c, 0x6b, 0x35, 0x41, 0xef, 0x27, 0x9c, 0xd5, 0x3b, 0x58,
+	0x3b, 0x7f, 0x5c, 0x0b, 0x87, 0xf5, 0xdc, 0xba, 0x87, 0xa7, 0xca, 0x62, 0x05, 0xd3, 0x1a, 0xc5,
+	0x7b, 0x01, 0x9d, 0x9b, 0x30, 0xe4, 0x98, 0xe7, 0xa4, 0x5f, 0x2e, 0xb5, 0xc7, 0xdd, 0x36, 0xf8,
+	0x7d, 0xa2, 0x27, 0x94, 0x04, 0x60, 0x4f, 0x91, 0xc5, 0xc4, 0x55, 0x9a, 0x07, 0x2f, 0xdd, 0x6d,
+	0xcc, 0xef, 0xc0, 0x22, 0x03, 0x68, 0x7f, 0x4d, 0x72, 0x79, 0xaa, 0x11, 0x71, 0x8d, 0x32, 0x46,
+	0x16, 0xf1, 0xa1, 0x4d, 0x51, 0x31, 0xcf, 0x94, 0xfe, 0xde, 0x53, 0x69, 0x6a, 0x93, 0xb7, 0xd0,
+	0x99, 0x6c, 0x44, 0xcd, 0xd0, 0xc1, 0xb9, 0xdf, 0x33, 0xf4, 0x1a, 0x9c, 0xc2, 0xd0, 0x3d, 0x8a,
+	0x3d, 0x4f, 0x0d, 0x99, 0x91, 0x45, 0xae, 0xa0, 0x57, 0x90, 0xc7, 0x18, 0xa3, 0x40, 0x83, 0xdf,
+	0x53, 0x7c, 0xdd, 0xa7, 0x91, 0x15, 0x30, 0x70, 0xee, 0x62, 0x64, 0x5c, 0xbf, 0xa0, 0xd6, 0x64,
+	0x23, 0x88, 0xa1, 0x69, 0xd6, 0x3d, 0xb0, 0x46, 0x96, 0xa4, 0x4a, 0x33, 0x46, 0xc8, 0xb4, 0x23,
+	0xa9, 0xc1, 0x2f, 0x0b, 0x40, 0x0f, 0x4f, 0x94, 0x26, 0xe4, 0x1a, 0x3a, 0x7a, 0xb7, 0x97, 0xe8,
+	0xd9, 0xde, 0x25, 0x55, 0x17, 0xaf, 0xb2, 0x5e, 0x43, 0x67, 0x8c, 0xc5, 0xd9, 0x7f, 0x71, 0x0f,
+	0xda, 0xf8, 0x63, 0x41, 0x67, 0x2a, 0x52, 0xce, 0x96, 0xf2, 0xe1, 0xda, 0x93, 0x4d, 0xbe, 0x22,
+	0xe6, 0xa4, 0x35, 0xdb, 0xa3, 0x0b, 0xb5, 0x27, 0x9b, 0x58, 0x8e, 0x42, 0x2d, 0xe2, 0x9a, 0x07,
+	0x15, 0xf5, 0x25, 0xd8, 0x53, 0xc1, 0x84, 0x41, 0x7d, 0xec, 0xeb, 0x1f, 0xaa, 0x8c, 0x7d, 0x4a,
+	0x16, 0x29, 0xb9, 0x84, 0x76, 0x79, 0x37, 0x75, 0x66, 0x63, 0x77, 0x7b, 0xfe, 0xfd, 0xf9, 0x32,
+	0x12, 0xab, 0xcd, 0xcc, 0x9f, 0xa7, 0xeb, 0xe1, 0x3a, 0x4d, 0xd8, 0xc3, 0x70, 0x95, 0x32, 0x1e,
+	0x0e, 0x7f, 0xbc, 0x1b, 0xb2, 0x2c, 0x9a, 0xb5, 0xd5, 0x1f, 0xfa, 0xcd, 0xdf, 0x00, 0x00, 0x00,
+	0xff, 0xff, 0x74, 0xe2, 0x2b, 0x04, 0xdf, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -500,9 +465,9 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type GrantClient interface {
 	// Seal a Reference to create a Grant
-	Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error)
+	Seal(ctx context.Context, opts ...grpc.CallOption) (Grant_SealClient, error)
 	// Unseal a Grant to recover the Reference
-	Unseal(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*reference.Ref, error)
+	Unseal(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Grant_UnsealClient, error)
 	// Convert one grant to another grant to re-share with another party or just
 	// to change grant type
 	Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error)
@@ -511,7 +476,7 @@ type GrantClient interface {
 	// Unseal a Grant and follow the Reference to return a Plaintext
 	UnsealGet(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Grant_UnsealGetClient, error)
 	// Unseal a Grant and follow the Reference to delete the Plaintext
-	UnsealDelete(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*Address, error)
+	UnsealDelete(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Grant_UnsealDeleteClient, error)
 }
 
 type grantClient struct {
@@ -522,22 +487,70 @@ func NewGrantClient(cc *grpc.ClientConn) GrantClient {
 	return &grantClient{cc}
 }
 
-func (c *grantClient) Seal(ctx context.Context, in *ReferenceAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error) {
-	out := new(grant.Grant)
-	err := c.cc.Invoke(ctx, "/api.Grant/Seal", in, out, opts...)
+func (c *grantClient) Seal(ctx context.Context, opts ...grpc.CallOption) (Grant_SealClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Grant_serviceDesc.Streams[0], "/api.Grant/Seal", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grantSealClient{stream}
+	return x, nil
 }
 
-func (c *grantClient) Unseal(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*reference.Ref, error) {
-	out := new(reference.Ref)
-	err := c.cc.Invoke(ctx, "/api.Grant/Unseal", in, out, opts...)
+type Grant_SealClient interface {
+	Send(*ReferenceAndGrantSpec) error
+	CloseAndRecv() (*grant.Grant, error)
+	grpc.ClientStream
+}
+
+type grantSealClient struct {
+	grpc.ClientStream
+}
+
+func (x *grantSealClient) Send(m *ReferenceAndGrantSpec) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *grantSealClient) CloseAndRecv() (*grant.Grant, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(grant.Grant)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *grantClient) Unseal(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Grant_UnsealClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Grant_serviceDesc.Streams[1], "/api.Grant/Unseal", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grantUnsealClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Grant_UnsealClient interface {
+	Recv() (*reference.Ref, error)
+	grpc.ClientStream
+}
+
+type grantUnsealClient struct {
+	grpc.ClientStream
+}
+
+func (x *grantUnsealClient) Recv() (*reference.Ref, error) {
+	m := new(reference.Ref)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *grantClient) Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error) {
@@ -550,7 +563,7 @@ func (c *grantClient) Reseal(ctx context.Context, in *GrantAndGrantSpec, opts ..
 }
 
 func (c *grantClient) PutSeal(ctx context.Context, opts ...grpc.CallOption) (Grant_PutSealClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Grant_serviceDesc.Streams[0], "/api.Grant/PutSeal", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Grant_serviceDesc.Streams[2], "/api.Grant/PutSeal", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -584,7 +597,7 @@ func (x *grantPutSealClient) CloseAndRecv() (*grant.Grant, error) {
 }
 
 func (c *grantClient) UnsealGet(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Grant_UnsealGetClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Grant_serviceDesc.Streams[1], "/api.Grant/UnsealGet", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Grant_serviceDesc.Streams[3], "/api.Grant/UnsealGet", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -615,21 +628,44 @@ func (x *grantUnsealGetClient) Recv() (*Plaintext, error) {
 	return m, nil
 }
 
-func (c *grantClient) UnsealDelete(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (*Address, error) {
-	out := new(Address)
-	err := c.cc.Invoke(ctx, "/api.Grant/UnsealDelete", in, out, opts...)
+func (c *grantClient) UnsealDelete(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Grant_UnsealDeleteClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Grant_serviceDesc.Streams[4], "/api.Grant/UnsealDelete", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grantUnsealDeleteClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Grant_UnsealDeleteClient interface {
+	Recv() (*Address, error)
+	grpc.ClientStream
+}
+
+type grantUnsealDeleteClient struct {
+	grpc.ClientStream
+}
+
+func (x *grantUnsealDeleteClient) Recv() (*Address, error) {
+	m := new(Address)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // GrantServer is the server API for Grant service.
 type GrantServer interface {
 	// Seal a Reference to create a Grant
-	Seal(context.Context, *ReferenceAndGrantSpec) (*grant.Grant, error)
+	Seal(Grant_SealServer) error
 	// Unseal a Grant to recover the Reference
-	Unseal(context.Context, *grant.Grant) (*reference.Ref, error)
+	Unseal(*grant.Grant, Grant_UnsealServer) error
 	// Convert one grant to another grant to re-share with another party or just
 	// to change grant type
 	Reseal(context.Context, *GrantAndGrantSpec) (*grant.Grant, error)
@@ -638,18 +674,18 @@ type GrantServer interface {
 	// Unseal a Grant and follow the Reference to return a Plaintext
 	UnsealGet(*grant.Grant, Grant_UnsealGetServer) error
 	// Unseal a Grant and follow the Reference to delete the Plaintext
-	UnsealDelete(context.Context, *grant.Grant) (*Address, error)
+	UnsealDelete(*grant.Grant, Grant_UnsealDeleteServer) error
 }
 
 // UnimplementedGrantServer can be embedded to have forward compatible implementations.
 type UnimplementedGrantServer struct {
 }
 
-func (*UnimplementedGrantServer) Seal(ctx context.Context, req *ReferenceAndGrantSpec) (*grant.Grant, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Seal not implemented")
+func (*UnimplementedGrantServer) Seal(srv Grant_SealServer) error {
+	return status.Errorf(codes.Unimplemented, "method Seal not implemented")
 }
-func (*UnimplementedGrantServer) Unseal(ctx context.Context, req *grant.Grant) (*reference.Ref, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Unseal not implemented")
+func (*UnimplementedGrantServer) Unseal(req *grant.Grant, srv Grant_UnsealServer) error {
+	return status.Errorf(codes.Unimplemented, "method Unseal not implemented")
 }
 func (*UnimplementedGrantServer) Reseal(ctx context.Context, req *GrantAndGrantSpec) (*grant.Grant, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Reseal not implemented")
@@ -660,48 +696,59 @@ func (*UnimplementedGrantServer) PutSeal(srv Grant_PutSealServer) error {
 func (*UnimplementedGrantServer) UnsealGet(req *grant.Grant, srv Grant_UnsealGetServer) error {
 	return status.Errorf(codes.Unimplemented, "method UnsealGet not implemented")
 }
-func (*UnimplementedGrantServer) UnsealDelete(ctx context.Context, req *grant.Grant) (*Address, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnsealDelete not implemented")
+func (*UnimplementedGrantServer) UnsealDelete(req *grant.Grant, srv Grant_UnsealDeleteServer) error {
+	return status.Errorf(codes.Unimplemented, "method UnsealDelete not implemented")
 }
 
 func RegisterGrantServer(s *grpc.Server, srv GrantServer) {
 	s.RegisterService(&_Grant_serviceDesc, srv)
 }
 
-func _Grant_Seal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReferenceAndGrantSpec)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GrantServer).Seal(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Grant/Seal",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantServer).Seal(ctx, req.(*ReferenceAndGrantSpec))
-	}
-	return interceptor(ctx, in, info, handler)
+func _Grant_Seal_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GrantServer).Seal(&grantSealServer{stream})
 }
 
-func _Grant_Unseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(grant.Grant)
-	if err := dec(in); err != nil {
+type Grant_SealServer interface {
+	SendAndClose(*grant.Grant) error
+	Recv() (*ReferenceAndGrantSpec, error)
+	grpc.ServerStream
+}
+
+type grantSealServer struct {
+	grpc.ServerStream
+}
+
+func (x *grantSealServer) SendAndClose(m *grant.Grant) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *grantSealServer) Recv() (*ReferenceAndGrantSpec, error) {
+	m := new(ReferenceAndGrantSpec)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(GrantServer).Unseal(ctx, in)
+	return m, nil
+}
+
+func _Grant_Unseal_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(grant.Grant)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Grant/Unseal",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantServer).Unseal(ctx, req.(*grant.Grant))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(GrantServer).Unseal(m, &grantUnsealServer{stream})
+}
+
+type Grant_UnsealServer interface {
+	Send(*reference.Ref) error
+	grpc.ServerStream
+}
+
+type grantUnsealServer struct {
+	grpc.ServerStream
+}
+
+func (x *grantUnsealServer) Send(m *reference.Ref) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Grant_Reseal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -769,22 +816,25 @@ func (x *grantUnsealGetServer) Send(m *Plaintext) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Grant_UnsealDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(grant.Grant)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Grant_UnsealDelete_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(grant.Grant)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(GrantServer).UnsealDelete(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Grant/UnsealDelete",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrantServer).UnsealDelete(ctx, req.(*grant.Grant))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(GrantServer).UnsealDelete(m, &grantUnsealDeleteServer{stream})
+}
+
+type Grant_UnsealDeleteServer interface {
+	Send(*Address) error
+	grpc.ServerStream
+}
+
+type grantUnsealDeleteServer struct {
+	grpc.ServerStream
+}
+
+func (x *grantUnsealDeleteServer) Send(m *Address) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 var _Grant_serviceDesc = grpc.ServiceDesc{
@@ -792,23 +842,21 @@ var _Grant_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*GrantServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Seal",
-			Handler:    _Grant_Seal_Handler,
-		},
-		{
-			MethodName: "Unseal",
-			Handler:    _Grant_Unseal_Handler,
-		},
-		{
 			MethodName: "Reseal",
 			Handler:    _Grant_Reseal_Handler,
 		},
-		{
-			MethodName: "UnsealDelete",
-			Handler:    _Grant_UnsealDelete_Handler,
-		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Seal",
+			Handler:       _Grant_Seal_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "Unseal",
+			Handler:       _Grant_Unseal_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "PutSeal",
 			Handler:       _Grant_PutSeal_Handler,
@@ -817,6 +865,11 @@ var _Grant_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "UnsealGet",
 			Handler:       _Grant_UnsealGet_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "UnsealDelete",
+			Handler:       _Grant_UnsealDelete_Handler,
 			ServerStreams: true,
 		},
 	},
@@ -832,7 +885,7 @@ type CleartextClient interface {
 	Put(ctx context.Context, opts ...grpc.CallOption) (Cleartext_PutClient, error)
 	// Provide a secret reference to an encrypted blob and get the plaintext
 	// data back.
-	Get(ctx context.Context, in *reference.Ref, opts ...grpc.CallOption) (Cleartext_GetClient, error)
+	Get(ctx context.Context, opts ...grpc.CallOption) (Cleartext_GetClient, error)
 }
 
 type cleartextClient struct {
@@ -854,7 +907,7 @@ func (c *cleartextClient) Put(ctx context.Context, opts ...grpc.CallOption) (Cle
 
 type Cleartext_PutClient interface {
 	Send(*Plaintext) error
-	CloseAndRecv() (*reference.Ref, error)
+	Recv() (*reference.Ref, error)
 	grpc.ClientStream
 }
 
@@ -866,10 +919,7 @@ func (x *cleartextPutClient) Send(m *Plaintext) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *cleartextPutClient) CloseAndRecv() (*reference.Ref, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
+func (x *cleartextPutClient) Recv() (*reference.Ref, error) {
 	m := new(reference.Ref)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -877,28 +927,27 @@ func (x *cleartextPutClient) CloseAndRecv() (*reference.Ref, error) {
 	return m, nil
 }
 
-func (c *cleartextClient) Get(ctx context.Context, in *reference.Ref, opts ...grpc.CallOption) (Cleartext_GetClient, error) {
+func (c *cleartextClient) Get(ctx context.Context, opts ...grpc.CallOption) (Cleartext_GetClient, error) {
 	stream, err := c.cc.NewStream(ctx, &_Cleartext_serviceDesc.Streams[1], "/api.Cleartext/Get", opts...)
 	if err != nil {
 		return nil, err
 	}
 	x := &cleartextGetClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
 	return x, nil
 }
 
 type Cleartext_GetClient interface {
+	Send(*reference.Ref) error
 	Recv() (*Plaintext, error)
 	grpc.ClientStream
 }
 
 type cleartextGetClient struct {
 	grpc.ClientStream
+}
+
+func (x *cleartextGetClient) Send(m *reference.Ref) error {
+	return x.ClientStream.SendMsg(m)
 }
 
 func (x *cleartextGetClient) Recv() (*Plaintext, error) {
@@ -916,7 +965,7 @@ type CleartextServer interface {
 	Put(Cleartext_PutServer) error
 	// Provide a secret reference to an encrypted blob and get the plaintext
 	// data back.
-	Get(*reference.Ref, Cleartext_GetServer) error
+	Get(Cleartext_GetServer) error
 }
 
 // UnimplementedCleartextServer can be embedded to have forward compatible implementations.
@@ -926,7 +975,7 @@ type UnimplementedCleartextServer struct {
 func (*UnimplementedCleartextServer) Put(srv Cleartext_PutServer) error {
 	return status.Errorf(codes.Unimplemented, "method Put not implemented")
 }
-func (*UnimplementedCleartextServer) Get(req *reference.Ref, srv Cleartext_GetServer) error {
+func (*UnimplementedCleartextServer) Get(srv Cleartext_GetServer) error {
 	return status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 
@@ -939,7 +988,7 @@ func _Cleartext_Put_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type Cleartext_PutServer interface {
-	SendAndClose(*reference.Ref) error
+	Send(*reference.Ref) error
 	Recv() (*Plaintext, error)
 	grpc.ServerStream
 }
@@ -948,7 +997,7 @@ type cleartextPutServer struct {
 	grpc.ServerStream
 }
 
-func (x *cleartextPutServer) SendAndClose(m *reference.Ref) error {
+func (x *cleartextPutServer) Send(m *reference.Ref) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -961,15 +1010,12 @@ func (x *cleartextPutServer) Recv() (*Plaintext, error) {
 }
 
 func _Cleartext_Get_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(reference.Ref)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(CleartextServer).Get(m, &cleartextGetServer{stream})
+	return srv.(CleartextServer).Get(&cleartextGetServer{stream})
 }
 
 type Cleartext_GetServer interface {
 	Send(*Plaintext) error
+	Recv() (*reference.Ref, error)
 	grpc.ServerStream
 }
 
@@ -981,6 +1027,14 @@ func (x *cleartextGetServer) Send(m *Plaintext) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func (x *cleartextGetServer) Recv() (*reference.Ref, error) {
+	m := new(reference.Ref)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _Cleartext_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.Cleartext",
 	HandlerType: (*CleartextServer)(nil),
@@ -989,12 +1043,14 @@ var _Cleartext_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Put",
 			Handler:       _Cleartext_Put_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 		{
 			StreamName:    "Get",
 			Handler:       _Cleartext_Get_Handler,
 			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "api.proto",
@@ -1009,7 +1065,7 @@ type EncryptionClient interface {
 	Encrypt(ctx context.Context, opts ...grpc.CallOption) (Encryption_EncryptClient, error)
 	// Decrypt the provided data by supplying it alongside its secret
 	// reference. The address is not used for decryption and may be omitted.
-	Decrypt(ctx context.Context, in *ReferenceAndCiphertext, opts ...grpc.CallOption) (Encryption_DecryptClient, error)
+	Decrypt(ctx context.Context, opts ...grpc.CallOption) (Encryption_DecryptClient, error)
 }
 
 type encryptionClient struct {
@@ -1031,7 +1087,7 @@ func (c *encryptionClient) Encrypt(ctx context.Context, opts ...grpc.CallOption)
 
 type Encryption_EncryptClient interface {
 	Send(*Plaintext) error
-	CloseAndRecv() (*ReferenceAndCiphertext, error)
+	Recv() (*ReferenceAndCiphertext, error)
 	grpc.ClientStream
 }
 
@@ -1043,10 +1099,7 @@ func (x *encryptionEncryptClient) Send(m *Plaintext) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *encryptionEncryptClient) CloseAndRecv() (*ReferenceAndCiphertext, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
+func (x *encryptionEncryptClient) Recv() (*ReferenceAndCiphertext, error) {
 	m := new(ReferenceAndCiphertext)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -1054,28 +1107,27 @@ func (x *encryptionEncryptClient) CloseAndRecv() (*ReferenceAndCiphertext, error
 	return m, nil
 }
 
-func (c *encryptionClient) Decrypt(ctx context.Context, in *ReferenceAndCiphertext, opts ...grpc.CallOption) (Encryption_DecryptClient, error) {
+func (c *encryptionClient) Decrypt(ctx context.Context, opts ...grpc.CallOption) (Encryption_DecryptClient, error) {
 	stream, err := c.cc.NewStream(ctx, &_Encryption_serviceDesc.Streams[1], "/api.Encryption/Decrypt", opts...)
 	if err != nil {
 		return nil, err
 	}
 	x := &encryptionDecryptClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
 	return x, nil
 }
 
 type Encryption_DecryptClient interface {
+	Send(*ReferenceAndCiphertext) error
 	Recv() (*Plaintext, error)
 	grpc.ClientStream
 }
 
 type encryptionDecryptClient struct {
 	grpc.ClientStream
+}
+
+func (x *encryptionDecryptClient) Send(m *ReferenceAndCiphertext) error {
+	return x.ClientStream.SendMsg(m)
 }
 
 func (x *encryptionDecryptClient) Recv() (*Plaintext, error) {
@@ -1093,7 +1145,7 @@ type EncryptionServer interface {
 	Encrypt(Encryption_EncryptServer) error
 	// Decrypt the provided data by supplying it alongside its secret
 	// reference. The address is not used for decryption and may be omitted.
-	Decrypt(*ReferenceAndCiphertext, Encryption_DecryptServer) error
+	Decrypt(Encryption_DecryptServer) error
 }
 
 // UnimplementedEncryptionServer can be embedded to have forward compatible implementations.
@@ -1103,7 +1155,7 @@ type UnimplementedEncryptionServer struct {
 func (*UnimplementedEncryptionServer) Encrypt(srv Encryption_EncryptServer) error {
 	return status.Errorf(codes.Unimplemented, "method Encrypt not implemented")
 }
-func (*UnimplementedEncryptionServer) Decrypt(req *ReferenceAndCiphertext, srv Encryption_DecryptServer) error {
+func (*UnimplementedEncryptionServer) Decrypt(srv Encryption_DecryptServer) error {
 	return status.Errorf(codes.Unimplemented, "method Decrypt not implemented")
 }
 
@@ -1116,7 +1168,7 @@ func _Encryption_Encrypt_Handler(srv interface{}, stream grpc.ServerStream) erro
 }
 
 type Encryption_EncryptServer interface {
-	SendAndClose(*ReferenceAndCiphertext) error
+	Send(*ReferenceAndCiphertext) error
 	Recv() (*Plaintext, error)
 	grpc.ServerStream
 }
@@ -1125,7 +1177,7 @@ type encryptionEncryptServer struct {
 	grpc.ServerStream
 }
 
-func (x *encryptionEncryptServer) SendAndClose(m *ReferenceAndCiphertext) error {
+func (x *encryptionEncryptServer) Send(m *ReferenceAndCiphertext) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -1138,15 +1190,12 @@ func (x *encryptionEncryptServer) Recv() (*Plaintext, error) {
 }
 
 func _Encryption_Decrypt_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ReferenceAndCiphertext)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(EncryptionServer).Decrypt(m, &encryptionDecryptServer{stream})
+	return srv.(EncryptionServer).Decrypt(&encryptionDecryptServer{stream})
 }
 
 type Encryption_DecryptServer interface {
 	Send(*Plaintext) error
+	Recv() (*ReferenceAndCiphertext, error)
 	grpc.ServerStream
 }
 
@@ -1158,6 +1207,14 @@ func (x *encryptionDecryptServer) Send(m *Plaintext) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func (x *encryptionDecryptServer) Recv() (*ReferenceAndCiphertext, error) {
+	m := new(ReferenceAndCiphertext)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _Encryption_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.Encryption",
 	HandlerType: (*EncryptionServer)(nil),
@@ -1166,12 +1223,14 @@ var _Encryption_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Encrypt",
 			Handler:       _Encryption_Encrypt_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 		{
 			StreamName:    "Decrypt",
 			Handler:       _Encryption_Decrypt_Handler,
 			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "api.proto",
@@ -1184,7 +1243,7 @@ type StorageClient interface {
 	// Insert the (presumably) encrypted data provided and get the its address.
 	Push(ctx context.Context, opts ...grpc.CallOption) (Storage_PushClient, error)
 	// Retrieve the (presumably) encrypted data stored at address.
-	Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (Storage_PullClient, error)
+	Pull(ctx context.Context, opts ...grpc.CallOption) (Storage_PullClient, error)
 	// Get some information about the encrypted blob stored at an address,
 	// including whether it exists.
 	Stat(ctx context.Context, in *Address, opts ...grpc.CallOption) (*stores.StatInfo, error)
@@ -1211,7 +1270,7 @@ func (c *storageClient) Push(ctx context.Context, opts ...grpc.CallOption) (Stor
 
 type Storage_PushClient interface {
 	Send(*Ciphertext) error
-	CloseAndRecv() (*Address, error)
+	Recv() (*Address, error)
 	grpc.ClientStream
 }
 
@@ -1223,10 +1282,7 @@ func (x *storagePushClient) Send(m *Ciphertext) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *storagePushClient) CloseAndRecv() (*Address, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
+func (x *storagePushClient) Recv() (*Address, error) {
 	m := new(Address)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -1234,28 +1290,27 @@ func (x *storagePushClient) CloseAndRecv() (*Address, error) {
 	return m, nil
 }
 
-func (c *storageClient) Pull(ctx context.Context, in *Address, opts ...grpc.CallOption) (Storage_PullClient, error) {
+func (c *storageClient) Pull(ctx context.Context, opts ...grpc.CallOption) (Storage_PullClient, error) {
 	stream, err := c.cc.NewStream(ctx, &_Storage_serviceDesc.Streams[1], "/api.Storage/Pull", opts...)
 	if err != nil {
 		return nil, err
 	}
 	x := &storagePullClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
 	return x, nil
 }
 
 type Storage_PullClient interface {
+	Send(*Address) error
 	Recv() (*Ciphertext, error)
 	grpc.ClientStream
 }
 
 type storagePullClient struct {
 	grpc.ClientStream
+}
+
+func (x *storagePullClient) Send(m *Address) error {
+	return x.ClientStream.SendMsg(m)
 }
 
 func (x *storagePullClient) Recv() (*Ciphertext, error) {
@@ -1289,7 +1344,7 @@ type StorageServer interface {
 	// Insert the (presumably) encrypted data provided and get the its address.
 	Push(Storage_PushServer) error
 	// Retrieve the (presumably) encrypted data stored at address.
-	Pull(*Address, Storage_PullServer) error
+	Pull(Storage_PullServer) error
 	// Get some information about the encrypted blob stored at an address,
 	// including whether it exists.
 	Stat(context.Context, *Address) (*stores.StatInfo, error)
@@ -1304,7 +1359,7 @@ type UnimplementedStorageServer struct {
 func (*UnimplementedStorageServer) Push(srv Storage_PushServer) error {
 	return status.Errorf(codes.Unimplemented, "method Push not implemented")
 }
-func (*UnimplementedStorageServer) Pull(req *Address, srv Storage_PullServer) error {
+func (*UnimplementedStorageServer) Pull(srv Storage_PullServer) error {
 	return status.Errorf(codes.Unimplemented, "method Pull not implemented")
 }
 func (*UnimplementedStorageServer) Stat(ctx context.Context, req *Address) (*stores.StatInfo, error) {
@@ -1323,7 +1378,7 @@ func _Storage_Push_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type Storage_PushServer interface {
-	SendAndClose(*Address) error
+	Send(*Address) error
 	Recv() (*Ciphertext, error)
 	grpc.ServerStream
 }
@@ -1332,7 +1387,7 @@ type storagePushServer struct {
 	grpc.ServerStream
 }
 
-func (x *storagePushServer) SendAndClose(m *Address) error {
+func (x *storagePushServer) Send(m *Address) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -1345,15 +1400,12 @@ func (x *storagePushServer) Recv() (*Ciphertext, error) {
 }
 
 func _Storage_Pull_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Address)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(StorageServer).Pull(m, &storagePullServer{stream})
+	return srv.(StorageServer).Pull(&storagePullServer{stream})
 }
 
 type Storage_PullServer interface {
 	Send(*Ciphertext) error
+	Recv() (*Address, error)
 	grpc.ServerStream
 }
 
@@ -1363,6 +1415,14 @@ type storagePullServer struct {
 
 func (x *storagePullServer) Send(m *Ciphertext) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func (x *storagePullServer) Recv() (*Address, error) {
+	m := new(Address)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func _Storage_Stat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1418,184 +1478,13 @@ var _Storage_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Push",
 			Handler:       _Storage_Push_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 		{
 			StreamName:    "Pull",
 			Handler:       _Storage_Pull_Handler,
 			ServerStreams: true,
-		},
-	},
-	Metadata: "api.proto",
-}
-
-// DocumentClient is the client API for Document service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type DocumentClient interface {
-	// GET a document from Hoard
-	Download(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Document_DownloadClient, error)
-	// POST a document into Hoard
-	Upload(ctx context.Context, opts ...grpc.CallOption) (Document_UploadClient, error)
-}
-
-type documentClient struct {
-	cc *grpc.ClientConn
-}
-
-func NewDocumentClient(cc *grpc.ClientConn) DocumentClient {
-	return &documentClient{cc}
-}
-
-func (c *documentClient) Download(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (Document_DownloadClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Document_serviceDesc.Streams[0], "/api.Document/Download", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &documentDownloadClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Document_DownloadClient interface {
-	Recv() (*PlaintextAndMeta, error)
-	grpc.ClientStream
-}
-
-type documentDownloadClient struct {
-	grpc.ClientStream
-}
-
-func (x *documentDownloadClient) Recv() (*PlaintextAndMeta, error) {
-	m := new(PlaintextAndMeta)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *documentClient) Upload(ctx context.Context, opts ...grpc.CallOption) (Document_UploadClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Document_serviceDesc.Streams[1], "/api.Document/Upload", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &documentUploadClient{stream}
-	return x, nil
-}
-
-type Document_UploadClient interface {
-	Send(*PlaintextAndGrantSpecAndMeta) error
-	CloseAndRecv() (*grant.Grant, error)
-	grpc.ClientStream
-}
-
-type documentUploadClient struct {
-	grpc.ClientStream
-}
-
-func (x *documentUploadClient) Send(m *PlaintextAndGrantSpecAndMeta) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *documentUploadClient) CloseAndRecv() (*grant.Grant, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(grant.Grant)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// DocumentServer is the server API for Document service.
-type DocumentServer interface {
-	// GET a document from Hoard
-	Download(*grant.Grant, Document_DownloadServer) error
-	// POST a document into Hoard
-	Upload(Document_UploadServer) error
-}
-
-// UnimplementedDocumentServer can be embedded to have forward compatible implementations.
-type UnimplementedDocumentServer struct {
-}
-
-func (*UnimplementedDocumentServer) Download(req *grant.Grant, srv Document_DownloadServer) error {
-	return status.Errorf(codes.Unimplemented, "method Download not implemented")
-}
-func (*UnimplementedDocumentServer) Upload(srv Document_UploadServer) error {
-	return status.Errorf(codes.Unimplemented, "method Upload not implemented")
-}
-
-func RegisterDocumentServer(s *grpc.Server, srv DocumentServer) {
-	s.RegisterService(&_Document_serviceDesc, srv)
-}
-
-func _Document_Download_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(grant.Grant)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(DocumentServer).Download(m, &documentDownloadServer{stream})
-}
-
-type Document_DownloadServer interface {
-	Send(*PlaintextAndMeta) error
-	grpc.ServerStream
-}
-
-type documentDownloadServer struct {
-	grpc.ServerStream
-}
-
-func (x *documentDownloadServer) Send(m *PlaintextAndMeta) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _Document_Upload_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(DocumentServer).Upload(&documentUploadServer{stream})
-}
-
-type Document_UploadServer interface {
-	SendAndClose(*grant.Grant) error
-	Recv() (*PlaintextAndGrantSpecAndMeta, error)
-	grpc.ServerStream
-}
-
-type documentUploadServer struct {
-	grpc.ServerStream
-}
-
-func (x *documentUploadServer) SendAndClose(m *grant.Grant) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *documentUploadServer) Recv() (*PlaintextAndGrantSpecAndMeta, error) {
-	m := new(PlaintextAndGrantSpecAndMeta)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-var _Document_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "api.Document",
-	HandlerType: (*DocumentServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Download",
-			Handler:       _Document_Download_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "Upload",
-			Handler:       _Document_Upload_Handler,
 			ClientStreams: true,
 		},
 	},
