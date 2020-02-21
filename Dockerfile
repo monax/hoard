@@ -27,4 +27,4 @@ EXPOSE 53431
 
 ENV HOARD_JSON_CONFIG '{"ListenAddress":"tcp://:53431","Storage":{"StorageType":"memory","AddressEncoding":"base64"},"Logging":{"LoggingType":"logfmt","Channels":["info","trace"]}}'
 
-CMD [ "hoard", "-e", "-l" ]
+CMD [ "hoard", "--env-config", "-l" ]
