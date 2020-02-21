@@ -1,6 +1,6 @@
 # Hoard
 
-[![CI](https://github.com/monax/hoard/workflows/master/badge.svg)](https://launch-editor.github.com/actions?workflowID=master&event=push&nwo=monax%hoard)
+![master](https://github.com/monax/hoard/workflows/master/badge.svg)
 [![version](https://img.shields.io/github/tag/monax/hoard.svg)](https://github.com/monax/hoard/releases/latest)
 [![GoDoc](https://godoc.org/github.com/hoard?status.png)](https://pkg.go.dev/github.com/monax/hoard)
 [![license](https://img.shields.io/github/license/monax/hoard.svg)](LICENSE.md)
