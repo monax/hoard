@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/monax/hoard/v7/config"
+	"github.com/monax/hoard/v8/config"
 
 	"bytes"
 	"io"
 	"io/ioutil"
 
-	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v8/reference"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )

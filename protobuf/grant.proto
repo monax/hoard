@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package grant;
 
-option go_package = "github.com/monax/hoard/v7/grant";
+option go_package = "github.com/monax/hoard/v8/grant";
 
 message Grant {
     // The grantSpec provides sufficient information to decrypt the reference

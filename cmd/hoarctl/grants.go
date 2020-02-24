@@ -6,9 +6,9 @@ import (
 	"os"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v7"
-	"github.com/monax/hoard/v7/api"
-	"github.com/monax/hoard/v7/grant"
+	"github.com/monax/hoard/v8"
+	"github.com/monax/hoard/v8/api"
+	"github.com/monax/hoard/v8/grant"
 )
 
 // PutSeal encrypts and stores data then prints a grant
