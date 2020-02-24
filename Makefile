@@ -32,6 +32,12 @@ GOFILES := $(shell find . -name '*.pb.go' -prune -o -not -path './vendor/*' -typ
 PROTO_FILES = $(shell find . -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
 PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
 PROTO_GO_FILES_REAL = $(shell find . -type f -name '*.pb.go' -print)
+PROTO_TS_FILES = $(patsubst %.proto, %.pb.ts, $(PROTO_FILES))
+
+HOARD_TS_PATH = ./hoard-js
+PROTO_GEN_TS_PATH = ${HOARD_TS_PATH}/proto
+PROTOC_GEN_TS_PATH = ${HOARD_TS_PATH}/node_modules/.bin/protoc-gen-ts
+PROTOC_GEN_GRPC_PATH= ${HOARD_TS_PATH}/node_modules/.bin/grpc_tools_node_protoc_plugin
 
 GO_BUILD_ARGS = -ldflags "-extldflags '-static' -X $(shell go list)/project.commit=$(shell cat commit_hash.txt) -X $(shell go list)/project.date=$(shell date '+%Y-%m-%d')"
 
@@ -76,8 +82,17 @@ commit_hash:
 	@mkdir -p .gopath
 	protoc -I protobuf $< --gogo_out=plugins=grpc:.gopath
 
+%.pb.ts: %.proto
+	protoc -I protobuf \
+		--plugin="protoc-gen-ts=${PROTOC_GEN_TS_PATH}" \
+		--plugin=protoc-gen-grpc=${PROTOC_GEN_GRPC_PATH} \
+		--js_out="import_style=commonjs,binary:${PROTO_GEN_TS_PATH}" \
+		--ts_out="service=grpc-node:${PROTO_GEN_TS_PATH}" \
+		--grpc_out="${PROTO_GEN_TS_PATH}" $<
+
+
 .PHONY: protobuf
-protobuf: $(PROTO_GO_FILES)
+protobuf: ${PROTO_GO_FILES} ${PROTO_TS_FILES}
 	rsync -r .gopath/github.com/monax/hoard/v7/ ./
 	rm -rf .gopath
 
@@ -85,9 +100,15 @@ protobuf: $(PROTO_GO_FILES)
 clean_protobuf:
 	@rm -f $(PROTO_GO_FILES_REAL)
 
+.PHONY: npm_install
+npm_install:
+	@cd ${HOARD_TS_PATH} && npm install
+
 .PHONY: protobuf_deps
 protobuf_deps:
 	@go get -u github.com/gogo/protobuf/protoc-gen-gogo
+	@cd ${HOARD_TS_PATH} && npm install grpc-tools
+	@cd ${HOARD_TS_PATH} && npm install ts-protoc-gen
 
 ## build the hoard binary
 .PHONY: build_hoard
@@ -125,7 +146,7 @@ test: check
 	@scripts/bin_wrapper.sh go test -v ./... ${GO_TEST_ARGS}
 
 .PHONY: test_js
-test_js: build install
+test_js: build install npm_install
 	@scripts/test_js.sh
 
 ## run tests including integration tests
