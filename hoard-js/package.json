@@ -23,7 +23,9 @@
     "bail": true
   },
   "files": [
-    "dist/"
+    "README.md",
+    "dist/",
+    "proto/"
   ],
   "keywords": [
     "hoard",

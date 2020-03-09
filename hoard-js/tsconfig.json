@@ -11,5 +11,8 @@
   },
   "exclude": [
     "node_modules",
+    "src/test/*",
+    "src/examples.ts",
+    "src/openpgp.ts"
   ]
 }

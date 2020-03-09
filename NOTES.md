@@ -1,3 +1,3 @@
 ### Fixed
-- NPM publish via auth token
+- NPM package.json now includes proto defs and README
 
