@@ -6,8 +6,8 @@ import (
 
 	"github.com/cep21/xdgbasedir"
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v7/config"
-	"github.com/monax/hoard/v7/encryption"
+	"github.com/monax/hoard/v8/config"
+	"github.com/monax/hoard/v8/encryption"
 )
 
 func Config(cmd *cli.Cmd) {

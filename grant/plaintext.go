@@ -1,7 +1,7 @@
 package grant
 
 import (
-	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v8/reference"
 )
 
 // PlaintextGrant returns an encoded reference

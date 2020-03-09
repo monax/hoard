@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/term"
-	"github.com/monax/hoard/v7/logging/loggers"
-	"github.com/monax/hoard/v7/logging/structure"
+	"github.com/monax/hoard/v8/logging/loggers"
+	"github.com/monax/hoard/v8/logging/structure"
 )
 
 type LoggingType string

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/monax/hoard/v7/project"
+	"github.com/monax/hoard/v8/project"
 )
 
 func main() {

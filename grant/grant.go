@@ -3,8 +3,8 @@ package grant
 import (
 	"fmt"
 
-	"github.com/monax/hoard/v7/config"
-	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v8/config"
+	"github.com/monax/hoard/v8/reference"
 )
 
 const defaultGrantVersion = 2

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v8/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
 )

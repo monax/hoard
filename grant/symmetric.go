@@ -3,8 +3,8 @@ package grant
 import (
 	"fmt"
 
-	"github.com/monax/hoard/v7/encryption"
-	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v8/encryption"
+	"github.com/monax/hoard/v8/reference"
 )
 
 // SymmetricGrant encrypts the given reference based on a secret read from the provider store

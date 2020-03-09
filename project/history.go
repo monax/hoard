@@ -22,6 +22,16 @@ func FullVersion() string {
 	return version
 }
 
+// Use below as template for change notes, delete empty sections but keep order
+/*
+### Security
+### Changed
+### Fixed
+### Added
+### Removed
+### Deprecated
+*/
+
 // The releases described by version string and changes, newest release first.
 // The current release is taken to be the first release in the slice, and its
 // version determines the single authoritative version for the next release.
@@ -30,6 +40,14 @@ func FullVersion() string {
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases(
+		"8.0.0 - 2020-02-24",
+		`### Changed
+- Service now encrypts per chunk of plaintext
+- Grants (v2) contain an array of references
+
+### Removed
+- Document service - metadata now in header
+`,
 		"7.2.0 - 2019-12-17",
 		`### Fixed
 - Symmetric grants are now versioned to preserve backwards compatability

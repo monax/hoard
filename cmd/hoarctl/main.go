@@ -10,14 +10,14 @@ import (
 	"net"
 	"os"
 
-	"github.com/monax/hoard/v7/api"
+	"github.com/monax/hoard/v8/api"
 
 	cli "github.com/jawher/mow.cli"
-	"github.com/monax/hoard/v7/cmd"
-	"github.com/monax/hoard/v7/config"
-	"github.com/monax/hoard/v7/grant"
-	"github.com/monax/hoard/v7/reference"
-	"github.com/monax/hoard/v7/server"
+	"github.com/monax/hoard/v8/cmd"
+	"github.com/monax/hoard/v8/config"
+	"github.com/monax/hoard/v8/grant"
+	"github.com/monax/hoard/v8/reference"
+	"github.com/monax/hoard/v8/server"
 	"google.golang.org/grpc"
 )
 

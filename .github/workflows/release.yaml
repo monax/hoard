@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Publish
+    - name: publish
       uses: docker://goreleaser/goreleaser
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-module github.com/monax/hoard/v7
+module github.com/monax/hoard/v8
 
 go 1.13
 
@@ -10,13 +10,13 @@ require (
 	github.com/aws/aws-sdk-go v1.25.43
 	github.com/cep21/xdgbasedir v0.0.0-20170329171747-21470bfc93b9
 	github.com/eapache/channels v1.1.0
-	github.com/eapache/queue v1.1.0 // indirect
 	github.com/go-kit/kit v0.9.0
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-stack/stack v1.8.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.2
 	github.com/jawher/mow.cli v1.1.0
+	github.com/monax/hoard/v7 v7.2.0 // indirect
 	github.com/monax/relic v2.0.0+incompatible
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.4.0

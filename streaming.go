@@ -5,9 +5,9 @@ import (
 	"io"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/monax/hoard/v7/api"
-	"github.com/monax/hoard/v7/grant"
-	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v8/api"
+	"github.com/monax/hoard/v8/grant"
+	"github.com/monax/hoard/v8/reference"
 )
 
 type PlaintextSender interface {

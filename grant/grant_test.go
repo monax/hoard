@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/monax/hoard/v7/config"
-	"github.com/monax/hoard/v7/encryption"
-	"github.com/monax/hoard/v7/reference"
+	"github.com/monax/hoard/v8/config"
+	"github.com/monax/hoard/v8/encryption"
+	"github.com/monax/hoard/v8/reference"
 	"github.com/stretchr/testify/assert"
 	"github.com/test-go/testify/require"
 )

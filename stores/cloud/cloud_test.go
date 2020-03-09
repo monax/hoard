@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/storage"
-	"github.com/monax/hoard/v7/stores"
+	"github.com/monax/hoard/v8/stores"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2/google"
