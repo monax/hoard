@@ -18,23 +18,25 @@ jobs:
       if: success()
 
   js:
+    name: npm
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-    - uses: actions/checkout@v1
-    - run: npm install -g npm-cli-login
-    - name: Publish
+    - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+    - name: publish
       env:
-        NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
-        NPM_USER: ${{ secrets.NPM_USER }}
-        NPM_PASS: ${{ secrets.NPM_PASS }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
-        git config --global user.name "${NPM_USER}"
-        git config --global user.email "${NPM_EMAIL}"
-        npm-cli-login
-        npm version from-git
+        git config --global user.email "${GITHUB_ACTOR}"
+        git config --global user.name "${GITHUB_ACTOR}"
+        cd hoard-js
+        npm install
+        npm run build
+        npm version $RELEASE_VERSION
+        npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
         npm publish --access public .
       
   docker:
