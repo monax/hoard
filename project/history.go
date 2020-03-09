@@ -40,6 +40,10 @@ func FullVersion() string {
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases(
+		"8.1.0 - 2020-03-09",
+		`### Changed
+- Header now specifies arbitrary data payload
+`,
 		"8.0.2 - 2020-03-09",
 		`### Fixed
 - NPM package.json now includes proto defs and README
