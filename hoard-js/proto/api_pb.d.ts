@@ -96,16 +96,10 @@ export class Header extends jspb.Message {
   getSalt_asB64(): string;
   setSalt(value: Uint8Array | string): void;
 
-  getName(): string;
-  setName(value: string): void;
-
-  getType(): string;
-  setType(value: string): void;
-
-  clearTagsList(): void;
-  getTagsList(): Array<string>;
-  setTagsList(value: Array<string>): void;
-  addTags(value: string, index?: number): string;
+  getData(): Uint8Array | string;
+  getData_asU8(): Uint8Array;
+  getData_asB64(): string;
+  setData(value: Uint8Array | string): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Header.AsObject;
@@ -120,9 +114,7 @@ export class Header extends jspb.Message {
 export namespace Header {
   export type AsObject = {
     salt: Uint8Array | string,
-    name: string,
-    type: string,
-    tagsList: Array<string>,
+    data: Uint8Array | string,
   }
 }
 

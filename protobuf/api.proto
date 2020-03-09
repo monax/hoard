@@ -87,9 +87,8 @@ message ReferenceAndGrantSpec {
 
 message Header {
     bytes Salt = 1;
-    string Name = 2;
-    string Type = 3;
-    repeated string Tags = 4;
+    // Metadata
+    bytes Data = 2;
 }
 
 message Plaintext {

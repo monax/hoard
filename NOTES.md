@@ -1,3 +1,3 @@
-### Fixed
-- NPM package.json now includes proto defs and README
+### Changed
+- Header now specifies arbitrary data payload
 

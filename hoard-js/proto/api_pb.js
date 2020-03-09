@@ -643,19 +643,12 @@ proto.api.ReferenceAndGrantSpec.prototype.hasGrantspec = function() {
  * @constructor
  */
 proto.api.Header = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.api.Header.repeatedFields_, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.api.Header, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
   proto.api.Header.displayName = 'proto.api.Header';
 }
-/**
- * List of repeated fields within this message type.
- * @private {!Array<number>}
- * @const
- */
-proto.api.Header.repeatedFields_ = [4];
-
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -686,9 +679,7 @@ proto.api.Header.prototype.toObject = function(opt_includeInstance) {
 proto.api.Header.toObject = function(includeInstance, msg) {
   var f, obj = {
     salt: msg.getSalt_asB64(),
-    name: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    type: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    tagsList: jspb.Message.getRepeatedField(msg, 4)
+    data: msg.getData_asB64()
   };
 
   if (includeInstance) {
@@ -730,16 +721,8 @@ proto.api.Header.deserializeBinaryFromReader = function(msg, reader) {
       msg.setSalt(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setName(value);
-      break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setType(value);
-      break;
-    case 4:
-      var value = /** @type {string} */ (reader.readString());
-      msg.addTags(value);
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setData(value);
       break;
     default:
       reader.skipField();
@@ -777,24 +760,10 @@ proto.api.Header.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getName();
+  f = message.getData_asU8();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writeBytes(
       2,
-      f
-    );
-  }
-  f = message.getType();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
-      f
-    );
-  }
-  f = message.getTagsList();
-  if (f.length > 0) {
-    writer.writeRepeatedString(
-      4,
       f
     );
   }
@@ -841,61 +810,41 @@ proto.api.Header.prototype.setSalt = function(value) {
 
 
 /**
- * optional string Name = 2;
- * @return {string}
+ * optional bytes Data = 2;
+ * @return {!(string|Uint8Array)}
  */
-proto.api.Header.prototype.getName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+proto.api.Header.prototype.getData = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
-/** @param {string} value */
-proto.api.Header.prototype.setName = function(value) {
+/**
+ * optional bytes Data = 2;
+ * This is a type-conversion wrapper around `getData()`
+ * @return {string}
+ */
+proto.api.Header.prototype.getData_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getData()));
+};
+
+
+/**
+ * optional bytes Data = 2;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getData()`
+ * @return {!Uint8Array}
+ */
+proto.api.Header.prototype.getData_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getData()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.api.Header.prototype.setData = function(value) {
   jspb.Message.setField(this, 2, value);
-};
-
-
-/**
- * optional string Type = 3;
- * @return {string}
- */
-proto.api.Header.prototype.getType = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/** @param {string} value */
-proto.api.Header.prototype.setType = function(value) {
-  jspb.Message.setField(this, 3, value);
-};
-
-
-/**
- * repeated string Tags = 4;
- * @return {!Array.<string>}
- */
-proto.api.Header.prototype.getTagsList = function() {
-  return /** @type {!Array.<string>} */ (jspb.Message.getRepeatedField(this, 4));
-};
-
-
-/** @param {!Array.<string>} value */
-proto.api.Header.prototype.setTagsList = function(value) {
-  jspb.Message.setField(this, 4, value || []);
-};
-
-
-/**
- * @param {!string} value
- * @param {number=} opt_index
- */
-proto.api.Header.prototype.addTags = function(value, opt_index) {
-  jspb.Message.addToRepeatedField(this, 4, value, opt_index);
-};
-
-
-proto.api.Header.prototype.clearTagsList = function() {
-  this.setTagsList([]);
 };
 
 
