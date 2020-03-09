@@ -1,7 +1,10 @@
 package hoard
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
+	"encoding/json"
 	"testing"
 
 	"github.com/go-kit/kit/log"
@@ -15,6 +18,22 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 )
+
+func writeUIntBE(buffer []byte, value, offset, byteLength int64) error {
+	slice := make([]byte, byteLength)
+
+	buf := bytes.NewBuffer(slice)
+	err := binary.Write(buf, binary.BigEndian, value)
+	if err != nil {
+		return err
+	}
+
+	slice = buf.Bytes()
+	slice = slice[int64(len(slice))-byteLength : len(slice)]
+
+	copy(buffer[offset:], slice)
+	return nil
+}
 
 func TestService(t *testing.T) {
 	chunkSize := 67
@@ -70,6 +89,52 @@ func TestService(t *testing.T) {
 				plaintext, err := ReceiveAllPlaintexts(getStream)
 				require.NoError(t, err)
 				require.Equal(t, data, plaintext.GetBody())
+			})
+
+			t.Run("LengthPrefix", func(t *testing.T) {
+				const lengthPrefixByteLength = 4
+
+				meta, err := json.Marshal(&struct {
+					Name           string
+					MimeType       string
+					Tags           []string
+					Agreement      string
+					AssemblyEngine string
+				}{
+					Name:     "document",
+					MimeType: ".docx",
+				})
+				require.NoError(t, err)
+
+				buffer := make([]byte, lengthPrefixByteLength)
+				err = writeUIntBE(buffer, int64(len(meta)), 0, lengthPrefixByteLength)
+				require.NoError(t, err)
+
+				data := make([]byte, 1000)
+				msg := append(buffer, meta...)
+				msg = append(msg, data...)
+
+				ref, err := service.grantService.Put(msg, []byte{})
+				require.NoError(t, err)
+
+				client := api.NewCleartextClient(conn)
+				getStream, err := client.Get(ctx)
+				require.NoError(t, err)
+				err = getStream.Send(ref)
+				require.NoError(t, err)
+				err = getStream.CloseSend()
+				require.NoError(t, err)
+
+				plaintext, err := ReceiveAllPlaintexts(getStream)
+				require.NoError(t, err)
+				require.Nil(t, plaintext.GetHead())
+				body := plaintext.GetBody()
+				size := binary.BigEndian.Uint32(body[:lengthPrefixByteLength])
+				head := body[lengthPrefixByteLength : size+lengthPrefixByteLength]
+				rest := body[size+lengthPrefixByteLength:]
+
+				require.Equal(t, meta, head)
+				require.Equal(t, data, rest)
 			})
 		})
 
