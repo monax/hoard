@@ -1,4 +1,13 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [8.0.0] - 2020-02-24
+### Changed
+- Service now encrypts per chunk of plaintext
+- Grants (v2) contain an array of references
+
+### Removed
+- Document service - metadata now in header
+
+
 ## [7.2.0] - 2019-12-17
 ### Fixed
 - Symmetric grants are now versioned to preserve backwards compatability
@@ -158,6 +167,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[8.0.0]: https://github.com/monax/hoard/compare/v7.2.0...v8.0.0
 [7.2.0]: https://github.com/monax/hoard/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/monax/hoard/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/monax/hoard/compare/v6.0.0...v7.0.0
