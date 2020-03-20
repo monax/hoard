@@ -14,7 +14,7 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	hrd := NewHoard(stores.NewMemoryStore(), config.NoopSecretManager, log.NewNopLogger())
 	bunsIn := bs("hot buns")
 
-	ref, err := hrd.Put(bunsIn, nil)
+	ref, err := hrd.Put(bunsIn, make([]byte, 32))
 	assert.NoError(t, err)
 
 	bunsOut, err := hrd.Get(ref)
@@ -28,10 +28,10 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	assert.True(t, statInfo.Exists)
 	// Our GCM cipher should be running an overhead of 16 bytes
 	// (no IV, but 16-byte authentication tag)
-	assert.Equal(t, uint64(len(bunsIn))+16, statInfo.Size_)
+	assert.Equal(t, uint64(len(bunsIn))+16+32, statInfo.Size_)
 
 	loc := hrd.Store().Location(ref.Address)
-	assert.Equal(t, "memfs://2768b87bc22a7f0f20eb268937a00d682bc5dc21a62badf1d24c78633436a1b7", loc)
+	assert.Equal(t, "memfs://a0abd6a3e5d8f343b3e71b2e97af05f38652dd6345021ca34655aa27e7aa94ae", loc)
 
 	// flip LSB of first byte of address to get an non-existent address
 	ref.Address[0] = ref.Address[0] ^ 1
