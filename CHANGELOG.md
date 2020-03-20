@@ -1,4 +1,9 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [8.2.0] - 2020-03-20
+### Changed
+- Grant json now uses lowercase field names for compatability with client lib
+
+
 ## [8.1.0] - 2020-03-09
 ### Changed
 - Header now specifies arbitrary data payload
@@ -182,6 +187,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[8.2.0]: https://github.com/monax/hoard/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/monax/hoard/compare/v8.0.2...v8.1.0
 [8.0.2]: https://github.com/monax/hoard/compare/v8.0.1...v8.0.2
 [8.0.1]: https://github.com/monax/hoard/compare/v8.0.0...v8.0.1

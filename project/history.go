@@ -40,6 +40,10 @@ func FullVersion() string {
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases(
+		"8.2.0 - 2020-03-20",
+		`### Changed
+- Grant json now uses lowercase field names for compatability with client lib
+`,
 		"8.1.0 - 2020-03-09",
 		`### Changed
 - Header now specifies arbitrary data payload

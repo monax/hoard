@@ -1,3 +1,3 @@
 ### Changed
-- Header now specifies arbitrary data payload
+- Grant json now uses lowercase field names for compatability with client lib
 
