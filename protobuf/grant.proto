@@ -1,21 +1,25 @@
 syntax = "proto3";
 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
 package grant;
 
 option go_package = "github.com/monax/hoard/v8/grant";
 
+// As the grant is often stored as json and we to specify the correct tags for
+// compatability with the client library. 
 message Grant {
     // The grantSpec provides sufficient information to decrypt the reference
     // if hoard has access to the requisite secret
-    Spec Spec = 1;
-    bytes EncryptedReferences = 2;
-    int32 Version = 3;
+    Spec Spec = 1 [json_name="spec", (gogoproto.jsontag) = "spec"];
+    bytes EncryptedReferences = 2 [json_name="encryptedreferences", (gogoproto.jsontag) = "encryptedreferences"];
+    int32 Version = 3 [json_name="version", (gogoproto.jsontag) = "version"];
 }
 
 message Spec {
-    PlaintextSpec Plaintext = 1;
-    SymmetricSpec Symmetric = 2;
-    OpenPGPSpec OpenPGP = 3;
+    PlaintextSpec Plaintext = 1 [json_name="plaintext", (gogoproto.jsontag) = "plaintext"];
+    SymmetricSpec Symmetric = 2 [json_name="symmetric", (gogoproto.jsontag) = "symmetric"];
+    OpenPGPSpec OpenPGP = 3 [json_name="openpgp", (gogoproto.jsontag) = "openpgp"];
 }
 
 message PlaintextSpec {
@@ -24,10 +28,10 @@ message PlaintextSpec {
 
 message SymmetricSpec {
     // A non-secret identifier for a secret that is 'known' to Hoard (accessible via store or config)
-    string PublicID = 1;
+    string PublicID = 1 [json_name="publicid", (gogoproto.jsontag) = "publicid"];
 }
 
 message OpenPGPSpec {
-    string PublicKey = 1;
+    string PublicKey = 1 [json_name="publickey", (gogoproto.jsontag) = "publickey"];
 }
 

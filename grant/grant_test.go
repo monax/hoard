@@ -2,6 +2,7 @@ package grant
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -138,4 +139,15 @@ func deriveSecret(t *testing.T, data []byte) []byte {
 	secret, err := encryption.DeriveSecretKey(data, salt)
 	assert.NoError(t, err)
 	return secret
+}
+
+func TestUnmarshal(t *testing.T) {
+	// the client library stores the grant with lowercase field names,
+	// we expect the go server to correctly unmarshal this
+	data := `{"spec":{"plaintext":{},"symmetric":null,"openpgp":null},"encryptedreferences":"eyJSZWZzIjpbeyJBZGRyZXNzIjoidDIzZjh1cTZsd3lJL2ZTTGJaMVJ2b3ZMYzFSSDMwWEk4cUlyUzBQZnljOD0iLCJTZWNyZXRLZXkiOiI0N0RFUXBqOEhCU2ErL1RJbVcrNUpDZXVRZVJrbTVOTXBKV1pHM2hTdUZVPSIsIlZlcnNpb24iOjF9LHsiQWRkcmVzcyI6Ii8rdWxUa0N6cFlnMnNQYVp0cVM4ZHljSkJMWTkzODd5WlBzdDhMWDVZTDA9IiwiU2VjcmV0S2V5IjoidGJ1ZGdCU2crYkhXSGlIbmx0ZU56TjhUVXZJODB5Z1M5SVVMaDRya2xFdz0ifV19","version":2}`
+	grant := new(Grant)
+	err := json.Unmarshal([]byte(data), grant)
+	require.NoError(t, err)
+	require.Equal(t, int32(2), grant.GetVersion())
+	require.NotNil(t, grant.GetSpec().GetPlaintext())
 }
