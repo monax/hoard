@@ -31,7 +31,7 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	assert.Equal(t, uint64(len(bunsIn))+16+32, statInfo.Size_)
 
 	loc := hrd.Store().Location(ref.Address)
-	assert.Equal(t, "memfs://a0abd6a3e5d8f343b3e71b2e97af05f38652dd6345021ca34655aa27e7aa94ae", loc)
+	assert.Equal(t, "memfs://75b382c29b0d8382a09b856f7a0f00300548c9f369574f68cfc9c62fcab2d1dc", loc)
 
 	// flip LSB of first byte of address to get an non-existent address
 	ref.Address[0] = ref.Address[0] ^ 1
