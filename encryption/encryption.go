@@ -49,7 +49,7 @@ func EncryptConvergent(data, salt []byte) (*Blob, error) {
 	return encrypt(Salinate(data, salt), Args{
 		BlockCipherMaker: aes.NewCipher,
 		SecretKey:        secretKey,
-		Nonce:            nil,
+		Nonce:            secretKey,
 		AdditionalData:   additionalDataForSalt(salt),
 	})
 }
@@ -59,7 +59,7 @@ func DecryptConvergent(encryptedData, salt, secretKey []byte) ([]byte, error) {
 	data, err := decrypt(encryptedData, Args{
 		BlockCipherMaker: aes.NewCipher,
 		SecretKey:        secretKey,
-		Nonce:            nil,
+		Nonce:            secretKey,
 		AdditionalData:   additionalDataForSalt(salt),
 	})
 	if err != nil {
