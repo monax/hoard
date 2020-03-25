@@ -1,3 +1,3 @@
 ### Fixed
-- Convergent encryption nonce is now specified
+- Chunk plaintext out if data too big
 

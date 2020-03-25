@@ -51,7 +51,7 @@ func (service *Service) Get(srv api.Cleartext_GetServer) error {
 			return err
 		}
 
-		if err = SendPlaintext(data, srv, ref.GetVersion()); err != nil {
+		if err = SendPlaintext(data, service.chunkSize, srv, ref.GetVersion()); err != nil {
 			return err
 		}
 	}
@@ -150,7 +150,7 @@ func (service *Service) Decrypt(srv api.Encryption_DecryptServer) error {
 			return err
 		}
 
-		if err = SendPlaintext(data, srv, refAndCiphertext.Reference.GetVersion()); err != nil {
+		if err = SendPlaintext(data, service.chunkSize, srv, refAndCiphertext.Reference.GetVersion()); err != nil {
 			return err
 		}
 	}
@@ -326,7 +326,7 @@ func (service *Service) UnsealGet(grt *grant.Grant, srv api.Grant_UnsealGetServe
 			return err
 		}
 
-		if err = SendPlaintext(data, srv, ref.GetVersion()); err != nil {
+		if err = SendPlaintext(data, service.chunkSize, srv, ref.GetVersion()); err != nil {
 			return err
 		}
 	}

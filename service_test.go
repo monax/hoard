@@ -36,7 +36,7 @@ func writeUIntBE(buffer []byte, value, offset, byteLength int64) error {
 }
 
 func TestService(t *testing.T) {
-	chunkSize := 67
+	chunkSize := 1024 * 1024
 	salt, err := encryption.NewNonce(encryption.NonceSize)
 	assert.NoError(t, err)
 	secret, err := encryption.DeriveSecretKey([]byte("shhhh"), salt)
@@ -135,6 +135,26 @@ func TestService(t *testing.T) {
 
 				require.Equal(t, meta, head)
 				require.Equal(t, data, rest)
+			})
+
+			t.Run("ChunkLarge", func(t *testing.T) {
+				size := 1024 * 1024 * 10
+				ref, err := hrd.Put(make([]byte, size), nil)
+				require.NoError(t, err)
+
+				client := api.NewCleartextClient(conn)
+				getStream, err := client.Get(ctx)
+				require.NoError(t, err)
+
+				err = getStream.Send(ref)
+				require.NoError(t, err)
+				err = getStream.CloseSend()
+				require.NoError(t, err)
+
+				plaintext, err := ReceiveAllPlaintexts(getStream)
+				require.NoError(t, err)
+
+				require.Equal(t, size, len(plaintext.GetBody()))
 			})
 		})
 
