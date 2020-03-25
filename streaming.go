@@ -15,7 +15,7 @@ type PlaintextSender interface {
 }
 
 // SendPlaintext gets the plaintext for a given reference and sends it to the client
-func SendPlaintext(data []byte, srv PlaintextSender, version int32) error {
+func SendPlaintext(data []byte, chunkSize int, srv PlaintextSender, version int32) error {
 	if version == defaultRefVersionForHeader {
 		head := new(api.Header)
 		err := proto.Unmarshal(data, head)
@@ -23,6 +23,14 @@ func SendPlaintext(data []byte, srv PlaintextSender, version int32) error {
 			return err
 		}
 		return srv.Send(&api.Plaintext{Head: head})
+	}
+
+	if len(data) > chunkSize {
+		return sendChunks(data, chunkSize, func(chunk []byte) error {
+			return srv.Send(&api.Plaintext{
+				Body: chunk,
+			})
+		})
 	}
 
 	return srv.Send(&api.Plaintext{Body: data})
@@ -252,4 +260,19 @@ func ReadStream(receiver func() (interface{}, error)) (interface{}, error) {
 			return chunk, nil
 		}
 	}
+}
+
+func sendChunks(data []byte, chunkSize int, sender func(chunk []byte) error) error {
+	var err error
+	for i := 0; i < len(data); i += chunkSize {
+		if i+chunkSize > len(data) {
+			err = sender(data[i:])
+		} else {
+			err = sender(data[i : i+chunkSize])
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

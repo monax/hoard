@@ -1,4 +1,9 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [8.2.2] - 2020-03-25
+### Fixed
+- Chunk plaintext out if data too big
+
+
 ## [8.2.1] - 2020-03-23
 ### Fixed
 - Convergent encryption nonce is now specified
@@ -192,6 +197,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[8.2.2]: https://github.com/monax/hoard/compare/v8.2.1...v8.2.2
 [8.2.1]: https://github.com/monax/hoard/compare/v8.2.0...v8.2.1
 [8.2.0]: https://github.com/monax/hoard/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/monax/hoard/compare/v8.0.2...v8.1.0
