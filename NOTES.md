@@ -1,3 +1,3 @@
-### Fixed
-- Chunk plaintext out if data too big
+### Added
+- ReadHeader will stop once it gets the head
 

@@ -171,6 +171,20 @@ export async function ReadUntil<T>(accum: T[], stream: grpc.ClientReadableStream
   })
 }
 
+export async function ReadHeader(stream: grpc.ClientReadableStream<Plaintext>) {
+  return new Promise<Header>((resolve, reject) => {
+    stream.on('data', (data: Plaintext) => { 
+      if (data.hasHead()) {
+        stream.cancel();
+        resolve(data.getHead());
+      }
+    });
+    stream.on('error', (err: { code: grpc.status; }) => err.code === grpc.status.CANCELLED ? resolve() : reject(err));
+    stream.on('close', () => reject("no header found"));
+    stream.on('end', () => reject("no header found"));
+  })
+}
+
 export async function Write<A, B>(input: A[], fn: (callback: grpc.requestCallback<B>) => grpc.ClientWritableStream<A>): Promise<B> {
   return new Promise((resolve, reject) => {
     let stream = fn((err, grt) => err ? reject(err) : resolve(grt));
