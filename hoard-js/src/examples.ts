@@ -21,6 +21,7 @@ import {
   Write,
   PlaintextAndGrantSpec,
   Header,
+  ReadHeader,
 } from './index';
 import * as assert from 'assert';
 
@@ -102,6 +103,9 @@ export const example = async function (data: string | Uint8Array, salt: string |
     plaintexts = await Read([], hoard.unsealGet(grant));
     plaintext = ReducePlaintext(plaintexts);
     assert.deepStrictEqual(plaintext.toObject(), expected.toObject());
+
+    let header = await ReadHeader(hoard.unsealGet(grant));
+    assert.strictEqual(header.getSalt_asB64(), "Zm9v");
 
     // A symmetric grant allows us to encrypt the reference
     // through secrets configured on the hoard daemon

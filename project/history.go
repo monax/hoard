@@ -40,6 +40,10 @@ func FullVersion() string {
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
 	MustDeclareReleases(
+		"8.2.3 - 2020-03-27",
+		`### Added
+- ReadHeader will stop once it gets the head
+`,
 		"8.2.2 - 2020-03-25",
 		`### Fixed
 - Chunk plaintext out if data too big
