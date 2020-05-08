@@ -25,3 +25,5 @@ node_modules
 .vscode/
 vendor/
 .gopath
+
+helm/package

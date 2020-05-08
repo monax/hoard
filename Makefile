@@ -45,6 +45,15 @@ export DOCKER_HUB := quay.io
 export DOCKER_REPO := $(DOCKER_HUB)/monax/hoard
 export BUILD_IMAGE := $(DOCKER_REPO):build
 
+## Release and Versioning
+
+VERSION := $(shell go run ./project/cmd/version/main.go)
+
+## print version
+.PHONY: version
+version:
+	@echo $(VERSION)
+
 # Formatting, linting and vetting
 
 ## check the code for style standards; currently enforces go formatting.
@@ -163,13 +172,6 @@ test_integration: check
 clean:
 	-rm -r ./bin
 
-## Release and Versioning
-
-## print version
-.PHONY: version
-version:
-	@go run ./project/cmd/version/main.go
-
 ## generate full changelog of all release notes
 CHANGELOG.md: project/history.go project/cmd/changelog/main.go
 	@go run ./project/cmd/changelog/main.go > CHANGELOG.md
@@ -200,3 +202,38 @@ build_ci_image:
 .PHONY: push_ci_image
 push_ci_image: build_ci_image
 	docker push ${BUILD_IMAGE}
+
+HELM_PATH?=helm/package
+HELM_PACKAGE=$(HELM_PATH)/hoard-$(VERSION).tgz
+ARCH?=linux-amd64
+
+# Note --set flag currently needs helm 3 version < 3.0.3 https://github.com/helm/helm/issues/3141 - but hopefully they will reintroduce support
+bin/helm:
+	@echo Downloading helm...
+	mkdir -p bin
+	curl https://get.helm.sh/helm-v3.0.2-$(ARCH).tar.gz | tar xvzO $(ARCH)/helm > bin/helm && chmod +x bin/helm
+
+.PHONY: helm_deps
+helm_deps: bin/helm
+	@bin/helm repo add --username "$(CM_USERNAME)" --password "$(CM_PASSWORD)" chartmuseum $(CM_URL)
+
+.PHONY: helm_test
+helm_test: bin/helm
+	bin/helm dep up helm/hoard
+	bin/helm lint helm/hoard
+
+helm_package: $(HELM_PACKAGE)
+
+$(HELM_PACKAGE): helm_test bin/helm
+	bin/helm package helm/hoard \
+		--version "$(VERSION)" \
+		--app-version "$(VERSION)" \
+		--set "image.tag=$(VERSION)" \
+		--dependency-update \
+		--destination helm/package
+
+.PHONY: helm_push
+helm_push: helm_package
+	@echo pushing helm chart...
+	@curl -u ${CM_USERNAME}:${CM_PASSWORD} \
+		--data-binary "@$(HELM_PACKAGE)" $(CM_URL)/api/charts

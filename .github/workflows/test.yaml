@@ -16,10 +16,21 @@ jobs:
     - uses: actions/checkout@v1
     - run: make build
     - run: make test
-    - run: make test_js 
+    - run: make test_js
 
   docker:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - run: make docker_build
+
+  charts:
+    runs-on: ubuntu-latest
+    env:
+      CM_USERNAME: ${{ secrets.CM_USERNAME }}
+      CM_PASSWORD: ${{ secrets.CM_PASSWORD }}
+      CM_URL:  ${{ secrets.CM_URL }}
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --unshallow --prune
+      - run: make helm_package
