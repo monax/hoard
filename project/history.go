@@ -39,7 +39,10 @@ func FullVersion() string {
 // To cut a new release add a release to the front of this slice then run the
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
-	MustDeclareReleases(
+	MustDeclareReleases("8.2.4 - 2020-05-22",
+		`### Fixed
+- Move various development dependencies to devDependencies in package.json for hoard-js
+`,
 		"8.2.3 - 2020-03-27",
 		`### Added
 - ReadHeader will stop once it gets the head

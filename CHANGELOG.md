@@ -1,4 +1,9 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [8.2.4] - 2020-05-22
+### Fixed
+- Move various development dependencies to devDependencies in package.json for hoard-js
+
+
 ## [8.2.3] - 2020-03-27
 ### Added
 - ReadHeader will stop once it gets the head
@@ -202,6 +207,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[8.2.4]: https://github.com/monax/hoard/compare/v8.2.3...v8.2.4
 [8.2.3]: https://github.com/monax/hoard/compare/v8.2.2...v8.2.3
 [8.2.2]: https://github.com/monax/hoard/compare/v8.2.1...v8.2.2
 [8.2.1]: https://github.com/monax/hoard/compare/v8.2.0...v8.2.1

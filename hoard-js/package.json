@@ -11,13 +11,7 @@
     "url": "git+https://github.com/monax/hoard.git"
   },
   "dependencies": {
-    "@types/google-protobuf": "^3.7.2",
-    "@types/mocha": "^5.2.7",
-    "grpc": "^1.24.2",
-    "grpc-tools": "^1.8.1",
-    "ts-node": "^8.5.4",
-    "ts-protoc-gen": "^0.12.0",
-    "typescript": "^3.7.4"
+    "@types/google-protobuf": "^3.7.2"
   },
   "mocha": {
     "bail": true
@@ -43,6 +37,12 @@
   },
   "homepage": "https://github.com/monax/hoard#readme",
   "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "grpc": "^1.24.2",
+    "grpc-tools": "^1.8.1",
+    "ts-node": "^8.5.4",
+    "ts-protoc-gen": "^0.12.0",
+    "typescript": "^3.7.4",
     "eslint": "^6.7.1",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.18.2",

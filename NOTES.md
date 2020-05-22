@@ -1,3 +1,3 @@
-### Added
-- ReadHeader will stop once it gets the head
+### Fixed
+- Move various development dependencies to devDependencies in package.json for hoard-js
 
