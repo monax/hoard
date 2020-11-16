@@ -11,7 +11,7 @@ import (
 
 const DefaultListenAddress = "tcp://:53431"
 
-const DefaultChunkSize = 1 << 16 // 64 Kb
+const DefaultChunkSize = 3 * (1 << 20) // 3 MiB
 
 var DefaultHoardConfig = NewHoardConfig(DefaultListenAddress, DefaultChunkSize, NewDefaultStorage(), DefaultLogging)
 

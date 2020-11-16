@@ -1,14 +1,15 @@
-import example = require('../examples');
+import {example} from "../src/examples";
 
 describe('Examples should run', function () {
-  it('buffer based plaintext', async function () {
+  test('buffer based plaintext', async function () {
+    const isIIIIT = Buffer.from([1,2]) instanceof Uint8Array
     const data = Buffer.from('some stuff', 'utf8');
     const salt = Buffer.from('foo', 'ascii');
-    await example.example(data, salt);
+    await example(data, salt);
   })
-  it('base64 based plaintext', async function () {
+  test('base64 based plaintext', async function () {
     const data = Buffer.from('some stuff', 'utf8').toString('base64');
     const salt = Buffer.from('foo', 'ascii').toString('base64');
-    await example.example(data, salt);
+    await example(data, salt);
   })
 })

@@ -128,7 +128,7 @@ make build && make install
 ```
 
 ## Javascript Client
-A Javascript client library can be found here: [hoard-js](https://github.com/monax/hoard/tree/master/hoard-js).
+A Javascript client library can be found here: [js](https://github.com/monax/hoard/tree/master/js).
 
 Hoard-js is a fairly lightweight wrapper around the Hoard GRPC API. It mainly serves to abstract over the dynamic protobuf library and the static protobuf generation.
 

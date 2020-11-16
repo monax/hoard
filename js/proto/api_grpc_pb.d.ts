@@ -7,7 +7,7 @@ import * as api_pb from "./api_pb";
 import * as grant_pb from "./grant_pb";
 import * as reference_pb from "./reference_pb";
 import * as stores_pb from "./stores_pb";
-import * as grpc from "grpc";
+import * as grpc from "@grpc/grpc-js";
 
 interface IGrantService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
   seal: grpc.MethodDefinition<api_pb.ReferenceAndGrantSpec, grant_pb.Grant>;

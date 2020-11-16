@@ -1,4 +1,11 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## pending - 2020-11-19
+### Changed
+- Move to pure-js @grpc/grpc-js library
+- Expose more usable methods from the client
+- Make default ChunkSize 3 MiB
+
+
 ## [8.2.3] - 2020-03-27
 ### Added
 - ReadHeader will stop once it gets the head
@@ -57,7 +64,7 @@
 
 
 ## [7.0.0] - 2019-12-02
-This release makes some changes to the Hoard protobuf and service that are backwards compatible for clients - Hoard v6 clients should work with Hoard v7 but hoard-js v7 will not work entirely correctly with Hoard v6 due to removal of oneof.
+This release makes some changes to the Hoard protobuf and service that are backwards compatible for clients - Hoard v6 clients should work with Hoard v7 but js v7 will not work entirely correctly with Hoard v6 due to removal of oneof.
 
 ### Changed
 - [API] Drop use of oneof in protobuf files - allow singleton fields to be sent with streamable fields

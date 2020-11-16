@@ -29,12 +29,12 @@ REPO := $(shell pwd)
 GOFILES := $(shell find . -name '*.pb.go' -prune -o -not -path './vendor/*' -type f -name '*.go' -print)
 
 # Protobuf generated go files
-PROTO_FILES = $(shell find . -path ./hoard-js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
+PROTO_FILES = $(shell find . -path ./js -prune -o -path ./node_modules -prune -o -type f -name '*.proto' -print)
 PROTO_GO_FILES = $(patsubst %.proto, %.pb.go, $(PROTO_FILES))
 PROTO_GO_FILES_REAL = $(shell find . -type f -name '*.pb.go' -print)
 PROTO_TS_FILES = $(patsubst %.proto, %.pb.ts, $(PROTO_FILES))
 
-HOARD_TS_PATH = ./hoard-js
+HOARD_TS_PATH = ./js
 PROTO_GEN_TS_PATH = ${HOARD_TS_PATH}/proto
 PROTOC_GEN_TS_PATH = ${HOARD_TS_PATH}/node_modules/.bin/protoc-gen-ts
 PROTOC_GEN_GRPC_PATH= ${HOARD_TS_PATH}/node_modules/.bin/grpc_tools_node_protoc_plugin
@@ -96,8 +96,8 @@ commit_hash:
 		--plugin="protoc-gen-ts=${PROTOC_GEN_TS_PATH}" \
 		--plugin=protoc-gen-grpc=${PROTOC_GEN_GRPC_PATH} \
 		--js_out="import_style=commonjs,binary:${PROTO_GEN_TS_PATH}" \
-		--ts_out="service=grpc-node:${PROTO_GEN_TS_PATH}" \
-		--grpc_out="${PROTO_GEN_TS_PATH}" $<
+		--ts_out="service=grpc-node,mode=grpc-js:${PROTO_GEN_TS_PATH}" \
+		--grpc_out="grpc_js:${PROTO_GEN_TS_PATH}" $<
 
 
 .PHONY: protobuf

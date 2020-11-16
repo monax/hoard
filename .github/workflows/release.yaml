@@ -32,7 +32,7 @@ jobs:
       run: |
         git config --global user.email "${GITHUB_ACTOR}"
         git config --global user.name "${GITHUB_ACTOR}"
-        cd hoard-js
+        cd js
         npm install
         npm run build
         npm version $RELEASE_VERSION
