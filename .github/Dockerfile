@@ -6,7 +6,7 @@ ENV GORELEASER_VERSION "v0.104.1"
 
 RUN apk add --update --no-cache \
  nodejs \
- npm \
+ yarn \
  netcat-openbsd \
  git \
  openssh-client \
@@ -24,7 +24,7 @@ RUN apk add --update --no-cache \
  py-pip
 
 RUN pip install docker-compose
-RUN npm install -g npm-cli-login
+RUN yarn install -g yarn-cli-login
 
 RUN curl -OL https://github.com/google/protobuf/releases/download/v${PROTO_VERSION}/protoc-${PROTO_VERSION}-linux-x86_64.zip
 RUN mkdir -p protobuf

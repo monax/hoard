@@ -61,7 +61,7 @@ func SymmetricReferenceV2(ciphertext, secret []byte) (reference.Refs, error) {
 	encryptedData, nonce := encryption.Desalinate(ciphertext, encryption.NonceSize)
 	data, err := encryption.Decrypt(encryptedData, nonce, secret)
 	if err != nil {
-		return nil, fmt.Errorf("SymmetricReferenceV1 failed to decrypt: %v", err)
+		return nil, fmt.Errorf("SymmetricReferenceV2 failed to decrypt: %v", err)
 	}
 	return reference.RepeatedFromPlaintext(string(data)), nil
 }

@@ -18,26 +18,26 @@ jobs:
       if: success()
 
   js:
-    name: npm
+    name: yarn
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
-        node-version: '12.x'
-    - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+        node-version: '14.x'
+        registry-url: 'https://registry.npmjs.org'
     - name: publish
       env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         git config --global user.email "${GITHUB_ACTOR}"
         git config --global user.name "${GITHUB_ACTOR}"
-        cd hoard-js
-        npm install
-        npm run build
-        npm version $RELEASE_VERSION
-        npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-        npm publish --access public .
+        cd js
+        yarn install
+        yarn build
+        yarn version --no-git-tag-version --new-version $(git describe --tags)
+        yarn config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
+        yarn publish --access public .
 
   docker:
     runs-on: ubuntu-latest

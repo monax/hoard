@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "Node",
+    "rootDir": "src",
+    "outDir": "dist",
+    "allowJs": false,
+    "declaration": true,
+    "target": "ES2020",
+    "preserveSymlinks": true,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "lib": ["ES2020", "DOM"]
+  },
+  "exclude": [
+    "node_modules",
+    "src/test/*",
+    "src/examples.ts",
+    "src/openpgp.ts"
+  ]
+}

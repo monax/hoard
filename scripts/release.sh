@@ -38,8 +38,8 @@ docker build -t quay.io/monax/hoard:${tag#v} -t quay.io/monax/hoard:latest .
 docker push quay.io/monax/hoard:${tag#v}
 
 git config --global user.email "billings@monax.io"
-npm-cli-login
-npm version from-git
-npm publish --access public .
+yarn-cli-login
+yarn version from-git
+yarn publish --access public .
 
 [[ -e notes.md ]] && goreleaser --release-notes notes.md || goreleaser

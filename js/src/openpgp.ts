@@ -16,7 +16,7 @@ import * as path from 'path';
 
 const hoard = Client('localhost:53431');
 
-// npm install openpgp
+// yarn install openpgp
 const openpgp = require('openpgp');
 openpgp.initWorker({ path:'openpgp.worker.js' })
 

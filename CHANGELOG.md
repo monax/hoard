@@ -1,4 +1,11 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [Unreleased]
+### Changed
+- Move to pure-js @grpc/grpc-js library
+- Expose more usable methods from the client
+- Make default ChunkSize 3 MiB
+
+
 ## [8.2.3] - 2020-03-27
 ### Added
 - ReadHeader will stop once it gets the head
@@ -81,7 +88,7 @@ This release makes some changes to the Hoard protobuf and service that are backw
 
 ## [5.0.1] - 2019-06-20
 ### Fixed
-- JS client - v5, npm publish
+- JS client - v5, yarn publish
 
 
 ## [5.0.0] - 2019-05-24
@@ -202,6 +209,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[Unreleased]: https://github.com/monax/hoard/compare/v8.2.3...HEAD
 [8.2.3]: https://github.com/monax/hoard/compare/v8.2.2...v8.2.3
 [8.2.2]: https://github.com/monax/hoard/compare/v8.2.1...v8.2.2
 [8.2.1]: https://github.com/monax/hoard/compare/v8.2.0...v8.2.1
