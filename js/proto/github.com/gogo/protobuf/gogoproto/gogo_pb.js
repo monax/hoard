@@ -1,3 +1,4 @@
+// source: github.com/gogo/protobuf/gogoproto/gogo.proto
 /**
  * @fileoverview
  * @enhanceable
@@ -12,6 +13,7 @@ var goog = jspb;
 var global = Function('return this')();
 
 var google_protobuf_descriptor_pb = require('google-protobuf/google/protobuf/descriptor_pb.js');
+goog.object.extend(proto, google_protobuf_descriptor_pb);
 goog.exportSymbol('proto.gogoproto.benchgen', null, global);
 goog.exportSymbol('proto.gogoproto.benchgenAll', null, global);
 goog.exportSymbol('proto.gogoproto.castkey', null, global);
@@ -92,7 +94,7 @@ goog.exportSymbol('proto.gogoproto.wktpointer', null, global);
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoEnumPrefix`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoEnumPrefix = new jspb.ExtensionFieldInfo(
     62001,
@@ -117,7 +119,7 @@ google_protobuf_descriptor_pb.EnumOptions.extensions[62001] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoEnumStringer`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoEnumStringer = new jspb.ExtensionFieldInfo(
     62021,
@@ -142,7 +144,7 @@ google_protobuf_descriptor_pb.EnumOptions.extensions[62021] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `enumStringer`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.enumStringer = new jspb.ExtensionFieldInfo(
     62022,
@@ -167,7 +169,7 @@ google_protobuf_descriptor_pb.EnumOptions.extensions[62022] = proto.gogoproto.en
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `enumCustomname`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.enumCustomname = new jspb.ExtensionFieldInfo(
     62023,
@@ -192,7 +194,7 @@ google_protobuf_descriptor_pb.EnumOptions.extensions[62023] = proto.gogoproto.en
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `enumdecl`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.enumdecl = new jspb.ExtensionFieldInfo(
     62024,
@@ -217,7 +219,7 @@ google_protobuf_descriptor_pb.EnumOptions.extensions[62024] = proto.gogoproto.en
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `enumvalueCustomname`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.enumvalueCustomname = new jspb.ExtensionFieldInfo(
     66001,
@@ -242,7 +244,7 @@ google_protobuf_descriptor_pb.EnumValueOptions.extensions[66001] = proto.gogopro
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoGettersAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoGettersAll = new jspb.ExtensionFieldInfo(
     63001,
@@ -267,7 +269,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63001] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoEnumPrefixAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoEnumPrefixAll = new jspb.ExtensionFieldInfo(
     63002,
@@ -292,7 +294,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63002] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoStringerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoStringerAll = new jspb.ExtensionFieldInfo(
     63003,
@@ -317,7 +319,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63003] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `verboseEqualAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.verboseEqualAll = new jspb.ExtensionFieldInfo(
     63004,
@@ -342,7 +344,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63004] = proto.gogoproto.ve
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `faceAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.faceAll = new jspb.ExtensionFieldInfo(
     63005,
@@ -367,7 +369,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63005] = proto.gogoproto.fa
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `gostringAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.gostringAll = new jspb.ExtensionFieldInfo(
     63006,
@@ -392,7 +394,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63006] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `populateAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.populateAll = new jspb.ExtensionFieldInfo(
     63007,
@@ -417,7 +419,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63007] = proto.gogoproto.po
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `stringerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.stringerAll = new jspb.ExtensionFieldInfo(
     63008,
@@ -442,7 +444,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63008] = proto.gogoproto.st
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `onlyoneAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.onlyoneAll = new jspb.ExtensionFieldInfo(
     63009,
@@ -467,7 +469,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63009] = proto.gogoproto.on
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `equalAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.equalAll = new jspb.ExtensionFieldInfo(
     63013,
@@ -492,7 +494,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63013] = proto.gogoproto.eq
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `descriptionAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.descriptionAll = new jspb.ExtensionFieldInfo(
     63014,
@@ -517,7 +519,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63014] = proto.gogoproto.de
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `testgenAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.testgenAll = new jspb.ExtensionFieldInfo(
     63015,
@@ -542,7 +544,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63015] = proto.gogoproto.te
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `benchgenAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.benchgenAll = new jspb.ExtensionFieldInfo(
     63016,
@@ -567,7 +569,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63016] = proto.gogoproto.be
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `marshalerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.marshalerAll = new jspb.ExtensionFieldInfo(
     63017,
@@ -592,7 +594,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63017] = proto.gogoproto.ma
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `unmarshalerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.unmarshalerAll = new jspb.ExtensionFieldInfo(
     63018,
@@ -617,7 +619,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63018] = proto.gogoproto.un
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `stableMarshalerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.stableMarshalerAll = new jspb.ExtensionFieldInfo(
     63019,
@@ -642,7 +644,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63019] = proto.gogoproto.st
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `sizerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.sizerAll = new jspb.ExtensionFieldInfo(
     63020,
@@ -667,7 +669,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63020] = proto.gogoproto.si
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoEnumStringerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoEnumStringerAll = new jspb.ExtensionFieldInfo(
     63021,
@@ -692,7 +694,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63021] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `enumStringerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.enumStringerAll = new jspb.ExtensionFieldInfo(
     63022,
@@ -717,7 +719,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63022] = proto.gogoproto.en
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `unsafeMarshalerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.unsafeMarshalerAll = new jspb.ExtensionFieldInfo(
     63023,
@@ -742,7 +744,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63023] = proto.gogoproto.un
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `unsafeUnmarshalerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.unsafeUnmarshalerAll = new jspb.ExtensionFieldInfo(
     63024,
@@ -767,7 +769,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63024] = proto.gogoproto.un
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoExtensionsMapAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoExtensionsMapAll = new jspb.ExtensionFieldInfo(
     63025,
@@ -792,7 +794,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63025] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoUnrecognizedAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoUnrecognizedAll = new jspb.ExtensionFieldInfo(
     63026,
@@ -817,7 +819,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63026] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `gogoprotoImport`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.gogoprotoImport = new jspb.ExtensionFieldInfo(
     63027,
@@ -842,7 +844,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63027] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `protosizerAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.protosizerAll = new jspb.ExtensionFieldInfo(
     63028,
@@ -867,7 +869,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63028] = proto.gogoproto.pr
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `compareAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.compareAll = new jspb.ExtensionFieldInfo(
     63029,
@@ -892,7 +894,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63029] = proto.gogoproto.co
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `typedeclAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.typedeclAll = new jspb.ExtensionFieldInfo(
     63030,
@@ -917,7 +919,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63030] = proto.gogoproto.ty
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `enumdeclAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.enumdeclAll = new jspb.ExtensionFieldInfo(
     63031,
@@ -942,7 +944,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63031] = proto.gogoproto.en
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoRegistration`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoRegistration = new jspb.ExtensionFieldInfo(
     63032,
@@ -967,7 +969,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63032] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `messagenameAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.messagenameAll = new jspb.ExtensionFieldInfo(
     63033,
@@ -992,7 +994,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63033] = proto.gogoproto.me
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoSizecacheAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoSizecacheAll = new jspb.ExtensionFieldInfo(
     63034,
@@ -1017,7 +1019,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63034] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoUnkeyedAll`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoUnkeyedAll = new jspb.ExtensionFieldInfo(
     63035,
@@ -1042,7 +1044,7 @@ google_protobuf_descriptor_pb.FileOptions.extensions[63035] = proto.gogoproto.go
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoGetters`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoGetters = new jspb.ExtensionFieldInfo(
     64001,
@@ -1067,7 +1069,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64001] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoStringer`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoStringer = new jspb.ExtensionFieldInfo(
     64003,
@@ -1092,7 +1094,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64003] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `verboseEqual`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.verboseEqual = new jspb.ExtensionFieldInfo(
     64004,
@@ -1117,7 +1119,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64004] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `face`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.face = new jspb.ExtensionFieldInfo(
     64005,
@@ -1142,7 +1144,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64005] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `gostring`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.gostring = new jspb.ExtensionFieldInfo(
     64006,
@@ -1167,7 +1169,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64006] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `populate`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.populate = new jspb.ExtensionFieldInfo(
     64007,
@@ -1192,7 +1194,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64007] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `stringer`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.stringer = new jspb.ExtensionFieldInfo(
     67008,
@@ -1217,7 +1219,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[67008] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `onlyone`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.onlyone = new jspb.ExtensionFieldInfo(
     64009,
@@ -1242,7 +1244,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64009] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `equal`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.equal = new jspb.ExtensionFieldInfo(
     64013,
@@ -1267,7 +1269,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64013] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `description`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.description = new jspb.ExtensionFieldInfo(
     64014,
@@ -1292,7 +1294,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64014] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `testgen`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.testgen = new jspb.ExtensionFieldInfo(
     64015,
@@ -1317,7 +1319,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64015] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `benchgen`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.benchgen = new jspb.ExtensionFieldInfo(
     64016,
@@ -1342,7 +1344,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64016] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `marshaler`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.marshaler = new jspb.ExtensionFieldInfo(
     64017,
@@ -1367,7 +1369,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64017] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `unmarshaler`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.unmarshaler = new jspb.ExtensionFieldInfo(
     64018,
@@ -1392,7 +1394,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64018] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `stableMarshaler`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.stableMarshaler = new jspb.ExtensionFieldInfo(
     64019,
@@ -1417,7 +1419,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64019] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `sizer`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.sizer = new jspb.ExtensionFieldInfo(
     64020,
@@ -1442,7 +1444,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64020] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `unsafeMarshaler`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.unsafeMarshaler = new jspb.ExtensionFieldInfo(
     64023,
@@ -1467,7 +1469,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64023] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `unsafeUnmarshaler`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.unsafeUnmarshaler = new jspb.ExtensionFieldInfo(
     64024,
@@ -1492,7 +1494,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64024] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoExtensionsMap`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoExtensionsMap = new jspb.ExtensionFieldInfo(
     64025,
@@ -1517,7 +1519,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64025] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoUnrecognized`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoUnrecognized = new jspb.ExtensionFieldInfo(
     64026,
@@ -1542,7 +1544,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64026] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `protosizer`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.protosizer = new jspb.ExtensionFieldInfo(
     64028,
@@ -1567,7 +1569,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64028] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `compare`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.compare = new jspb.ExtensionFieldInfo(
     64029,
@@ -1592,7 +1594,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64029] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `typedecl`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.typedecl = new jspb.ExtensionFieldInfo(
     64030,
@@ -1617,7 +1619,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64030] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `messagename`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.messagename = new jspb.ExtensionFieldInfo(
     64033,
@@ -1642,7 +1644,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64033] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoSizecache`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoSizecache = new jspb.ExtensionFieldInfo(
     64034,
@@ -1667,7 +1669,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64034] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `goprotoUnkeyed`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.goprotoUnkeyed = new jspb.ExtensionFieldInfo(
     64035,
@@ -1692,7 +1694,7 @@ google_protobuf_descriptor_pb.MessageOptions.extensions[64035] = proto.gogoproto
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `nullable`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.nullable = new jspb.ExtensionFieldInfo(
     65001,
@@ -1717,7 +1719,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65001] = proto.gogoproto.n
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `embed`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.embed = new jspb.ExtensionFieldInfo(
     65002,
@@ -1742,7 +1744,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65002] = proto.gogoproto.e
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `customtype`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.customtype = new jspb.ExtensionFieldInfo(
     65003,
@@ -1767,7 +1769,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65003] = proto.gogoproto.c
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `customname`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.customname = new jspb.ExtensionFieldInfo(
     65004,
@@ -1792,7 +1794,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65004] = proto.gogoproto.c
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `jsontag`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.jsontag = new jspb.ExtensionFieldInfo(
     65005,
@@ -1817,7 +1819,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65005] = proto.gogoproto.j
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `moretags`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.moretags = new jspb.ExtensionFieldInfo(
     65006,
@@ -1842,7 +1844,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65006] = proto.gogoproto.m
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `casttype`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.casttype = new jspb.ExtensionFieldInfo(
     65007,
@@ -1867,7 +1869,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65007] = proto.gogoproto.c
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `castkey`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.castkey = new jspb.ExtensionFieldInfo(
     65008,
@@ -1892,7 +1894,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65008] = proto.gogoproto.c
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `castvalue`.
- * @type {!jspb.ExtensionFieldInfo.<string>}
+ * @type {!jspb.ExtensionFieldInfo<string>}
  */
 proto.gogoproto.castvalue = new jspb.ExtensionFieldInfo(
     65009,
@@ -1917,7 +1919,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65009] = proto.gogoproto.c
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `stdtime`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.stdtime = new jspb.ExtensionFieldInfo(
     65010,
@@ -1942,7 +1944,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65010] = proto.gogoproto.s
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `stdduration`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.stdduration = new jspb.ExtensionFieldInfo(
     65011,
@@ -1967,7 +1969,7 @@ google_protobuf_descriptor_pb.FieldOptions.extensions[65011] = proto.gogoproto.s
 /**
  * A tuple of {field number, class constructor} for the extension
  * field named `wktpointer`.
- * @type {!jspb.ExtensionFieldInfo.<boolean>}
+ * @type {!jspb.ExtensionFieldInfo<boolean>}
  */
 proto.gogoproto.wktpointer = new jspb.ExtensionFieldInfo(
     65012,
