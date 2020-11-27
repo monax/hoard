@@ -121,8 +121,6 @@ To build Hoard you will need to have the following installed:
 Then, from the project root run:
 
 ```shell
-# Install protobuf GRPC plugin, glide, and glide dependencies
-make protobuf_deps
 # Run checks, tests, and build binaries
 make build && make install
 ```

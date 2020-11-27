@@ -15,7 +15,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'jest'],
+  plugins: ['@typescript-eslint', 'jest', 'prettier'],
   rules: {
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/camelcase': 0,

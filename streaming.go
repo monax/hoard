@@ -25,15 +25,11 @@ func SendPlaintext(data []byte, chunkSize int, srv PlaintextSender, version int3
 		return srv.Send(&api.Plaintext{Head: head})
 	}
 
-	if len(data) > chunkSize {
-		return sendChunks(data, chunkSize, func(chunk []byte) error {
-			return srv.Send(&api.Plaintext{
-				Body: chunk,
-			})
+	return sendChunks(data, chunkSize, func(chunk []byte) error {
+		return srv.Send(&api.Plaintext{
+			Body: chunk,
 		})
-	}
-
-	return srv.Send(&api.Plaintext{Body: data})
+	})
 }
 
 func receiveReferencesAndGrantSpec(srv api.Grant_SealServer) (reference.Refs, *grant.Spec, error) {
@@ -110,9 +106,10 @@ func consumeBodyFromPlaintextAndGrantSpec(ptgs *api.PlaintextAndGrantSpec, acc [
 
 func consumeBodyFromPlaintext(pt *api.Plaintext, acc []byte, chunkSize int, cb func([]byte) error) ([]byte, error) {
 	if pt.GetHead() != nil {
-		return nil, fmt.Errorf("received multiple headers but there can be at most one")
+		return nil, fmt.Errorf("received header in a Plaintext frame other than the first")
 	}
 
+	// acc is the lefto
 	limit := chunkSize - len(acc)
 	data := pt.GetBody()
 
@@ -264,15 +261,15 @@ func ReadStream(receiver func() (interface{}, error)) (interface{}, error) {
 
 func sendChunks(data []byte, chunkSize int, sender func(chunk []byte) error) error {
 	var err error
-	for i := 0; i < len(data); i += chunkSize {
-		if i+chunkSize > len(data) {
-			err = sender(data[i:])
-		} else {
-			err = sender(data[i : i+chunkSize])
-		}
+	for len(data) > chunkSize {
+		err = sender(data[:chunkSize])
 		if err != nil {
 			return err
 		}
+		data = data[chunkSize:]
 	}
-	return nil
+	if len(data) == 0 {
+		return nil
+	}
+	return sender(data)
 }

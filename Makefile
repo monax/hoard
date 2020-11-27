@@ -113,12 +113,6 @@ clean_protobuf:
 yarn_install:
 	cd ${HOARD_TS_PATH} && yarn install
 
-.PHONY: protobuf_deps
-protobuf_deps:
-	go get -u github.com/gogo/protobuf/protoc-gen-gogo
-	cd ${HOARD_TS_PATH} && yarn install grpc-tools
-	cd ${HOARD_TS_PATH} && yarn install ts-protoc-gen
-
 ## build the hoard binary
 .PHONY: build_hoard
 build_hoard: commit_hash
