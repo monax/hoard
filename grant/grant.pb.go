@@ -21,6 +21,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// As the grant is often stored as json and we to specify the correct tags for
+// compatability with the client library.
 type Grant struct {
 	// The grantSpec provides sufficient information to decrypt the reference
 	// if hoard has access to the requisite secret

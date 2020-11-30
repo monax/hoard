@@ -21,7 +21,7 @@ of the API. To run use:
 
 ```shell
 # Get dependencies
-npm install
+yarn install
 # Run examples
-npm test
+yarn test
 ```

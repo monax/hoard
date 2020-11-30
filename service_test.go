@@ -36,7 +36,7 @@ func writeUIntBE(buffer []byte, value, offset, byteLength int64) error {
 }
 
 func TestService(t *testing.T) {
-	chunkSize := 1024 * 1024
+	chunkSize := 16
 	salt, err := encryption.NewNonce(encryption.NonceSize)
 	assert.NoError(t, err)
 	secret, err := encryption.DeriveSecretKey([]byte("shhhh"), salt)

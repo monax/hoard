@@ -71,6 +71,7 @@ func (service *Service) Put(srv api.Cleartext_PutServer) error {
 	}
 
 	var accumulator []byte
+	// fuck me this is ugly code
 	for {
 		plaintext, err := srv.Recv()
 		if err != nil {
@@ -373,6 +374,9 @@ func (service *Service) encHeader(head *api.Header, cb func(*api.ReferenceAndCip
 }
 
 func (service *Service) putHeader(head *api.Header, cb func(*reference.Ref) error) error {
+	if head == nil {
+		return nil
+	}
 	data, err := proto.Marshal(head)
 	if err != nil {
 		return err
@@ -388,7 +392,7 @@ func (service *Service) putHeader(head *api.Header, cb func(*reference.Ref) erro
 }
 
 func (service *Service) putPlaintext(data, salt []byte, cb func(*reference.Ref) error) error {
-	if data == nil {
+	if len(data) == 0 {
 		return nil
 	}
 
