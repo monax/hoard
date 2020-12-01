@@ -1,27 +1,25 @@
-FROM golang:1.12.1-alpine3.9
-MAINTAINER Monax <support@monax.io>
-
-ENV PROTO_VERSION 3.3.0
-ENV GORELEASER_VERSION "v0.104.1"
+FROM golang:1.15-alpine3.12
+ENV PROTO_VERSION 3.11.4
+ENV GORELEASER_VERSION "v0.149.0"
 
 RUN apk add --update --no-cache \
- nodejs \
- yarn \
- netcat-openbsd \
- git \
- openssh-client \
- openssl \
- make \
- bash \
- gcc \
- g++ \
- jq \
- curl \
- docker \
- libffi-dev \
- openssl-dev \
- python-dev \
- py-pip
+  nodejs \
+  yarn \
+  netcat-openbsd \
+  git \
+  openssh-client \
+  openssl \
+  make \
+  bash \
+  gcc \
+  g++ \
+  jq \
+  curl \
+  docker \
+  libffi-dev \
+  openssl-dev \
+  python-dev \
+  py-pip
 
 RUN pip install docker-compose
 RUN yarn install -g yarn-cli-login

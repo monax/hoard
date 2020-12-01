@@ -158,9 +158,9 @@ test_js: build install yarn_install
 ## run tests including integration tests
 .PHONY:	test_integration
 test_integration: check
-	@go test -v -tags integration ./...
-	@scripts/integration/test_gcp.sh
-	@scripts/integration/test_ipfs.sh
+	go test -v -tags integration ./...
+	scripts/integration/test_gcp.sh
+	# @scripts/integration/test_ipfs.sh ## needs work
 
 # Clean Up
 

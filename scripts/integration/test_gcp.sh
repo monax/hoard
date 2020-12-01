@@ -10,15 +10,19 @@ then
   exit 1
 fi
 
-GCS_BUCKET="monax-hoard"
+GCS_BUCKET="hoard-integration-tests"
 GCS_PREFIX="test-store"
 
 # Integration test dir
 cd "$(dirname "$0")"
 
-if [[ -z "$GCLOUD_SERVICE_KEY" ]]; then
+if [[ -z "${GCLOUD_SERVICE_KEY}" ]]; then
+  if [[ -z "${GOOGLE_APPLICATION_CREDENTIALS}" ]]; then
+    export GCLOUD_SERVICE_KEY=${GOOGLE_APPLICATION_CREDENTIALS}
+  else
     echo "GCLOUD_SERVICE_KEY must be set" 1>&2
     exit 1
+  fi
 fi
 
 read -d '' HOARD_JSON_CONFIG << CONFIG
