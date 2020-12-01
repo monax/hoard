@@ -10,16 +10,15 @@ import {
   ReferenceAndCiphertext,
   ReferenceAndGrantSpec,
 } from '../proto/api_pb';
-import { Grant, OpenPGPSpec, PlaintextSpec, Spec, SymmetricSpec } from '../proto/grant_pb';
-import { Ref } from '../proto/reference_pb';
-import { StatInfo } from '../proto/stores_pb';
+import {Grant, OpenPGPSpec, PlaintextSpec, Spec, SymmetricSpec} from '../proto/grant_pb';
+import {Ref} from '../proto/reference_pb';
+import {StatInfo} from '../proto/stores_pb';
 import {
   BytesLike,
   BytesReadable,
   bytesReadable,
   bytesToObject,
   cancelAndDestroy,
-  DEFAULT_CHUNK_SIZE,
   HeaderStream,
   objectToBytes,
   pipeline,
