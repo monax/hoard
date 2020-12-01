@@ -18,7 +18,7 @@ import (
 )
 
 func TestStoreGCS(t *testing.T) {
-	bucket := "monax-hoard"
+	bucket := "hoard-integration-tests"
 	prefix := "test-store"
 	err := deleteGCSPrefix(bucket, prefix)
 	require.NoError(t, err)
