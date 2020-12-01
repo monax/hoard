@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/monax/hoard/v8/reference"
+
 	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/v8"
 	"github.com/monax/hoard/v8/api"
@@ -45,13 +47,13 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 			fatalf("Error sending head: %v", err)
 		}
 
-		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
+		err = hoard.NewStreamer().WithChunkSize(*chunk).WithInput(os.Stdin).WithSend(func(data []byte) error {
 			return putseal.Send(&api.PlaintextAndGrantSpec{
 				Plaintext: &api.Plaintext{
 					Body: data,
 				},
 			})
-		})
+		}).Stream(context.Background())
 		if err != nil {
 			fatalf("Error sending body: %v", err)
 		}
@@ -74,31 +76,35 @@ func (client *Client) Seal(cmd *cli.Cmd) {
 	key := addStringOpt(cmd, "key", keyOpt)
 
 	cmd.Action = func() {
-		spec := grant.Spec{Plaintext: &grant.PlaintextSpec{}}
+		spec := &grant.Spec{Plaintext: &grant.PlaintextSpec{}}
 		if *key != "" {
-			spec = grant.Spec{
+			spec = &grant.Spec{
 				Plaintext: nil,
 				Symmetric: &grant.SymmetricSpec{PublicID: *key},
 			}
 		}
 
-		refs := readReferences()
 		seal, err := client.grant.Seal(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		for _, ref := range refs {
-			if err = seal.Send(&api.ReferenceAndGrantSpec{
-				Reference: ref,
-				GrantSpec: &spec,
-			}); err != nil {
-				fatalf("Error sending data: %v", err)
-			}
+		// Send spec
+		err = seal.Send(&api.ReferenceAndGrantSpec{
+			GrantSpec: spec,
+		})
+		if err != nil {
+			fatalf("Could not send spec to seal: %v", err)
 		}
-		if err = seal.CloseSend(); err != nil {
-			fatalf("Error closing send: %v", err)
-		}
+
+		err = hoard.NewStreamer().
+			WithSend(readReferences(func(ref *reference.Ref) error {
+				return seal.Send(&api.ReferenceAndGrantSpec{
+					Reference: ref,
+				})
+			})).
+			WithCloseSend(seal.CloseSend).
+			Stream(context.Background())
 
 		grt, err := seal.CloseAndRecv()
 		if err != nil {
@@ -150,7 +156,11 @@ func (client *Client) Unseal(cmd *cli.Cmd) {
 			fatalf("Error closing send: %v", err)
 		}
 
-		refs, err := hoard.ReceiveAllReferences(unseal)
+		refs := reference.Refs{}
+		err = hoard.NewStreamer().
+			WithRecv(recvReferences(&refs, unseal.Recv)).
+			Stream(context.Background())
+
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
@@ -169,10 +179,16 @@ func (client *Client) UnsealGet(cmd *cli.Cmd) {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
-			plaintext, err := unsealget.Recv()
-			return plaintext.GetBody(), err
-		})
+		err = hoard.NewStreamer().
+			WithRecv(func() ([]byte, error) {
+				plaintext, err := unsealget.Recv()
+				if err != nil {
+					return nil, err
+				}
+				return plaintext.GetBody(), nil
+			}).
+			WithOutput(os.Stdout).
+			Stream(context.Background())
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}

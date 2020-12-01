@@ -9,7 +9,15 @@ message Ref {
     bytes SecretKey = 2;
     bytes Salt = 3;
 
-    // Version indicates whether to undergo further decoding
-    int32 Version = 4;
+    enum RefType {
+        // Default raw reference containing a body chunk
+        BODY = 0;
+        // Ref to a header chunk
+        HEADER = 1;
+        // A ref to a Plaintext of refs
+        LINK = 2;
+    }
+    // Type indicates whether to undergo further decoding
+    RefType Type = 4;
 }
 

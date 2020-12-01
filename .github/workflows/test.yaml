@@ -12,14 +12,16 @@ jobs:
           go-version: 1.15
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: '14.x'
+          node-version: '15.x'
+      - run: sudo apt-get install jq
       - run: make build
       - run: make test
+      - run: make test_hoarctl
       - run: make test_js
 
   integration:
     runs-on: ubuntu-latest
-    env: 
+    env:
       GCLOUD_SERVICE_KEY: ${{ secrets.GCLOUD_SERVICE_KEY }}
     steps:
       - uses: actions/checkout@v2

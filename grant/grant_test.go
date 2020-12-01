@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
-	"strings"
 	"testing"
 
 	"github.com/monax/hoard/v8/config"
@@ -29,8 +28,8 @@ func TestGrants(t *testing.T) {
 	plaintextSpec := Spec{Plaintext: &PlaintextSpec{}}
 	plaintextGrant, err := Seal(testSecrets, testRefs, &plaintextSpec)
 	assert.NoError(t, err)
-	assert.Equal(t, testRefs[0].Address, reference.RepeatedFromPlaintext(string(plaintextGrant.EncryptedReferences))[0].Address)
-	assert.Equal(t, testRefs[0].SecretKey, reference.RepeatedFromPlaintext(string(plaintextGrant.EncryptedReferences))[0].SecretKey)
+	assert.Equal(t, testRefs[0].Address, reference.RepeatedFromPlaintext(plaintextGrant.EncryptedReferences)[0].Address)
+	assert.Equal(t, testRefs[0].SecretKey, reference.RepeatedFromPlaintext(plaintextGrant.EncryptedReferences)[0].SecretKey)
 	plaintextRef, err := Unseal(testSecrets, plaintextGrant)
 	assert.Equal(t, testRefs, plaintextRef)
 
@@ -68,41 +67,6 @@ func mustDecodeString(str string) []byte {
 		panic(err)
 	}
 	return ciphertext
-}
-
-func TestUnsealV0Grant(t *testing.T) {
-	secrets := newSecretsManager(map[string]string{
-		"testing-id-1": strings.Repeat("A", encryption.KeySize),
-		"testing-id-2": strings.Repeat("A", encryption.KeySize-1),
-	}, nil)
-
-	var params = []struct {
-		id         string
-		ciphertext string
-	}{
-		{
-			"testing-id-1",
-			"Rki+cOHZ1WClgLUx3/6AlP48p//fz8Y8hEbAqYsM2w/os1dQ+yViX6JPRI/BcJW7ebSmwzisnekowWjZ6w+Zpi7EFa52q8SXZOgg5Qi5RmAfHDpbbtQNGpLIQUrCIXaa/+6TKpiEKB67Vq+9OIhjtI1pThTPDyMGc6dBHx6P9d+zfALn4iAOPURWma93vjZKsJON6sU3YzHIc3+Gag==",
-		},
-		{
-			"testing-id-2",
-			"+WErtplQBsz3Uq+LTbyxEI1JMUDWBqJdHeFey3gSG/KOgnp55xRqDGa4bq/ByksQ1EOPjFSD3AwU/Zc2Z+1E1PhAizp+uhdbJvtHXbEL1x/Ox/zEBQ/x4ZI5cMxtiB0LtPWfAvWaA8OmHYZkvNnJ/zoD4Ch/TV4+Y8h7Q8dLipcsG6PEVNWvIW52W61XJUBQozf/iZOpx6dRcv4xwA==",
-		},
-	}
-
-	for _, tt := range params {
-		ciphertext, err := base64.StdEncoding.DecodeString(tt.ciphertext)
-		require.NoError(t, err)
-
-		_, err = Unseal(secrets, &Grant{
-			Spec: &Spec{
-				Symmetric: &SymmetricSpec{PublicID: tt.id},
-			},
-			EncryptedReferences: ciphertext,
-			Version:             0,
-		})
-		require.NoError(t, err)
-	}
 }
 
 func newSecretsManager(secrets map[string]string, pgp *config.OpenPGPSecret) config.SecretsManager {

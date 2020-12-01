@@ -9,6 +9,12 @@ package api;
 option go_package = "github.com/monax/hoard/v8/api";
 
 service Grant {
+    // Put a Plaintext and returned the sealed Reference as a Grant
+    rpc PutSeal (stream PlaintextAndGrantSpec) returns (grant.Grant);
+
+    // Unseal a Grant and follow the Reference to return a Plaintext
+    rpc UnsealGet (grant.Grant) returns (stream Plaintext);
+
     // Seal a Reference to create a Grant
     rpc Seal (stream ReferenceAndGrantSpec) returns (grant.Grant);
 
@@ -18,12 +24,6 @@ service Grant {
     // Convert one grant to another grant to re-share with another party or just
     // to change grant type
     rpc Reseal (GrantAndGrantSpec) returns (grant.Grant);
-
-    // Put a Plaintext and returned the sealed Reference as a Grant
-    rpc PutSeal (stream PlaintextAndGrantSpec) returns (grant.Grant);
-
-    // Unseal a Grant and follow the Reference to return a Plaintext
-    rpc UnsealGet (grant.Grant) returns (stream Plaintext);
 
     // Unseal a Grant and follow the Reference to delete the Plaintext
     rpc UnsealDelete (grant.Grant) returns (stream Address);

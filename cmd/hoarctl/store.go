@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/monax/hoard/v8/stores"
+
+	"github.com/monax/hoard/v8/reference"
 
 	cli "github.com/jawher/mow.cli"
 	hoard "github.com/monax/hoard/v8"
@@ -13,26 +18,28 @@ import (
 // Cat retrieves encrypted data from store
 func (client *Client) Cat(cmd *cli.Cmd) {
 	cmd.Action = func() {
-		refs := readReferences()
-
 		pull, err := client.storage.Pull(context.Background())
-		if err != nil {
-			fatalf("Error starting client: %v", err)
-		}
-
-		for _, ref := range refs {
-			if err = pull.Send(&api.Address{Address: ref.Address}); err != nil {
-				fatalf("Error sending data: %v", err)
+		decoder := json.NewDecoder(os.Stdin)
+		err = hoard.NewStreamer().WithSend(func(chunk []byte) error {
+			refs := new(reference.Refs)
+			err := decoder.Decode(refs)
+			if err != nil {
+				return err
 			}
-		}
-		if err = pull.CloseSend(); err != nil {
-			fatalf("Error closing send: %v", err)
-		}
-
-		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
+			for _, ref := range *refs {
+				err := pull.Send(&api.Address{Address: ref.Address})
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}).WithCloseSend(pull.CloseSend).WithRecv(func() ([]byte, error) {
 			ciphertext, err := pull.Recv()
+			if err != nil {
+				return nil, err
+			}
 			return ciphertext.GetEncryptedData(), err
-		})
+		}).WithOutput(os.Stdout).Stream(context.Background())
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
@@ -42,26 +49,17 @@ func (client *Client) Cat(cmd *cli.Cmd) {
 // Get retrieves and decrypts data from store
 func (client *Client) Get(cmd *cli.Cmd) {
 	cmd.Action = func() {
-		refs := readReferences()
-
 		get, err := client.cleartext.Get(context.Background())
-		if err != nil {
-			fatalf("Error starting client: %v", err)
-		}
-
-		for _, ref := range refs {
-			if err = get.Send(ref); err != nil {
-				fatalf("Error sending data: %v", err)
-			}
-		}
-		if err = get.CloseSend(); err != nil {
-			fatalf("Error closing send: %v", err)
-		}
-
-		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
-			plaintext, err := get.Recv()
-			return plaintext.GetBody(), err
-		})
+		err = hoard.NewStreamer().
+			WithSend(readReferences(get.Send)).
+			WithCloseSend(get.CloseSend).
+			WithRecv(func() ([]byte, error) {
+				plaintext, err := get.Recv()
+				if err != nil {
+					return nil, err
+				}
+				return plaintext.GetBody(), err
+			}).WithOutput(os.Stdout).Stream(context.Background())
 		if err != nil {
 			fatalf("Error receiving data: %v", err)
 		}
@@ -81,22 +79,28 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
-			return push.Send(&api.Ciphertext{EncryptedData: data})
-		})
+		var addresses []*api.Address
+
+		err = hoard.NewStreamer().WithChunkSize(*chunk).
+			WithInput(os.Stdin).
+			WithSend(func(data []byte) error {
+				return push.Send(&api.Ciphertext{EncryptedData: data})
+			}).
+			WithCloseSend(push.CloseSend).
+			WithRecv(func() ([]byte, error) {
+				address, err := push.Recv()
+				if err != nil {
+					return nil, err
+				}
+				addresses = append(addresses, address)
+				return nil, nil
+			}).
+			Stream(context.Background())
 		if err != nil {
 			fatalf("Error sending data: %v", err)
 		}
-		if err = push.CloseSend(); err != nil {
-			fatalf("Error closing send: %v", err)
-		}
 
-		addrs, err := hoard.ReceiveAllAddresses(push)
-		if err != nil {
-			fatalf("Error receiving data: %v", err)
-		}
-
-		fmt.Printf("%s\n", jsonString(addrs))
+		fmt.Printf("%s\n", jsonString(addresses))
 	}
 }
 
@@ -119,20 +123,18 @@ func (client *Client) Put(cmd *cli.Cmd) {
 			fatalf("Error sending head: %v", err)
 		}
 
-		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
-			return put.Send(&api.Plaintext{Body: data})
-		})
+		refs := reference.Refs{}
+		err = hoard.NewStreamer().WithChunkSize(*chunk).
+			WithInput(os.Stdin).
+			WithSend(func(data []byte) error {
+				return put.Send(&api.Plaintext{Body: data})
+			}).
+			WithCloseSend(put.CloseSend).
+			WithRecv(recvReferences(&refs, put.Recv)).
+			Stream(context.Background())
+
 		if err != nil {
 			fatalf("Error sending body: %v", err)
-		}
-
-		if err = put.CloseSend(); err != nil {
-			fatalf("Error closing send: %v", err)
-		}
-
-		refs, err := hoard.ReceiveAllReferences(put)
-		if err != nil {
-			fatalf("Error receiving data: %v", err)
 		}
 
 		fmt.Printf("%s\n", jsonString(refs))
@@ -141,31 +143,38 @@ func (client *Client) Put(cmd *cli.Cmd) {
 
 // Delete removes the blob located at the provided address
 func (client *Client) Delete(cmd *cli.Cmd) {
-	address := addStringOpt(cmd, "address", addrOpt)
-
 	cmd.Action = func() {
-		ref := readReference(address)
-		_, err := client.storage.Delete(context.Background(),
-			&api.Address{
-				Address: ref.Address,
-			})
+		err := hoard.NewStreamer().WithSend(readReferences(func(ref *reference.Ref) error {
+			_, err := client.storage.Delete(context.Background(),
+				&api.Address{
+					Address: ref.Address,
+				})
+			return err
+		})).Stream(context.Background())
 		if err != nil {
 			fatalf("Error deleting data: %v", err)
 		}
+
 	}
 }
 
 // Stat retrieves info about the stored data
 func (client *Client) Stat(cmd *cli.Cmd) {
-	address := addStringOpt(cmd, "address", addrOpt)
-
 	cmd.Action = func() {
-		ref := readReference(address)
-		statInfo, err := client.storage.Stat(context.Background(),
-			&api.Address{Address: ref.Address})
+		var statInfos []*stores.StatInfo
+		err := hoard.NewStreamer().WithSend(readReferences(func(ref *reference.Ref) error {
+			statInfo, err := client.storage.Stat(context.Background(),
+				&api.Address{Address: ref.Address})
+			if err != nil {
+				return err
+			}
+			statInfos = append(statInfos, statInfo)
+			return nil
+		})).Stream(context.Background())
+
+		fmt.Printf("%s\n", jsonString(statInfos))
 		if err != nil {
-			fatalf("Error querying data: %v", err)
+			fatalf("Error querying blobs: %v", err)
 		}
-		fmt.Printf("%s\n", jsonString(statInfo))
 	}
 }

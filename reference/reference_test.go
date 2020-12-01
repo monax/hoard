@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// We more or may not want grants to be deterministic (as in byte-wise identical
+// We may or may not want grants to be deterministic (as in byte-wise identical
 // for the same reference). We provide the ability to salt a reference for the case when
 // we expressly want to avoid them being deterministic. Furthermore the JSON
 // spec doesn't specify a canonical field order. However golang has a pretty
@@ -18,45 +18,26 @@ import (
 // decrypt it), but from this vantage point that case seems fairly marginal.
 // If this test fails but TestGrantPlaintext passes, consider removing this test.
 func TestReferencePlaintextDeterministic(t *testing.T) {
-	assert.Equal(t,
-		"{\"Address\":\"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=\","+
-			"\"SecretKey\":\"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=\""+
-			"}",
-		testReference(nil).Plaintext(nil))
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg="}]}`,
+		string(testReference(nil).Plaintext(nil)))
 
-	assert.Equal(t,
-		"{\"Address\":\"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=\","+
-			"\"SecretKey\":\"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=\","+
-			"\"Salt\":\"c2FsdA==\""+
-			"}",
-		testReference(([]byte)("salt")).Plaintext(nil))
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA=="}]}`, string(testReference(([]byte)("salt")).Plaintext(nil)))
 
-	assert.Equal(t,
-		"{\"Address\":\"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=\","+
-			"\"SecretKey\":\"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=\","+
-			"\"Salt\":\"c2FsdA==\","+
-			"\"Nonce\":\"bm9uY2U=\""+
-			"}",
-		testReference(([]byte)("salt")).Plaintext(([]byte)("nonce")))
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA=="}],"Nonce":"bm9uY2U="}`, string(testReference(([]byte)("salt")).Plaintext(([]byte)("nonce"))))
 
-	assert.Equal(t,
-		"{\"Refs\":[{\"Address\":\"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=\","+
-			"\"SecretKey\":\"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=\","+
-			"\"Salt\":\"c2FsdA==\"}],"+
-			"\"Nonce\":\"bm9uY2U=\""+
-			"}",
-		Refs{testReference(([]byte)("salt"))}.Plaintext(([]byte)("nonce")))
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA=="}],"Nonce":"bm9uY2U="}`,
+		string(testReference(([]byte)("salt")).Plaintext(([]byte)("nonce"))))
 }
 
 func TestReferencePlaintext(t *testing.T) {
 	ref := testReference(nil)
 	assert.Equal(t, ref,
-		FromPlaintext(ref.Plaintext(nil)))
+		RepeatedFromPlaintext(ref.Plaintext(nil)))
 	assert.Equal(t, ref,
-		FromPlaintext(ref.Plaintext(([]byte)("nonce"))))
+		RepeatedFromPlaintext(ref.Plaintext(([]byte)("nonce"))))
 }
 
-func testReference(salt []byte) *Ref {
+func testReference(salt []byte) Refs {
 	address := []byte{
 		1, 2, 3, 4, 5, 6, 7, 1,
 		1, 2, 3, 4, 5, 6, 7, 1,
@@ -69,5 +50,5 @@ func testReference(salt []byte) *Ref {
 		1, 2, 3, 4, 5, 6, 7, 8,
 		1, 2, 3, 4, 5, 6, 7, 8,
 	}
-	return New(address, secretKey, salt)
+	return Refs{New(address, secretKey, salt)}
 }

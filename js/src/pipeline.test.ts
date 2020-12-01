@@ -1,9 +1,8 @@
 import { Readable, Transform, TransformOptions, Writable } from 'stream';
-import { pipeline, readAll, waitFor } from './stream';
+import {pipeline} from "./pipeline";
+import { readAll, waitFor } from './streaming';
 
-// This test is mostly to sanity check pumpify and to provide some executable documentation to remind you, dear reader,
-// of its behaviour.
-describe('streams', () => {
+describe('pipeline', () => {
   test('error propagation', async () => {
     const explode = Buffer.from('bang');
 
@@ -77,15 +76,15 @@ describe('streams', () => {
     };
 
     const first = new Transform({
-      transform(chunk, encoding, callback) {
-        callback(undefined, chunk);
+      transform({ foo }, encoding, callback) {
+        callback(undefined, { foo: foo + 2 });
       },
       ...opts,
     });
 
     const second = new Transform({
       transform(chunk, encoding, callback) {
-        callback(undefined, chunk);
+        callback(undefined, chunk['foo']);
       },
       ...opts,
     });
@@ -95,12 +94,13 @@ describe('streams', () => {
     expect(piped.readableObjectMode).toStrictEqual(true);
     expect(piped.writableObjectMode).toStrictEqual(true);
 
+    // Writing to first should have same effect as writing to piped (which should be duplex)
     first.write({ foo: 1 });
-    first.write({ foo: 2 });
+    piped.write({ foo: 2 });
     first.end();
 
     const result = await readAll(piped);
 
-    expect(result).toEqual([{ foo: 1 }, { foo: 2 }]);
+    expect(result).toEqual([3, 4]);
   });
 });

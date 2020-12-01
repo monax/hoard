@@ -49,9 +49,6 @@ func TestOpenPGPGrant(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, testRefs, ref)
 
-	ref, err = OpenPGPReferenceV0(grant, nil)
-	assert.Errorf(t, err, "hoard is not currently configured to use openpgp")
-
 	grant, err = OpenPGPGrant(testRefs, string(keyPublic), nil)
 	assert.Errorf(t, err, "hoard is not currently configured to use openpgp")
 }
