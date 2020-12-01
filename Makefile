@@ -23,6 +23,7 @@ export GO111MODULE := on
 # Gets implicit default GOPATH if not set
 GOPATH?=$(shell go env GOPATH)
 BIN_PATH?=${GOPATH}/bin
+NODE_BIN=$(shell yarn --cwd js bin)
 
 SHELL := /bin/bash
 REPO := $(shell pwd)
@@ -91,13 +92,15 @@ commit_hash:
 	@mkdir -p .gopath
 	protoc -I protobuf $< --gogo_out=plugins=grpc:.gopath
 
+# We are using this plugin to match usage in other modules: https://github.com/agreatfool/grpc_tools_node_protoc_ts
 %.pb.ts: %.proto
-	protoc -I protobuf \
-		--plugin="protoc-gen-ts=${PROTOC_GEN_TS_PATH}" \
-		--plugin=protoc-gen-grpc=${PROTOC_GEN_GRPC_PATH} \
+	mkdir -p ${PROTO_GEN_TS_PATH}
+	$(NODE_BIN)/grpc_tools_node_protoc -I protobuf \
+		--plugin="protoc-gen-ts=$(NODE_BIN)/protoc-gen-ts" \
 		--js_out="import_style=commonjs,binary:${PROTO_GEN_TS_PATH}" \
-		--ts_out="service=grpc-node,mode=grpc-js:${PROTO_GEN_TS_PATH}" \
-		--grpc_out="grpc_js:${PROTO_GEN_TS_PATH}" $<
+		--ts_out="grpc_js:${PROTO_GEN_TS_PATH}" \
+		--grpc_out="grpc_js:${PROTO_GEN_TS_PATH}" \
+		$<
 
 
 .PHONY: protobuf
