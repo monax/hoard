@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func CopyChunked(dest func(chunk []byte) error, src func() ([]byte, error), chunkSize int) error {
+func CopyChunked(dest func(chunk []byte) error, src func() ([]byte, error), chunkSize int64) error {
 	// The internal Buffer will ensure we write in chunks
 	_, err := io.CopyBuffer(NewPusher(dest), NewPuller(src), make([]byte, chunkSize))
 	if err != io.EOF {

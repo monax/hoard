@@ -72,7 +72,8 @@ proto.reference.Ref.toObject = function(includeInstance, msg) {
     address: msg.getAddress_asB64(),
     secretkey: msg.getSecretkey_asB64(),
     salt: msg.getSalt_asB64(),
-    type: jspb.Message.getFieldWithDefault(msg, 4, 0)
+    type: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    size: jspb.Message.getFieldWithDefault(msg, 5, 0)
   };
 
   if (includeInstance) {
@@ -124,6 +125,10 @@ proto.reference.Ref.deserializeBinaryFromReader = function(msg, reader) {
     case 4:
       var value = /** @type {!proto.reference.Ref.RefType} */ (reader.readEnum());
       msg.setType(value);
+      break;
+    case 5:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setSize(value);
       break;
     default:
       reader.skipField();
@@ -179,6 +184,13 @@ proto.reference.Ref.serializeBinaryToWriter = function(message, writer) {
   if (f !== 0.0) {
     writer.writeEnum(
       4,
+      f
+    );
+  }
+  f = message.getSize();
+  if (f !== 0) {
+    writer.writeInt64(
+      5,
       f
     );
   }
@@ -335,6 +347,24 @@ proto.reference.Ref.prototype.getType = function() {
  */
 proto.reference.Ref.prototype.setType = function(value) {
   return jspb.Message.setProto3EnumField(this, 4, value);
+};
+
+
+/**
+ * optional int64 Size = 5;
+ * @return {number}
+ */
+proto.reference.Ref.prototype.getSize = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.reference.Ref} returns this
+ */
+proto.reference.Ref.prototype.setSize = function(value) {
+  return jspb.Message.setProto3IntField(this, 5, value);
 };
 
 

@@ -18,14 +18,14 @@ import (
 // decrypt it), but from this vantage point that case seems fairly marginal.
 // If this test fails but TestGrantPlaintext passes, consider removing this test.
 func TestReferencePlaintextDeterministic(t *testing.T) {
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg="}]}`,
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Size":1024}]}`,
 		string(testReference(nil).Plaintext(nil)))
 
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA=="}]}`, string(testReference(([]byte)("salt")).Plaintext(nil)))
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA==","Size":1024}]}`, string(testReference(([]byte)("salt")).Plaintext(nil)))
 
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA=="}],"Nonce":"bm9uY2U="}`, string(testReference(([]byte)("salt")).Plaintext(([]byte)("nonce"))))
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA==","Size":1024}],"Nonce":"bm9uY2U="}`, string(testReference(([]byte)("salt")).Plaintext(([]byte)("nonce"))))
 
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA=="}],"Nonce":"bm9uY2U="}`,
+	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA==","Size":1024}],"Nonce":"bm9uY2U="}`,
 		string(testReference(([]byte)("salt")).Plaintext(([]byte)("nonce"))))
 }
 
@@ -50,5 +50,5 @@ func testReference(salt []byte) Refs {
 		1, 2, 3, 4, 5, 6, 7, 8,
 		1, 2, 3, 4, 5, 6, 7, 8,
 	}
-	return Refs{New(address, secretKey, salt)}
+	return Refs{New(address, secretKey, salt, 1024)}
 }

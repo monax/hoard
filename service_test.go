@@ -38,7 +38,7 @@ func writeUIntBE(buffer []byte, value, offset, byteLength int64) error {
 }
 
 func TestService(t *testing.T) {
-	chunkSize := 16
+	chunkSize := int64(16)
 	salt, err := encryption.NewNonce(encryption.NonceSize)
 	assert.NoError(t, err)
 	secret, err := encryption.DeriveSecretKey([]byte("shhhh"), salt)
@@ -72,11 +72,11 @@ func TestService(t *testing.T) {
 
 				refs, err := ReceiveAllReferences(putStream.Recv)
 				require.NoError(t, err)
-				expected := len(data)/chunkSize + 1
-				if len(data)%chunkSize > 0 {
+				expected := int64(len(data))/chunkSize + 1
+				if int64(len(data))%chunkSize > 0 {
 					expected++
 				}
-				require.Equal(t, expected, len(refs))
+				require.Equal(t, expected, int64(len(refs)))
 
 				getStream, err := client.Get(ctx)
 				require.NoError(t, err)

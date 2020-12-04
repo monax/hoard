@@ -94,7 +94,7 @@ func testReferences() reference.Refs {
 		1, 2, 3, 4, 5, 6, 7, 8,
 		1, 2, 3, 4, 5, 6, 7, 8,
 	}
-	return reference.Refs{reference.New(address, secretKey, nil)}
+	return reference.Refs{reference.New(address, secretKey, nil, 1024)}
 }
 
 func deriveSecret(t *testing.T, data []byte) []byte {

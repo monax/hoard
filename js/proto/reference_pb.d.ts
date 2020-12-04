@@ -25,6 +25,9 @@ export class Ref extends jspb.Message {
     getType(): Ref.RefType;
     setType(value: Ref.RefType): Ref;
 
+    getSize(): number;
+    setSize(value: number): Ref;
+
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Ref.AsObject;
@@ -42,6 +45,7 @@ export namespace Ref {
         secretkey: Uint8Array | string,
         salt: Uint8Array | string,
         type: Ref.RefType,
+        size: number,
     }
 
     export enum RefType {

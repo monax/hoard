@@ -20,7 +20,7 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	bunsOut, err := hrd.Get(ref)
 	assert.Equal(t, bunsIn, bunsOut)
 
-	_, err = hrd.Get(reference.New(ref.Address, pad("wrong secret", 32), nil))
+	_, err = hrd.Get(reference.New(ref.Address, pad("wrong secret", 32), nil, 1024))
 	assert.Error(t, err)
 
 	statInfo, err := hrd.Store().Stat(ref.Address)

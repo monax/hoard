@@ -18,14 +18,14 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		validateChunkSize(*chunk)
+		validateChunkSize(int64(*chunk))
 
 		dec, err := client.encryption.Decrypt(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.NewStreamer().WithChunkSize(*chunk).WithInput(os.Stdin).
+		err = hoard.NewStreamer().WithChunkSize(int64(*chunk)).WithInput(os.Stdin).
 			WithSend(
 				func(data []byte) error {
 					return dec.Send(&api.ReferenceAndCiphertext{
@@ -58,7 +58,7 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		validateChunkSize(*chunk)
+		validateChunkSize(int64(*chunk))
 
 		enc, err := client.encryption.Encrypt(context.Background())
 		if err != nil {
@@ -77,7 +77,7 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 		}
 
 		err = hoard.NewStreamer().
-			WithChunkSize(*chunk).
+			WithChunkSize(int64(*chunk)).
 			WithInput(os.Stdin).
 			WithSend(
 				func(data []byte) error {
@@ -108,7 +108,7 @@ func (client *Client) Ref(cmd *cli.Cmd) {
 	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		validateChunkSize(*chunk)
+		validateChunkSize(int64(*chunk))
 
 		enc, err := client.encryption.Encrypt(context.Background())
 		if err != nil {
@@ -123,7 +123,7 @@ func (client *Client) Ref(cmd *cli.Cmd) {
 		var refs reference.Refs
 
 		err = hoard.NewStreamer().
-			WithChunkSize(*chunk).
+			WithChunkSize(int64(*chunk)).
 			WithInput(os.Stdin).
 			WithSend(func(data []byte) error {
 				return enc.Send(&api.Plaintext{Body: data})

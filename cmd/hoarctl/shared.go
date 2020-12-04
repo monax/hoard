@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/monax/hoard/v8"
+
 	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/v8/grant"
 	"github.com/monax/hoard/v8/reference"
@@ -24,10 +26,10 @@ func addIntOpt(cmd *cli.Cmd, arg, desc string, def int) *int {
 	return opt
 }
 
-func validateChunkSize(cs int) {
-	if cs == 0 {
+func validateChunkSize(chunkSize int64) {
+	if chunkSize == 0 {
 		fatalf("Chunk size cannot be 0")
-	} else if cs > grpcLimit {
+	} else if chunkSize > hoard.MaxChunkSize {
 		fatalf("Chunk size cannot be greater than 4Mb")
 	}
 }

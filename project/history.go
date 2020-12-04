@@ -39,11 +39,25 @@ func FullVersion() string {
 // To cut a new release add a release to the front of this slice then run the
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
-	MustDeclareReleases("",
-		`### Changed
-- Move to pure-js @grpc/grpc-js library
-- Expose more usable methods from the client
-- Make default ChunkSize 3 MiB
+	MustDeclareReleases("9.0.0",
+		`### Added
+- [Hoard] Grants store the refs to their chunks in a new LINK ref type that is followed during dereferencing (Get, UnsealGet, Decrypt). Version 4 grants _always_ store a single LINK ref. This LINK ref is guaranteed to be unique to the Grant (and therefore grants are now unique). This means UnsealDelete can be safely called without the risk of deleting data still referenced by other grants. This also means grants are not linear in the number of chunks used to store them which keeps grants in constant size.
+- [Hoard] Refs now store the size of the plaintext data stored behind them. This allows for easier random access and predictable downloads.
+
+### Changed
+- [JS] Move to pure-js @grpc/grpc-js library
+- [JS] Expose more usable methods from the client (breaking)
+- [JS] Support streaming versions of calls taking BytesLike
+- [Hoard] Make default storage ChunkSize 3 MiB
+- [Hoard] Body can be sent in same message as Plaintext Header (but Header data will be normalised out into first message on storage and retrieval)
+
+
+### Fixed
+- [Hoard] Blocking read-then-write write-then-read usage
+- [Hoard] Unnecessary copying for streams
+- [Hoard] Encrypt endpoints not chunking
+- [Cloud] Stat now explicitly checks for NotFound error for Exists flag, and throws other errors
+
 `,
 		"8.2.3 - 2020-03-27",
 		`### Added

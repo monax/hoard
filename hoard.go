@@ -99,7 +99,7 @@ func (hrd *Hoard) Put(data, salt []byte) (*reference.Ref, error) {
 	if err != nil {
 		return nil, err
 	}
-	return reference.New(address, blob.SecretKey, salt), nil
+	return reference.New(address, blob.SecretKey, salt, int64(len(data))), nil
 }
 
 func (hrd *Hoard) Delete(address []byte) error {
@@ -113,7 +113,7 @@ func (hrd *Hoard) Encrypt(data, salt []byte) (*reference.Ref, []byte, error) {
 		return nil, nil, err
 	}
 	address := hrd.store.Address(blob.EncryptedData)
-	return reference.New(address, blob.SecretKey, salt), blob.EncryptedData, nil
+	return reference.New(address, blob.SecretKey, salt, int64(len(data))), blob.EncryptedData, nil
 }
 
 // Decrypt data using reference

@@ -119,6 +119,30 @@ function deserialize_stores_StatInfo(buffer_arg) {
 
 
 var GrantService = exports.GrantService = {
+  // Put a Plaintext and returned the sealed Reference as a Grant
+putSeal: {
+    path: '/api.Grant/PutSeal',
+    requestStream: true,
+    responseStream: false,
+    requestType: api_pb.PlaintextAndGrantSpec,
+    responseType: grant_pb.Grant,
+    requestSerialize: serialize_api_PlaintextAndGrantSpec,
+    requestDeserialize: deserialize_api_PlaintextAndGrantSpec,
+    responseSerialize: serialize_grant_Grant,
+    responseDeserialize: deserialize_grant_Grant,
+  },
+  // Unseal a Grant and follow the Reference to return a Plaintext
+unsealGet: {
+    path: '/api.Grant/UnsealGet',
+    requestStream: false,
+    responseStream: true,
+    requestType: grant_pb.Grant,
+    responseType: api_pb.Plaintext,
+    requestSerialize: serialize_grant_Grant,
+    requestDeserialize: deserialize_grant_Grant,
+    responseSerialize: serialize_api_Plaintext,
+    responseDeserialize: deserialize_api_Plaintext,
+  },
   // Seal a Reference to create a Grant
 seal: {
     path: '/api.Grant/Seal',
@@ -155,30 +179,6 @@ reseal: {
     requestDeserialize: deserialize_api_GrantAndGrantSpec,
     responseSerialize: serialize_grant_Grant,
     responseDeserialize: deserialize_grant_Grant,
-  },
-  // Put a Plaintext and returned the sealed Reference as a Grant
-putSeal: {
-    path: '/api.Grant/PutSeal',
-    requestStream: true,
-    responseStream: false,
-    requestType: api_pb.PlaintextAndGrantSpec,
-    responseType: grant_pb.Grant,
-    requestSerialize: serialize_api_PlaintextAndGrantSpec,
-    requestDeserialize: deserialize_api_PlaintextAndGrantSpec,
-    responseSerialize: serialize_grant_Grant,
-    responseDeserialize: deserialize_grant_Grant,
-  },
-  // Unseal a Grant and follow the Reference to return a Plaintext
-unsealGet: {
-    path: '/api.Grant/UnsealGet',
-    requestStream: false,
-    responseStream: true,
-    requestType: grant_pb.Grant,
-    responseType: api_pb.Plaintext,
-    requestSerialize: serialize_grant_Grant,
-    requestDeserialize: deserialize_grant_Grant,
-    responseSerialize: serialize_api_Plaintext,
-    responseDeserialize: deserialize_api_Plaintext,
   },
   // Unseal a Grant and follow the Reference to delete the Plaintext
 unsealDelete: {

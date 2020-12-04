@@ -19,5 +19,7 @@ message Ref {
     }
     // Type indicates whether to undergo further decoding
     RefType Type = 4;
+    // The size in bytes of the plaintext data
+    int64 Size = 5;
 }
 

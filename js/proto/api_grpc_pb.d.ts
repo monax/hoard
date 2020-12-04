@@ -12,14 +12,32 @@ import * as reference_pb from "./reference_pb";
 import * as stores_pb from "./stores_pb";
 
 interface IGrantService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
+    putSeal: IGrantService_IPutSeal;
+    unsealGet: IGrantService_IUnsealGet;
     seal: IGrantService_ISeal;
     unseal: IGrantService_IUnseal;
     reseal: IGrantService_IReseal;
-    putSeal: IGrantService_IPutSeal;
-    unsealGet: IGrantService_IUnsealGet;
     unsealDelete: IGrantService_IUnsealDelete;
 }
 
+interface IGrantService_IPutSeal extends grpc.MethodDefinition<api_pb.PlaintextAndGrantSpec, grant_pb.Grant> {
+    path: "/api.Grant/PutSeal";
+    requestStream: true;
+    responseStream: false;
+    requestSerialize: grpc.serialize<api_pb.PlaintextAndGrantSpec>;
+    requestDeserialize: grpc.deserialize<api_pb.PlaintextAndGrantSpec>;
+    responseSerialize: grpc.serialize<grant_pb.Grant>;
+    responseDeserialize: grpc.deserialize<grant_pb.Grant>;
+}
+interface IGrantService_IUnsealGet extends grpc.MethodDefinition<grant_pb.Grant, api_pb.Plaintext> {
+    path: "/api.Grant/UnsealGet";
+    requestStream: false;
+    responseStream: true;
+    requestSerialize: grpc.serialize<grant_pb.Grant>;
+    requestDeserialize: grpc.deserialize<grant_pb.Grant>;
+    responseSerialize: grpc.serialize<api_pb.Plaintext>;
+    responseDeserialize: grpc.deserialize<api_pb.Plaintext>;
+}
 interface IGrantService_ISeal extends grpc.MethodDefinition<api_pb.ReferenceAndGrantSpec, grant_pb.Grant> {
     path: "/api.Grant/Seal";
     requestStream: true;
@@ -47,24 +65,6 @@ interface IGrantService_IReseal extends grpc.MethodDefinition<api_pb.GrantAndGra
     responseSerialize: grpc.serialize<grant_pb.Grant>;
     responseDeserialize: grpc.deserialize<grant_pb.Grant>;
 }
-interface IGrantService_IPutSeal extends grpc.MethodDefinition<api_pb.PlaintextAndGrantSpec, grant_pb.Grant> {
-    path: "/api.Grant/PutSeal";
-    requestStream: true;
-    responseStream: false;
-    requestSerialize: grpc.serialize<api_pb.PlaintextAndGrantSpec>;
-    requestDeserialize: grpc.deserialize<api_pb.PlaintextAndGrantSpec>;
-    responseSerialize: grpc.serialize<grant_pb.Grant>;
-    responseDeserialize: grpc.deserialize<grant_pb.Grant>;
-}
-interface IGrantService_IUnsealGet extends grpc.MethodDefinition<grant_pb.Grant, api_pb.Plaintext> {
-    path: "/api.Grant/UnsealGet";
-    requestStream: false;
-    responseStream: true;
-    requestSerialize: grpc.serialize<grant_pb.Grant>;
-    requestDeserialize: grpc.deserialize<grant_pb.Grant>;
-    responseSerialize: grpc.serialize<api_pb.Plaintext>;
-    responseDeserialize: grpc.deserialize<api_pb.Plaintext>;
-}
 interface IGrantService_IUnsealDelete extends grpc.MethodDefinition<grant_pb.Grant, api_pb.Address> {
     path: "/api.Grant/UnsealDelete";
     requestStream: false;
@@ -78,15 +78,21 @@ interface IGrantService_IUnsealDelete extends grpc.MethodDefinition<grant_pb.Gra
 export const GrantService: IGrantService;
 
 export interface IGrantServer {
+    putSeal: handleClientStreamingCall<api_pb.PlaintextAndGrantSpec, grant_pb.Grant>;
+    unsealGet: grpc.handleServerStreamingCall<grant_pb.Grant, api_pb.Plaintext>;
     seal: handleClientStreamingCall<api_pb.ReferenceAndGrantSpec, grant_pb.Grant>;
     unseal: grpc.handleServerStreamingCall<grant_pb.Grant, reference_pb.Ref>;
     reseal: grpc.handleUnaryCall<api_pb.GrantAndGrantSpec, grant_pb.Grant>;
-    putSeal: handleClientStreamingCall<api_pb.PlaintextAndGrantSpec, grant_pb.Grant>;
-    unsealGet: grpc.handleServerStreamingCall<grant_pb.Grant, api_pb.Plaintext>;
     unsealDelete: grpc.handleServerStreamingCall<grant_pb.Grant, api_pb.Address>;
 }
 
 export interface IGrantClient {
+    putSeal(callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    putSeal(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    putSeal(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    putSeal(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    unsealGet(request: grant_pb.Grant, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
+    unsealGet(request: grant_pb.Grant, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
     seal(callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.ReferenceAndGrantSpec>;
     seal(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.ReferenceAndGrantSpec>;
     seal(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.ReferenceAndGrantSpec>;
@@ -96,18 +102,18 @@ export interface IGrantClient {
     reseal(request: api_pb.GrantAndGrantSpec, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientUnaryCall;
     reseal(request: api_pb.GrantAndGrantSpec, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientUnaryCall;
     reseal(request: api_pb.GrantAndGrantSpec, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientUnaryCall;
-    putSeal(callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    putSeal(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    putSeal(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    putSeal(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    unsealGet(request: grant_pb.Grant, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
-    unsealGet(request: grant_pb.Grant, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
     unsealDelete(request: grant_pb.Grant, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Address>;
     unsealDelete(request: grant_pb.Grant, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Address>;
 }
 
 export class GrantClient extends grpc.Client implements IGrantClient {
     constructor(address: string, credentials: grpc.ChannelCredentials, options?: Partial<grpc.ClientOptions>);
+    public putSeal(callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    public putSeal(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    public putSeal(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    public putSeal(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
+    public unsealGet(request: grant_pb.Grant, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
+    public unsealGet(request: grant_pb.Grant, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
     public seal(callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.ReferenceAndGrantSpec>;
     public seal(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.ReferenceAndGrantSpec>;
     public seal(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.ReferenceAndGrantSpec>;
@@ -117,12 +123,6 @@ export class GrantClient extends grpc.Client implements IGrantClient {
     public reseal(request: api_pb.GrantAndGrantSpec, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientUnaryCall;
     public reseal(request: api_pb.GrantAndGrantSpec, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientUnaryCall;
     public reseal(request: api_pb.GrantAndGrantSpec, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientUnaryCall;
-    public putSeal(callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    public putSeal(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    public putSeal(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    public putSeal(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: grant_pb.Grant) => void): grpc.ClientWritableStream<api_pb.PlaintextAndGrantSpec>;
-    public unsealGet(request: grant_pb.Grant, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
-    public unsealGet(request: grant_pb.Grant, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Plaintext>;
     public unsealDelete(request: grant_pb.Grant, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Address>;
     public unsealDelete(request: grant_pb.Grant, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<api_pb.Address>;
 }

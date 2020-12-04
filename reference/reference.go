@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func New(address, secretKey, salt []byte) *Ref {
+func New(address, secretKey, salt []byte, size int64) *Ref {
 	if len(salt) == 0 {
 		salt = nil
 	}
@@ -13,6 +13,7 @@ func New(address, secretKey, salt []byte) *Ref {
 		Address:   address,
 		SecretKey: secretKey,
 		Salt:      salt,
+		Size_:     size,
 	}
 }
 

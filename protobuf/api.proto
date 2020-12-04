@@ -89,6 +89,8 @@ message Header {
     bytes Salt = 1;
     // Metadata
     bytes Data = 2;
+    // The chunk size in bytes to use for the data
+    int64 ChunkSize =3;
 }
 
 message Plaintext {
