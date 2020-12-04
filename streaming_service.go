@@ -35,6 +35,7 @@ func (service *StreamingService) PutSeal(sendAndClose func(*grant.Grant) error, 
 	if err != nil {
 		return err
 	}
+
 	spec := first.GetGrantSpec()
 	if spec == nil {
 		return fmt.Errorf("grant spec expected in first message")
@@ -43,36 +44,19 @@ func (service *StreamingService) PutSeal(sendAndClose func(*grant.Grant) error, 
 	head := first.GetPlaintext().GetHead()
 
 	var refs reference.Refs
-	if head != nil {
-		ref, err := headerReference(head, service.grantService.Put)
-		if err != nil {
-			return err
-		}
-		refs = append(refs, ref)
-	}
 
-	err = CopyChunked(
-		func(chunk []byte) error {
-			ref, err := service.grantService.Put(chunk, head.GetSalt())
-			if err != nil {
-				return err
-			}
+	err = encrypt(first.GetPlaintext(), service.put,
+		func(ref *reference.Ref, encryptedData []byte) error {
 			refs = append(refs, ref)
 			return nil
 		},
-		func() ([]byte, error) {
-			if first != nil {
-				body := first.GetPlaintext().GetBody()
-				first = nil
-				return body, nil
-			}
+		func() (*api.Plaintext, error) {
 			ptgs, err := recv()
 			if err != nil {
 				return nil, err
 			}
-			return ptgs.GetPlaintext().GetBody(), nil
-		},
-		service.chunkSize)
+			return ptgs.GetPlaintext(), nil
+		}, service.chunkSize)
 
 	// Should we store the refs themselves in hoard and seal a LINK ref into the grant
 	if service.useLinkRefInGrant(refs) {
@@ -134,44 +118,13 @@ func (service *StreamingService) UnsealDelete(grt *grant.Grant, send func(addres
 
 // Put encrypted data in the store
 func (service *StreamingService) Put(send func(*reference.Ref) error, recv func() (*api.Plaintext, error)) error {
-	pt, err := recv()
+	first, err := recv()
 	if err != nil {
 		return err
 	}
 
-	head := pt.GetHead()
-	if head != nil {
-		ref, err := headerReference(head, service.grantService.Put)
-		if err != nil {
-			return err
-		}
-		err = send(ref)
-		if err != nil {
-			return err
-		}
-	}
-	err = CopyChunked(
-		func(chunk []byte) error {
-			ref, err := service.grantService.Put(chunk, head.GetSalt())
-			if err != nil {
-				return err
-			}
-			return send(ref)
-		},
-		func() ([]byte, error) {
-			// When Header is omitted first message should contain b
-			if pt.GetBody() != nil {
-				body := pt.Body
-				pt = nil
-				return body, nil
-			}
-			plaintext, err := recv()
-			if err != nil {
-				return nil, err
-			}
-			return plaintext.Body, nil
-		},
-		service.chunkSize)
+	err = encrypt(first, service.put, func(ref *reference.Ref, _ []byte) error { return send(ref) },
+		recv, service.chunkSize)
 
 	if err != nil {
 		return fmt.Errorf("Put: could not put plaintexts: %w", err)
@@ -209,59 +162,20 @@ func (service *StreamingService) Encrypt(send func(*api.ReferenceAndCiphertext) 
 	if err != nil {
 		return err
 	}
-	head := first.GetHead()
 
-	if head != nil {
-		var encryptedData []byte
-		ref, err := headerReference(head, func(data, salt []byte) (ref *reference.Ref, err error) {
-			ref, encryptedData, err = service.grantService.Encrypt(data, salt)
-			return ref, err
-		})
-		if err != nil {
-			return fmt.Errorf("Encrypt: could not encode header: %w", err)
-		}
-
-		err = send(&api.ReferenceAndCiphertext{
+	err = encrypt(first, service.grantService.Encrypt, func(ref *reference.Ref, encryptedData []byte) error {
+		return send(&api.ReferenceAndCiphertext{
 			Reference: ref,
 			Ciphertext: &api.Ciphertext{
 				EncryptedData: encryptedData,
 			},
 		})
-		if err != nil {
-			return err
-		}
+	}, recv, service.chunkSize)
+
+	if err != nil {
+		return fmt.Errorf("Could not encrypt data: %w", err)
 	}
-
-	var body []byte
-	for {
-		if first.GetBody() != nil {
-			body = first.GetBody()
-			first = nil
-		} else {
-			plaintext, err := recv()
-			if err != nil {
-				if err == io.EOF {
-					return nil
-				}
-				return err
-			}
-			body = plaintext.GetBody()
-		}
-
-		ref, encryptedData, err := service.grantService.Encrypt(body, head.GetSalt())
-		if err != nil {
-			return err
-		}
-
-		if err = send(&api.ReferenceAndCiphertext{
-			Reference: ref,
-			Ciphertext: &api.Ciphertext{
-				EncryptedData: encryptedData,
-			},
-		}); err != nil {
-			return err
-		}
-	}
+	return nil
 }
 
 // Decrypt ciphertext and return plaintext
@@ -452,17 +366,56 @@ func decodePlaintext(data []byte, refType reference.Ref_RefType, get func(*refer
 	}
 }
 
-func headerReference(head *api.Header, getRef func(data, salt []byte) (*reference.Ref, error)) (*reference.Ref, error) {
-	data, err := proto.Marshal(head)
-	if err != nil {
-		return nil, err
-	}
+// Put wrapped with dummy 'encrypt' signature to help with reuse
+func (service *StreamingService) put(data, salt []byte) (*reference.Ref, []byte, error) {
+	ref, err := service.grantService.Put(data, salt)
+	return ref, nil, err
+}
 
-	ref, err := getRef(data, head.GetSalt())
-	if err != nil {
-		return nil, err
-	}
-	ref.Type = reference.Ref_HEADER
+// Abstracts common Plaintext input flow handling
+func encrypt(first *api.Plaintext,
+	encrypt func(data []byte, salt []byte) (ref *reference.Ref, encryptedData []byte, err error),
+	send func(ref *reference.Ref, encryptedData []byte) error,
+	recv func() (*api.Plaintext, error), chunkSize int) error {
 
-	return ref, nil
+	head := first.GetHead()
+	if head != nil {
+		data, err := proto.Marshal(head)
+		if err != nil {
+			return err
+		}
+
+		ref, encryptedData, err := encrypt(data, head.GetSalt())
+		if err != nil {
+			return err
+		}
+		ref.Type = reference.Ref_HEADER
+
+		err = send(ref, encryptedData)
+		if err != nil {
+			return err
+		}
+	}
+	return CopyChunked(
+		func(chunk []byte) error {
+			ref, encryptedData, err := encrypt(chunk, head.GetSalt())
+			if err != nil {
+				return err
+			}
+			return send(ref, encryptedData)
+		},
+		func() ([]byte, error) {
+			// In case first message contains body, push that first
+			if first.GetBody() != nil {
+				body := first.GetBody()
+				first = nil
+				return body, nil
+			}
+			plaintext, err := recv()
+			if err != nil {
+				return nil, err
+			}
+			return plaintext.Body, nil
+		},
+		chunkSize)
 }
