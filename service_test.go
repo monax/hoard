@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"io"
 	"testing"
 
 	"github.com/go-kit/kit/log"
@@ -12,6 +13,7 @@ import (
 	"github.com/monax/hoard/v8/config"
 	"github.com/monax/hoard/v8/encryption"
 	"github.com/monax/hoard/v8/grant"
+	"github.com/monax/hoard/v8/reference"
 	"github.com/monax/hoard/v8/stores"
 	"github.com/monax/hoard/v8/test/helpers"
 	"github.com/stretchr/testify/assert"
@@ -68,7 +70,7 @@ func TestService(t *testing.T) {
 				err = putStream.CloseSend()
 				require.NoError(t, err)
 
-				refs, err := ReceiveAllReferences(putStream)
+				refs, err := ReceiveAllReferences(putStream.Recv)
 				require.NoError(t, err)
 				expected := len(data)/chunkSize + 1
 				if len(data)%chunkSize > 0 {
@@ -86,7 +88,7 @@ func TestService(t *testing.T) {
 				err = getStream.CloseSend()
 				require.NoError(t, err)
 
-				plaintext, err := ReceiveAllPlaintexts(getStream)
+				plaintext, err := ReceiveAllPlaintexts(getStream.Recv)
 				require.NoError(t, err)
 				require.Equal(t, data, plaintext.GetBody())
 			})
@@ -114,7 +116,7 @@ func TestService(t *testing.T) {
 				msg := append(buffer, meta...)
 				msg = append(msg, data...)
 
-				ref, err := service.grantService.Put(msg, []byte{})
+				ref, err := service.streaming.grantService.Put(msg, []byte{})
 				require.NoError(t, err)
 
 				client := api.NewCleartextClient(conn)
@@ -125,7 +127,7 @@ func TestService(t *testing.T) {
 				err = getStream.CloseSend()
 				require.NoError(t, err)
 
-				plaintext, err := ReceiveAllPlaintexts(getStream)
+				plaintext, err := ReceiveAllPlaintexts(getStream.Recv)
 				require.NoError(t, err)
 				require.Nil(t, plaintext.GetHead())
 				body := plaintext.GetBody()
@@ -138,23 +140,66 @@ func TestService(t *testing.T) {
 			})
 
 			t.Run("ChunkLarge", func(t *testing.T) {
-				size := 1024 * 1024 * 10
-				ref, err := hrd.Put(make([]byte, size), nil)
+				size := 124 * 124 * 10
+				client := api.NewCleartextClient(conn)
+				putStream, err := client.Put(ctx)
 				require.NoError(t, err)
 
-				client := api.NewCleartextClient(conn)
+				bigBytes := make([]byte, size)
+				bigBytes[333] = 23
+				input := bytes.NewBuffer(bigBytes)
+
+				var refs reference.Refs
+				err = NewStreamer().
+					WithChunkSize(512).
+					WithInput(input).
+					WithSend(
+						func(chunk []byte) error {
+							err := putStream.Send(&api.Plaintext{
+								Body: chunk,
+							})
+							return err
+						}).
+					WithCloseSend(putStream.CloseSend).
+					WithRecv(func() ([]byte, error) {
+						ref, err := putStream.Recv()
+						if err != nil {
+							return nil, err
+						}
+						refs = append(refs, ref)
+						// Hi, I'm Go, I don't have generics.
+						return nil, nil
+					}).
+					Stream(context.Background())
+
 				getStream, err := client.Get(ctx)
 				require.NoError(t, err)
 
-				err = getStream.Send(ref)
-				require.NoError(t, err)
-				err = getStream.CloseSend()
+				output := new(bytes.Buffer)
+
+				err = NewStreamer().
+					WithSend(func(chunk []byte) error {
+						if len(refs) == 0 {
+							return io.EOF
+						}
+						ref := refs[0]
+						refs = refs[1:]
+						return getStream.Send(ref)
+					}).
+					WithRecv(func() ([]byte, error) {
+						pt, err := getStream.Recv()
+						if err != nil {
+							return nil, err
+						}
+						return pt.Body, nil
+					}).
+					WithCloseSend(getStream.CloseSend).
+					WithOutput(output).
+					Stream(context.Background())
+
 				require.NoError(t, err)
 
-				plaintext, err := ReceiveAllPlaintexts(getStream)
-				require.NoError(t, err)
-
-				require.Equal(t, size, len(plaintext.GetBody()))
+				require.True(t, bytes.Equal(bigBytes, output.Bytes()))
 			})
 		})
 
@@ -186,7 +231,7 @@ func TestService(t *testing.T) {
 
 				getStream, err := client.UnsealGet(ctx, grt)
 				require.NoError(t, err)
-				plaintext, err := ReceiveAllPlaintexts(getStream)
+				plaintext, err := ReceiveAllPlaintexts(getStream.Recv)
 				require.NoError(t, err)
 				require.Equal(t, data, plaintext.GetBody())
 			})
@@ -195,4 +240,41 @@ func TestService(t *testing.T) {
 		return nil
 	})
 	require.NoError(t, err)
+}
+
+func ReceiveAllPlaintexts(recv func() (*api.Plaintext, error)) (*api.Plaintext, error) {
+	plaintext := new(api.Plaintext)
+
+	for {
+		pt, err := recv()
+		if err != nil {
+			if err == io.EOF {
+				return plaintext, nil
+			}
+
+			return nil, err
+		}
+
+		plaintext.Body = append(plaintext.Body, pt.GetBody()...)
+		if plaintext.Head == nil {
+			plaintext.Head = pt.GetHead()
+		}
+	}
+}
+
+func ReceiveAllReferences(recv func() (*reference.Ref, error)) (reference.Refs, error) {
+	refs := make(reference.Refs, 0)
+
+	for {
+		ref, err := recv()
+		if err != nil {
+			if err == io.EOF {
+				return refs, nil
+			}
+
+			return nil, err
+		}
+
+		refs = append(refs, ref)
+	}
 }

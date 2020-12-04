@@ -149,11 +149,15 @@ build_dist:
 
 .PHONY:	test
 test: check
-	@scripts/bin_wrapper.sh go test -v ./... ${GO_TEST_ARGS}
+	go test -v ./... ${GO_TEST_ARGS}
 
 .PHONY: test_js
 test_js: build install yarn_install
-	@scripts/test_js.sh
+	scripts/with_hoard.sh yarn --cwd js test
+
+.PHONY: test_hoarctl
+test_hoarctl: build install
+	scripts/with_hoard.sh test/hoarctl.sh
 
 ## run tests including integration tests
 .PHONY:	test_integration

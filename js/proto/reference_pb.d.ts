@@ -22,8 +22,8 @@ export class Ref extends jspb.Message {
     getSalt_asB64(): string;
     setSalt(value: Uint8Array | string): Ref;
 
-    getVersion(): number;
-    setVersion(value: number): Ref;
+    getType(): Ref.RefType;
+    setType(value: Ref.RefType): Ref;
 
 
     serializeBinary(): Uint8Array;
@@ -41,6 +41,13 @@ export namespace Ref {
         address: Uint8Array | string,
         secretkey: Uint8Array | string,
         salt: Uint8Array | string,
-        version: number,
+        type: Ref.RefType,
     }
+
+    export enum RefType {
+    BODY = 0,
+    HEADER = 1,
+    LINK = 2,
+    }
+
 }

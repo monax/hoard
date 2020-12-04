@@ -20,34 +20,35 @@ func (client *Client) Decrypt(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		validateChunkSize(*chunk)
 
-		encryptedData := readData(os.Stdin)
 		dec, err := client.encryption.Decrypt(context.Background())
 		if err != nil {
 			fatalf("Error starting client: %v", err)
 		}
 
-		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
-			return dec.Send(&api.ReferenceAndCiphertext{
-				Reference: &reference.Ref{
-					SecretKey: readBase64(secretKey),
-					Salt:      parseSalt(salt),
-				},
-				Ciphertext: &api.Ciphertext{
-					EncryptedData: encryptedData,
-				},
-			})
-		})
+		err = hoard.NewStreamer().WithChunkSize(*chunk).WithInput(os.Stdin).
+			WithSend(
+				func(data []byte) error {
+					return dec.Send(&api.ReferenceAndCiphertext{
+						Reference: &reference.Ref{
+							SecretKey: readBase64(secretKey),
+							Salt:      parseSalt(salt),
+						},
+						Ciphertext: &api.Ciphertext{
+							EncryptedData: data,
+						},
+					})
+				}).
+			WithCloseSend(dec.CloseSend).
+			WithRecv(func() ([]byte, error) {
+				plaintext, err := dec.Recv()
+				return plaintext.GetBody(), err
+			}).WithOutput(os.Stdout).
+			Stream(context.Background())
+
 		if err != nil {
-			fatalf("Error sending data: %v", err)
+			fatalf("Error streaming data: %v", err)
 		}
 
-		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
-			plaintext, err := dec.Recv()
-			return plaintext.GetBody(), err
-		})
-		if err != nil {
-			fatalf("Error receiving data: %v", err)
-		}
 	}
 }
 
@@ -66,23 +67,38 @@ func (client *Client) Encrypt(cmd *cli.Cmd) {
 
 		err = enc.Send(&api.Plaintext{Head: &api.Header{Salt: parseSalt(salt)}})
 		if err != nil {
-			fatalf("Error sending head: %v", err)
+			fatalf("Could not send encryption head: %v", err)
 		}
 
-		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
-			return enc.Send(&api.Plaintext{Body: data})
-		})
+		// Throw away the encrypted header
+		_, err = enc.Recv()
+		if err != nil {
+			fatalf("Could not receive (and discard) header")
+		}
+
+		err = hoard.NewStreamer().
+			WithChunkSize(*chunk).
+			WithInput(os.Stdin).
+			WithSend(
+				func(data []byte) error {
+					return enc.Send(&api.Plaintext{Body: data})
+				},
+			).
+			WithCloseSend(enc.CloseSend).
+			WithRecv(func() ([]byte, error) {
+				refAndCiphertext, err := enc.Recv()
+				if err != nil {
+					return nil, err
+				}
+				encryptedData := refAndCiphertext.GetCiphertext().GetEncryptedData()
+				return encryptedData, nil
+			}).
+			WithOutput(os.Stdout).
+			Stream(context.Background())
 		if err != nil {
 			fatalf("Error sending body: %v", err)
 		}
 
-		err = hoard.StreamFileTo(os.Stdout, func() ([]byte, error) {
-			refAndCiphertext, err := enc.Recv()
-			return refAndCiphertext.GetCiphertext().GetEncryptedData(), err
-		})
-		if err != nil {
-			fatalf("Error receiving data: %v", err)
-		}
 	}
 }
 
@@ -104,21 +120,28 @@ func (client *Client) Ref(cmd *cli.Cmd) {
 			fatalf("Error sending head: %v", err)
 		}
 
-		err = hoard.StreamFileFrom(os.Stdin, *chunk, func(data []byte) error {
-			return enc.Send(&api.Plaintext{Body: data})
-		})
+		var refs reference.Refs
+
+		err = hoard.NewStreamer().
+			WithChunkSize(*chunk).
+			WithInput(os.Stdin).
+			WithSend(func(data []byte) error {
+				return enc.Send(&api.Plaintext{Body: data})
+			}).
+			WithCloseSend(enc.CloseSend).
+			WithRecv(
+				func() ([]byte, error) {
+					refAndCiphertext, err := enc.Recv()
+					if err != nil {
+						return nil, err
+					}
+					refs = append(refs, refAndCiphertext.GetReference())
+					return nil, nil
+				}).Stream(context.Background())
 		if err != nil {
-			fatalf("Error sending body: %v", err)
+			fatalf("Error streaming data: %v", err)
 		}
 
-		ref, err := hoard.ReadStream(func() (interface{}, error) {
-			refAndCiphertext, err := enc.Recv()
-			return refAndCiphertext.GetReference(), err
-		})
-		if err != nil {
-			fatalf("Error receiving data: %v", err)
-		}
-
-		fmt.Printf("%s\n", jsonString(ref))
+		fmt.Printf("%s\n", jsonString(refs))
 	}
 }

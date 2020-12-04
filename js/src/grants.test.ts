@@ -1,7 +1,6 @@
-import { Readable } from 'stream';
 import * as fixtures from './fixtures';
-import { Client, Header, make, Spec, SymmetricSpec } from './index';
-import { bytesReadable, readAll, readBytes, readLengthPrefixed } from './stream';
+import {Client, Header, make, Spec, SymmetricSpec} from './index';
+import {bytesReadable, readAll, readBytes, readLengthPrefixed} from './streaming';
 
 describe('Grants', function () {
   const hoard = new Client('localhost:53431');

@@ -2,11 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"net"
 	"os"
 
@@ -15,8 +10,6 @@ import (
 	cli "github.com/jawher/mow.cli"
 	"github.com/monax/hoard/v8/cmd"
 	"github.com/monax/hoard/v8/config"
-	"github.com/monax/hoard/v8/grant"
-	"github.com/monax/hoard/v8/reference"
 	"github.com/monax/hoard/v8/server"
 	"google.golang.org/grpc"
 )
@@ -97,119 +90,4 @@ func main() {
 	hoarctlApp.Command("unsealget", "Unseal grant read from STDIN and print decrypted data to STDOUT", client.UnsealGet)
 
 	hoarctlApp.Run(os.Args)
-}
-
-// extra cli options
-func addStringOpt(cmd *cli.Cmd, arg, desc string) *string {
-	opt := cmd.StringOpt(fmt.Sprintf("%s %s", string(arg[0]), arg), "", desc)
-	cmd.Spec += fmt.Sprintf("[-%s | --%s]", string(arg[0]), arg)
-	return opt
-}
-
-func addIntOpt(cmd *cli.Cmd, arg, desc string, def int) *int {
-	opt := cmd.IntOpt(fmt.Sprintf("%s %s", string(arg[0]), arg), def, desc)
-	cmd.Spec += fmt.Sprintf("[-%s | --%s]", string(arg[0]), arg)
-	return opt
-}
-
-func validateChunkSize(cs int) {
-	if cs == 0 {
-		fatalf("Chunk size cannot be 0")
-	} else if cs > grpcLimit {
-		fatalf("Chunk size cannot be greater than 4Mb")
-	}
-}
-
-func parseSalt(saltString *string) []byte {
-	if saltString == nil {
-		return nil
-	}
-	saltBytes, err := base64.StdEncoding.DecodeString(*saltString)
-	if err == nil {
-		return saltBytes
-	}
-	return ([]byte)(*saltString)
-}
-
-func jsonString(v interface{}) string {
-	bs, err := json.Marshal(v)
-	if err != nil {
-		fatalf("Could not serialise '%s' to json: %v", err)
-	}
-	return string(bs)
-
-}
-
-func readData(f *os.File) []byte {
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		fatalf("Could not read bytes to store: %v", err)
-	}
-	return data
-}
-
-func openFile(file *string) (*os.File, error) {
-	if file == nil || *file == "" {
-		return nil, fmt.Errorf("no file given")
-	}
-	return os.Open(*file)
-}
-
-func readReference(address *string) *reference.Ref {
-	ref := new(reference.Ref)
-	if address != nil && *address != "" {
-		ref.Address = readBase64(address)
-		return ref
-	}
-	err := parseObject(os.Stdin, ref)
-	if err != nil {
-		fatalf("Could not read reference from STDIN: %v", err)
-	}
-	return ref
-}
-
-func readReferences() reference.Refs {
-	refs := make(reference.Refs, 0)
-	err := parseObject(os.Stdin, &refs)
-	if err != nil {
-		fatalf("Could not read references from STDIN: %v", err)
-	}
-	return refs
-}
-
-func readGrant() *grant.Grant {
-	grt := new(grant.Grant)
-	err := parseObject(os.Stdin, grt)
-	if err != nil {
-		fatalf("Could not read grant from STDIN: %v", err)
-	}
-	return grt
-}
-
-func parseObject(r io.Reader, o interface{}) error {
-	bs, err := ioutil.ReadAll(r)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(bs, o)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func readBase64(base64String *string) []byte {
-	if base64String == nil {
-		return nil
-	}
-	secretKeyBytes, err := base64.StdEncoding.DecodeString(*base64String)
-	if err != nil {
-		fatalf("Could not decode '%s' as base64-encoded string", base64String)
-	}
-	return secretKeyBytes
-}
-
-func fatalf(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
-	os.Exit(1)
 }

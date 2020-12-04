@@ -5,7 +5,7 @@
 // the Hoard daemon.
 import * as assert from 'assert';
 import { Address, Client, Header, make, PlaintextSpec, Spec, SymmetricSpec } from './index';
-import { readAll, readBytes } from './stream';
+import { readAll, readBytes } from './streaming';
 
 // This is the default tcp socket that hoard runs on, just run `bin/hoard`
 // after running `make build` in the main hoard repo.

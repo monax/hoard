@@ -1,15 +1,13 @@
 package grant
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 
 	"github.com/monax/hoard/v8/config"
-
-	"bytes"
-	"io"
-	"io/ioutil"
 
 	"github.com/monax/hoard/v8/reference"
 	"golang.org/x/crypto/openpgp"
@@ -63,7 +61,7 @@ func OpenPGPGrant(refs reference.Refs, public string, keyring *config.OpenPGPSec
 		return nil, fmt.Errorf("could not set up openpgp encryption: %s", err)
 	}
 
-	_, err = io.WriteString(plaintextWriter, refs.Plaintext(nil))
+	_, err = plaintextWriter.Write(refs.Plaintext(nil))
 	if err != nil {
 		return nil, err
 	}
@@ -112,24 +110,11 @@ func openPGPReference(grant []byte, keyring *config.OpenPGPSecret) ([]byte, erro
 
 }
 
-func OpenPGPReferenceV0(grant []byte, keyring *config.OpenPGPSecret) (reference.Refs, error) {
-	data, err := openPGPReference(grant, keyring)
-	if err != nil {
-		return nil, err
-	}
-
-	return reference.Refs{reference.FromPlaintext(string(data))}, nil
-}
-
-func OpenPGPReferenceV1(grant []byte, keyring *config.OpenPGPSecret) (reference.Refs, error) {
-	return OpenPGPReferenceV0(grant, keyring)
-}
-
 func OpenPGPReferenceV2(grant []byte, keyring *config.OpenPGPSecret) (reference.Refs, error) {
 	data, err := openPGPReference(grant, keyring)
 	if err != nil {
 		return nil, err
 	}
 
-	return reference.RepeatedFromPlaintext(string(data)), nil
+	return reference.RepeatedFromPlaintext(data), nil
 }
