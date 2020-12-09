@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/monax/hoard/v8/reference"
 	"io"
 
 	"github.com/monax/hoard/v8/api"
@@ -75,7 +76,7 @@ func (c Client) PutSeal(ctx context.Context,
 	}
 	grt, err := stream.CloseAndRecv()
 	if err != nil {
-		return nil, fmt.Errorf("PutSeal: could not get grant from stream: %w", err)
+		return nil, fmt.Errorf("PutSeal: could not close stream and get grant: %w", err)
 	}
 	return grt, err
 }
@@ -117,12 +118,53 @@ func (c Client) UnsealGet(ctx context.Context, grt *grant.Grant,
 	}, nil
 }
 
-func (c Client) Seal(ctx context.Context, opts ...grpc.CallOption) (api.Grant_SealClient, error) {
-	panic("implement me")
+func (c Client) Seal(ctx context.Context, spec *grant.Spec, refs []*reference.Ref,
+	opts ...grpc.CallOption) (*grant.Grant, error) {
+
+	stream, err := c.grant.Seal(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("Seal: could not establish stream: %w", err)
+	}
+	err = stream.Send(&api.ReferenceAndGrantSpec{
+		GrantSpec: spec,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("Seal: could not send grant spec: %w", err)
+	}
+	for _, ref := range refs {
+		err = stream.Send(&api.ReferenceAndGrantSpec{
+			Reference: ref,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("Seal: could not send one of the refs: %w", err)
+		}
+	}
+	grt, err := stream.CloseAndRecv()
+	if err != nil {
+		return nil, fmt.Errorf("Seal: could not close stream and get grant: %w", err)
+	}
+	return grt, nil
 }
 
-func (c Client) Unseal(ctx context.Context, in *grant.Grant, opts ...grpc.CallOption) (api.Grant_UnsealClient, error) {
-	panic("implement me")
+func (c Client) Unseal(ctx context.Context, grt *grant.Grant, opts ...grpc.CallOption) ([]*reference.Ref, error) {
+	stream, err := c.grant.Unseal(ctx, grt, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("Unseal: could not establish stream: %w", err)
+	}
+
+	var refs []*reference.Ref
+	for {
+		ref, err := stream.Recv()
+		if ref != nil {
+			refs = append(refs, ref)
+		}
+		if err != nil {
+			if err == io.EOF {
+				return refs, nil
+			}
+		}
+	}
+
 }
 
 func (c Client) Reseal(ctx context.Context, in *api.GrantAndGrantSpec, opts ...grpc.CallOption) (*grant.Grant, error) {
