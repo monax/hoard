@@ -2,11 +2,12 @@ package grant
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"testing"
+
 	"github.com/gogo/protobuf/proto"
 	"github.com/monax/hoard/v8/versions"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
-	"testing"
 
 	"github.com/monax/hoard/v8/config"
 	"github.com/monax/hoard/v8/encryption"

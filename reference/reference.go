@@ -3,6 +3,7 @@ package reference
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/monax/hoard/v8/protodet"
 	"github.com/monax/hoard/v8/versions"
@@ -58,7 +59,7 @@ func refsFromJSON(plaintext []byte) ([]*Ref, error) {
 func RefsFromPlaintext(plaintext []byte, version int32) (refs []*Ref, err error) {
 	switch version {
 	case 0, 1, 2:
-		refs, err  = refsFromJSON(plaintext)
+		refs, err = refsFromJSON(plaintext)
 		for _, ref := range refs {
 			if ref.Version == versions.RefVersionIncorrectlyUsedToDenoteHeader {
 				ref.Type = Ref_HEADER

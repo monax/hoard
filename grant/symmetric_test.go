@@ -1,8 +1,9 @@
 package grant
 
 import (
-	"github.com/monax/hoard/v8/versions"
 	"testing"
+
+	"github.com/monax/hoard/v8/versions"
 
 	"github.com/monax/hoard/v8/encryption"
 	"github.com/monax/hoard/v8/reference"

@@ -31,9 +31,9 @@ const linkNonce = "special-link-nonce-for-linking-nonces"
 
 /** This program operates on a single directory <dir> (passed as first argument) with a structure:
  * <dir>/fixtures - original plaintext files for comparison and in order to reset regression tests
- * <dir>/output/plaintexts - containing some input data (not necessarily limited to text)
- * <dir>/output/store - the root directory of a Hoard filesystem store
- * <dir>/output/grants - a folder containing persisted grants for each file in the plaintexts directory
+ * <dir>/snapshots/<snapshot>/plaintexts - containing some input data (not necessarily limited to text)
+ * <dir>/snapshots/<snapshot>/store - the root directory of a Hoard filesystem store
+ * <dir>/snapshots/<snapshot>/grants - a folder containing persisted grants for each file in the plaintexts directory
  *                (unless the plaintext is new for a particular run)
  *
  * Each time the program is run it walks the plaintexts directory and performs the following cycle:

@@ -2,9 +2,10 @@ package hoard
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/monax/hoard/v8/protodet"
 	"github.com/monax/hoard/v8/versions"
-	"io"
 
 	"github.com/monax/hoard/v8/encryption"
 

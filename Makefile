@@ -47,10 +47,8 @@ PROTOC_GEN_GRPC_PATH= ${HOARD_TS_PATH}/node_modules/.bin/grpc_tools_node_protoc_
 
 GO_BUILD_ARGS = -ldflags "-extldflags '-static' -X $(shell go list)/project.commit=$(shell cat commit_hash.txt) -X $(shell go list)/project.date=$(shell date '+%Y-%m-%d')"
 
-REGRESSION_DIR=test/regression
-REGRESSION_SNAPSHOT=v8.2.3
-export REGRESSION_FIXTURES=$(REGRESSION_DIR)/fixtures
-export REGRESSION_OUTPUT=$(REGRESSION_DIR)/snapshots/$(REGRESSION_SNAPSHOT)
+export REGRESSION_DIR=test/regression
+export REGRESSION_SNAPSHOT=v8.2.3
 
 export DOCKER_HUB := quay.io
 export DOCKER_REPO := $(DOCKER_HUB)/monax/hoard
@@ -176,14 +174,17 @@ test_integration: check
 	scripts/integration/test_gcp.sh
 	# @scripts/integration/test_ipfs.sh ## needs work
 
+# Run a regression test against the currently targeting regression snapshot
 .PHONY: test_regression
 test_regression:
 	scripts/test_regression.sh
 
-.PHONY: reset_regression
-reset_regression:
-	rm -rf $(REGRESSION_OUTPUT)
-	$(MAKE) test_regression
+# Create a new regression test snapshot using the current git version as a name
+# (note: update REGRESSION_SNAPSHOT at top of Makefile if you want to start testing against this snapshot in the future)
+.PHONY: regression_snapshot
+regression_snapshot: export REGRESSION_SNAPSHOT=$(shell git describe --tags)
+regression_snapshot:
+	scripts/test_regression.sh
 
 # Clean Up
 

@@ -6,6 +6,26 @@ A regression in this context means that a newer version of Hoard cannot faithful
 
 Sometimes a breaking change may have been intentionally introduced, in this case this test can be used to check that a Hoard upgrade and migration script combined produce no regression.
 
+The regression tests work by pushing some plaintext in test/regression/fixtures through Hoard across a cycle that will be invariant without breaking changes.
+
+## Usage
+
+Run:
+
+```shell
+make test_regression
+``` 
+
+To run against the currently targeted compatibility snapshot (defined by the `REGRESSION_SNAPSHOT` variable in the Makefile).
+
+Run:
+
+```shell
+make regression_snapshot
+``` 
+
+To make a new snapshot based on the fixtures and current hoard version. Then commit the snapshot directory, and update `REGRESSION_SNAPSHOT` to match the name of the snapshot directory (e.g. `v8.2.3`).
+
 ## Test cycle
 The test is implemented as a simple go program that takes an input directory containing some plaintexts, a filesystem store, and some saved grants and cycles the plaintexts through Hoard by:
 

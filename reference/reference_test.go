@@ -1,38 +1,38 @@
 package reference
 
 import (
+	"testing"
+
 	"github.com/bradleyjkemp/cupaloy/v2"
 	"github.com/gogo/protobuf/proto"
 	"github.com/monax/hoard/v8/versions"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // References should be serialised using a deterministic method, a non-deterministic salt or nonce provides a
 // mechanism to make an individual ref or an array of refs non-deterministic
 func TestReferencePlaintextDeterministic(t *testing.T) {
 	cases := []struct {
-		name string
-		refs []*Ref
+		name  string
+		refs  []*Ref
 		nonce []byte
 	}{
 		{
 			name: "UnsaltedNoNonce",
-			refs:  testRefs(nil),
+			refs: testRefs(nil),
 		},
 		{
 			name: "SaltedNoNonce",
 			refs: testRefs([]byte("salt")),
 		},
 		{
-			name: "SaltedNonce",
-			refs: testRefs([]byte("salt")),
+			name:  "SaltedNonce",
+			refs:  testRefs([]byte("salt")),
 			nonce: []byte("nonce"),
-
 		},
 		{
-			name: "RepeatedSaltedNonce",
-			refs: append(testRefs([]byte("salt1")), testRefs([]byte("salt2"))...),
+			name:  "RepeatedSaltedNonce",
+			refs:  append(testRefs([]byte("salt1")), testRefs([]byte("salt2"))...),
 			nonce: []byte("nonce"),
 		},
 	}

@@ -1,9 +1,10 @@
 package grant
 
 import (
-	"github.com/monax/hoard/v8/versions"
 	"io/ioutil"
 	"testing"
+
+	"github.com/monax/hoard/v8/versions"
 
 	"github.com/monax/hoard/v8/config"
 

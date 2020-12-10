@@ -3,8 +3,9 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/monax/hoard/v8/reference"
 	"io"
+
+	"github.com/monax/hoard/v8/reference"
 
 	"github.com/monax/hoard/v8/api"
 	"github.com/monax/hoard/v8/grant"
