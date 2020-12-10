@@ -2,18 +2,19 @@ package hoard
 
 import (
 	"fmt"
+	"github.com/monax/hoard/v8/protodet"
+	"github.com/monax/hoard/v8/versions"
 	"io"
 
 	"github.com/monax/hoard/v8/encryption"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/monax/hoard/v8/api"
 	"github.com/monax/hoard/v8/grant"
 	"github.com/monax/hoard/v8/reference"
 	"github.com/monax/hoard/v8/stores"
 )
 
-type Linker func(refs reference.Refs, head *api.Header, put func(data, salt []byte) (*reference.Ref, error)) (reference.Refs, error)
+type Linker func(refs []*reference.Ref, head *api.Header, put func(data, salt []byte) (*reference.Ref, error)) ([]*reference.Ref, error)
 
 // StreamingService provides the API implementation for Service without relying directly on the
 // GRPC generated streaming types
@@ -47,7 +48,7 @@ func (service *StreamingService) PutSeal(sendAndClose func(*grant.Grant) error, 
 
 	head := first.GetPlaintext().GetHead()
 
-	var refs reference.Refs
+	var refs []*reference.Ref
 
 	err = encrypt(first.GetPlaintext(), service.put,
 		func(ref *reference.Ref, encryptedData []byte) error {
@@ -90,7 +91,8 @@ func (service *StreamingService) UnsealGet(grt *grant.Grant, send func(*api.Plai
 			return err
 		}
 
-		if err = decodePlaintext(data, ref.GetType(), service.grantService.Get, send); err != nil {
+		err = decodePlaintext(data, ref.GetType(), service.grantService.Get, send, versions.LatestGrantVersion)
+		if err != nil {
 			return err
 		}
 	}
@@ -150,7 +152,8 @@ func (service *StreamingService) Get(send func(*api.Plaintext) error, recv func(
 			return err
 		}
 
-		if err = decodePlaintext(data, ref.GetType(), service.grantService.Get, send); err != nil {
+		err = decodePlaintext(data, ref.GetType(), service.grantService.Get, send, versions.LatestGrantVersion)
+		if err != nil {
 			return err
 		}
 	}
@@ -195,7 +198,8 @@ func (service *StreamingService) Decrypt(send func(*api.Plaintext) error, recv f
 			return err
 		}
 
-		if err = decodePlaintext(data, refAndCiphertext.Reference.GetType(), service.grantService.Get, send); err != nil {
+		err = decodePlaintext(data, refAndCiphertext.Reference.GetType(), service.grantService.Get, send, versions.LatestGrantVersion)
+		if err != nil {
 			return err
 		}
 	}
@@ -253,7 +257,7 @@ func (service *StreamingService) Pull(send func(*api.Ciphertext) error, recv fun
 
 // Seal puts refs in a shareable grant
 func (service *StreamingService) Seal(sendAndClose func(*grant.Grant) error, recv func() (*api.ReferenceAndGrantSpec, error)) error {
-	var refs reference.Refs
+	var refs []*reference.Ref
 	rgs, err := recv()
 	if err != nil {
 		return err
@@ -328,31 +332,34 @@ func (service *StreamingService) Delete(address []byte) error {
 	return service.grantService.Store().Delete(address)
 }
 
-// Converts raw plaintext data to the Plaintext wrapper type
+// Converts raw plaintext data to the MustPlaintextFromRefs wrapper type
 // In the case of a HEADER ref type the plaintext is deserialised using the header type
 // In the case of a LINK ref type the supplied get function is used to fetch additional plaintext data which are themselves each decoded
-// Otherwise the data is returned as Plaintext.Body
+// Otherwise the data is returned as MustPlaintextFromRefs.Body
 // The decoded plaintext(s) are then streamed as output via the supplied send function
 func decodePlaintext(data []byte, refType reference.Ref_RefType, get func(*reference.Ref) ([]byte, error),
-	send func(*api.Plaintext) error) error {
+	send func(*api.Plaintext) error, version int32) error {
 
 	switch refType {
 	case reference.Ref_HEADER:
 		head := new(api.Header)
-		err := proto.Unmarshal(data, head)
+		err := protodet.Unmarshal(data, head)
 		if err != nil {
 			return err
 		}
 		return send(&api.Plaintext{Head: head})
 
 	case reference.Ref_LINK:
-		refs := reference.RepeatedFromPlaintext(data)
+		refs, err := reference.RefsFromPlaintext(data, version)
+		if err != nil {
+			return err
+		}
 		for _, ref := range refs {
 			data, err := get(ref)
 			if err != nil {
 				return err
 			}
-			err = decodePlaintext(data, ref.Type, get, send)
+			err = decodePlaintext(data, ref.Type, get, send, version)
 			if err != nil {
 				return err
 			}
@@ -372,7 +379,7 @@ func (service *StreamingService) put(data, salt []byte) (*reference.Ref, []byte,
 	return ref, nil, err
 }
 
-// Abstracts common Plaintext input flow handling
+// Abstracts common MustPlaintextFromRefs input flow handling
 func encrypt(first *api.Plaintext,
 	encrypt func(data []byte, salt []byte) (ref *reference.Ref, encryptedData []byte, err error),
 	send func(ref *reference.Ref, encryptedData []byte) error,
@@ -384,7 +391,7 @@ func encrypt(first *api.Plaintext,
 		if head.GetChunkSize() > 0 {
 			chunkSize = head.ChunkSize
 		}
-		data, err := proto.Marshal(head)
+		data, err := protodet.Marshal(head)
 		if err != nil {
 			return err
 		}
@@ -428,18 +435,22 @@ func encrypt(first *api.Plaintext,
 		chunkSize)
 }
 
-func defaultLinker(refs reference.Refs, head *api.Header, put func(data, salt []byte) (*reference.Ref, error)) (reference.Refs, error) {
+func defaultLinker(refs []*reference.Ref, head *api.Header, put func(data, salt []byte) (*reference.Ref, error)) ([]*reference.Ref, error) {
 	// Always link refs and always use a unique nonce to allow them to be deletable
 	nonce, err := encryption.NewNonce(encryption.NonceSize)
 	if err != nil {
 		return nil, fmt.Errorf("could not create nonce for LINK ref: %w", err)
 	}
 	// Store refs as a plaintext document
-	ref, err := put(refs.Plaintext(nonce), head.GetSalt())
+	plaintext, err := reference.PlaintextFromRefs(refs, nonce)
+	if err != nil {
+		return nil, err
+	}
+	ref, err := put(plaintext, head.GetSalt())
 	if err != nil {
 		return nil, err
 	}
 	// Mark this ref as a LINK so it will be followed during dereferencing
 	ref.Type = reference.Ref_LINK
-	return reference.Refs{ref}, nil
+	return []*reference.Ref{ref}, nil
 }

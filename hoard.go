@@ -33,9 +33,9 @@ type ObjectService interface {
 type GrantService interface {
 	ObjectService
 	// Seal a reference by encrypting it according to a grant spec
-	Seal(refs reference.Refs, spec *grant.Spec) (*grant.Grant, error)
+	Seal(refs []*reference.Ref, spec *grant.Spec) (*grant.Grant, error)
 	// Unseal a grant by decrypting it and returning the reference
-	Unseal(grt *grant.Grant) (reference.Refs, error)
+	Unseal(grt *grant.Grant) ([]*reference.Ref, error)
 }
 
 // This is our top level API object providing library acting as a deterministic
@@ -67,11 +67,11 @@ func (hrd *Hoard) Name() string {
 	return hrd.name
 }
 
-func (hrd *Hoard) Seal(refs reference.Refs, spec *grant.Spec) (*grant.Grant, error) {
+func (hrd *Hoard) Seal(refs []*reference.Ref, spec *grant.Spec) (*grant.Grant, error) {
 	return grant.Seal(hrd.secrets, refs, spec)
 }
 
-func (hrd *Hoard) Unseal(grt *grant.Grant) (reference.Refs, error) {
+func (hrd *Hoard) Unseal(grt *grant.Grant) ([]*reference.Ref, error) {
 	return grant.Unseal(hrd.secrets, grt)
 }
 

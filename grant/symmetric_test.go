@@ -1,6 +1,7 @@
 package grant
 
 import (
+	"github.com/monax/hoard/v8/versions"
 	"testing"
 
 	"github.com/monax/hoard/v8/encryption"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestSymmetricGrant(t *testing.T) {
-	ref := reference.Refs{&reference.Ref{
+	ref := []*reference.Ref{&reference.Ref{
 		Address:   []byte("adddressss"),
 		SecretKey: []byte("other secret"),
 	}}
@@ -26,7 +27,7 @@ func TestSymmetricGrant(t *testing.T) {
 	grt, err = SymmetricGrant(ref, secret)
 	assert.NoError(t, err)
 	assert.NotNil(t, grt)
-	refOut, err := SymmetricReferenceV2(grt, secret)
+	refOut, err := SymmetricReference(grt, secret, versions.LatestGrantVersion)
 	assert.NoError(t, err)
-	assert.Equal(t, ref, refOut)
+	assertRefsEqual(t, ref, refOut)
 }

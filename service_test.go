@@ -149,7 +149,7 @@ func TestService(t *testing.T) {
 				bigBytes[333] = 23
 				input := bytes.NewBuffer(bigBytes)
 
-				var refs reference.Refs
+				var refs []*reference.Ref
 				err = NewStreamer().
 					WithChunkSize(512).
 					WithInput(input).
@@ -262,8 +262,8 @@ func ReceiveAllPlaintexts(recv func() (*api.Plaintext, error)) (*api.Plaintext, 
 	}
 }
 
-func ReceiveAllReferences(recv func() (*reference.Ref, error)) (reference.Refs, error) {
-	refs := make(reference.Refs, 0)
+func ReceiveAllReferences(recv func() (*reference.Ref, error)) ([]*reference.Ref, error) {
+	refs := make([]*reference.Ref, 0)
 
 	for {
 		ref, err := recv()

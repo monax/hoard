@@ -15,7 +15,7 @@ import (
 )
 
 // OpenPGPGrant encrypts and signs a given reference
-func OpenPGPGrant(refs reference.Refs, public string, keyring *config.OpenPGPSecret) ([]byte, error) {
+func OpenPGPGrant(refs []*reference.Ref, public string, keyring *config.OpenPGPSecret) ([]byte, error) {
 	if keyring == nil {
 		return nil, fmt.Errorf("cannot encrypt because no private key was provided")
 	}
@@ -61,7 +61,11 @@ func OpenPGPGrant(refs reference.Refs, public string, keyring *config.OpenPGPSec
 		return nil, fmt.Errorf("could not set up openpgp encryption: %s", err)
 	}
 
-	_, err = plaintextWriter.Write(refs.Plaintext(nil))
+	plaintext, err := reference.PlaintextFromRefs(refs, nil)
+	if err != nil {
+		return nil, err
+	}
+	_, err = plaintextWriter.Write(plaintext)
 	if err != nil {
 		return nil, err
 	}
@@ -110,11 +114,11 @@ func openPGPReference(grant []byte, keyring *config.OpenPGPSecret) ([]byte, erro
 
 }
 
-func OpenPGPReferenceV2(grant []byte, keyring *config.OpenPGPSecret) (reference.Refs, error) {
+func OpenPGPReference(grant []byte, keyring *config.OpenPGPSecret, version int32) ([]*reference.Ref, error) {
 	data, err := openPGPReference(grant, keyring)
 	if err != nil {
 		return nil, err
 	}
 
-	return reference.RepeatedFromPlaintext(data), nil
+	return reference.RefsFromPlaintext(data, version)
 }

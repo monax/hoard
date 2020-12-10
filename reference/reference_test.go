@@ -1,43 +1,58 @@
 package reference
 
 import (
-	"testing"
-
+	"github.com/bradleyjkemp/cupaloy/v2"
+	"github.com/gogo/protobuf/proto"
+	"github.com/monax/hoard/v8/versions"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-// We may or may not want grants to be deterministic (as in byte-wise identical
-// for the same reference). We provide the ability to salt a reference for the case when
-// we expressly want to avoid them being deterministic. Furthermore the JSON
-// spec doesn't specify a canonical field order. However golang has a pretty
-// stable ordering for structs, though we probably shouldn't depend on it. In
-// case we are this test is a canary that will alert us if that ever changes.
-// If it is useful to have strictly deterministic grants then we should consider
-// a canonical ordering. It might be useful in some circumstances to see that one
-// reference is the same as an other without knowing the reference content (or having to
-// decrypt it), but from this vantage point that case seems fairly marginal.
-// If this test fails but TestGrantPlaintext passes, consider removing this test.
+// References should be serialised using a deterministic method, a non-deterministic salt or nonce provides a
+// mechanism to make an individual ref or an array of refs non-deterministic
 func TestReferencePlaintextDeterministic(t *testing.T) {
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Size":1024}]}`,
-		string(testReference(nil).Plaintext(nil)))
+	cases := []struct {
+		name string
+		refs []*Ref
+		nonce []byte
+	}{
+		{
+			name: "UnsaltedNoNonce",
+			refs:  testRefs(nil),
+		},
+		{
+			name: "SaltedNoNonce",
+			refs: testRefs([]byte("salt")),
+		},
+		{
+			name: "SaltedNonce",
+			refs: testRefs([]byte("salt")),
+			nonce: []byte("nonce"),
 
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA==","Size":1024}]}`, string(testReference(([]byte)("salt")).Plaintext(nil)))
+		},
+		{
+			name: "RepeatedSaltedNonce",
+			refs: append(testRefs([]byte("salt1")), testRefs([]byte("salt2"))...),
+			nonce: []byte("nonce"),
+		},
+	}
 
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA==","Size":1024}],"Nonce":"bm9uY2U="}`, string(testReference(([]byte)("salt")).Plaintext(([]byte)("nonce"))))
-
-	assert.Equal(t, `{"Refs":[{"Address":"AQIDBAUGBwEBAgMEBQYHAQECAwQFBgcBAQIDBAUGBwE=","SecretKey":"AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=","Salt":"c2FsdA==","Size":1024}],"Nonce":"bm9uY2U="}`,
-		string(testReference(([]byte)("salt")).Plaintext(([]byte)("nonce"))))
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			cupaloy.SnapshotT(t, string(MustPlaintextFromRefs(c.refs, c.nonce)))
+		})
+	}
 }
 
 func TestReferencePlaintext(t *testing.T) {
-	ref := testReference(nil)
-	assert.Equal(t, ref,
-		RepeatedFromPlaintext(ref.Plaintext(nil)))
-	assert.Equal(t, ref,
-		RepeatedFromPlaintext(ref.Plaintext(([]byte)("nonce"))))
+	refs := testRefs(nil)
+	assertRefsEqual(t, refs,
+		MustRefsFromPlaintext(MustPlaintextFromRefs(refs, nil), versions.LatestGrantVersion))
+	assertRefsEqual(t, refs,
+		MustRefsFromPlaintext(MustPlaintextFromRefs(refs, ([]byte)("nonce")), versions.LatestGrantVersion))
 }
 
-func testReference(salt []byte) Refs {
+func testRefs(salt []byte) []*Ref {
 	address := []byte{
 		1, 2, 3, 4, 5, 6, 7, 1,
 		1, 2, 3, 4, 5, 6, 7, 1,
@@ -50,5 +65,11 @@ func testReference(salt []byte) Refs {
 		1, 2, 3, 4, 5, 6, 7, 8,
 		1, 2, 3, 4, 5, 6, 7, 8,
 	}
-	return Refs{New(address, secretKey, salt, 1024)}
+	return []*Ref{New(address, secretKey, salt, 1024)}
+}
+
+func assertRefsEqual(t *testing.T, as, bs []*Ref) {
+	for i, ref := range as {
+		assert.True(t, proto.Equal(ref, bs[i]))
+	}
 }

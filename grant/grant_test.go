@@ -1,8 +1,10 @@
 package grant
 
 import (
-	"encoding/base64"
 	"encoding/json"
+	"github.com/gogo/protobuf/proto"
+	"github.com/monax/hoard/v8/versions"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"testing"
 
@@ -10,7 +12,6 @@ import (
 	"github.com/monax/hoard/v8/encryption"
 	"github.com/monax/hoard/v8/reference"
 	"github.com/stretchr/testify/assert"
-	"github.com/test-go/testify/require"
 )
 
 func TestGrants(t *testing.T) {
@@ -28,10 +29,12 @@ func TestGrants(t *testing.T) {
 	plaintextSpec := Spec{Plaintext: &PlaintextSpec{}}
 	plaintextGrant, err := Seal(testSecrets, testRefs, &plaintextSpec)
 	assert.NoError(t, err)
-	assert.Equal(t, testRefs[0].Address, reference.RepeatedFromPlaintext(plaintextGrant.EncryptedReferences)[0].Address)
-	assert.Equal(t, testRefs[0].SecretKey, reference.RepeatedFromPlaintext(plaintextGrant.EncryptedReferences)[0].SecretKey)
+	refs := reference.MustRefsFromPlaintext(plaintextGrant.EncryptedReferences, versions.LatestGrantVersion)
+	require.NotEmpty(t, refs)
+	assert.Equal(t, testRefs[0].Address, refs[0].Address)
+	assert.Equal(t, testRefs[0].SecretKey, refs[0].SecretKey)
 	plaintextRef, err := Unseal(testSecrets, plaintextGrant)
-	assert.Equal(t, testRefs, plaintextRef)
+	assertRefsEqual(t, testRefs, plaintextRef)
 
 	// SymmetricGrant with empty provider
 	symmetricSpec := Spec{Symmetric: &SymmetricSpec{PublicID: "test"}}
@@ -49,7 +52,7 @@ func TestGrants(t *testing.T) {
 	assert.NotNil(t, symmetricGrant)
 	assert.NoError(t, err)
 	symmetricRef, err := Unseal(testSecrets, symmetricGrant)
-	assert.Equal(t, testRefs, symmetricRef)
+	assertRefsEqual(t, testRefs, symmetricRef)
 	assert.NoError(t, err)
 
 	// OpenPGPGrant encrypt / decrypt with local keypair
@@ -57,16 +60,14 @@ func TestGrants(t *testing.T) {
 	openpgpGrant, err := Seal(testSecrets, testRefs, &openpgpSpec)
 	assert.NoError(t, err)
 	openpgpRef, err := Unseal(testSecrets, openpgpGrant)
-	assert.Equal(t, testRefs, openpgpRef)
+	assertRefsEqual(t, testRefs, openpgpRef)
 	assert.NoError(t, err)
 }
 
-func mustDecodeString(str string) []byte {
-	ciphertext, err := base64.StdEncoding.DecodeString(str)
-	if err != nil {
-		panic(err)
+func assertRefsEqual(t *testing.T, as, bs []*reference.Ref) {
+	for i, ref := range as {
+		assert.True(t, proto.Equal(ref, bs[i]))
 	}
-	return ciphertext
 }
 
 func newSecretsManager(secrets map[string]string, pgp *config.OpenPGPSecret) config.SecretsManager {
@@ -81,7 +82,7 @@ func newSecretsManager(secrets map[string]string, pgp *config.OpenPGPSecret) con
 	}
 }
 
-func testReferences() reference.Refs {
+func testReferences() []*reference.Ref {
 	address := []byte{
 		1, 2, 3, 4, 5, 6, 7, 1,
 		1, 2, 3, 4, 5, 6, 7, 1,
@@ -94,7 +95,7 @@ func testReferences() reference.Refs {
 		1, 2, 3, 4, 5, 6, 7, 8,
 		1, 2, 3, 4, 5, 6, 7, 8,
 	}
-	return reference.Refs{reference.New(address, secretKey, nil, 1024)}
+	return []*reference.Ref{reference.New(address, secretKey, nil, 1024)}
 }
 
 func deriveSecret(t *testing.T, data []byte) []byte {

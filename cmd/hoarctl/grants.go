@@ -156,7 +156,7 @@ func (client *Client) Unseal(cmd *cli.Cmd) {
 			fatalf("Error closing send: %v", err)
 		}
 
-		refs := reference.Refs{}
+		refs := []*reference.Ref{}
 		err = hoard.NewStreamer().
 			WithRecv(recvReferences(&refs, unseal.Recv)).
 			Stream(context.Background())

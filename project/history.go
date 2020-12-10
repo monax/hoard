@@ -49,7 +49,7 @@ var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://gi
 - [JS] Expose more usable methods from the client (breaking)
 - [JS] Support streaming versions of calls taking BytesLike
 - [Hoard] Make default storage ChunkSize 3 MiB
-- [Hoard] Body can be sent in same message as Plaintext Header (but Header data will be normalised out into first message on storage and retrieval)
+- [Hoard] Body can be sent in same message as MustPlaintext Header (but Header data will be normalised out into first message on storage and retrieval)
 
 
 ### Fixed

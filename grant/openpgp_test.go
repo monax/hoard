@@ -1,6 +1,7 @@
 package grant
 
 import (
+	"github.com/monax/hoard/v8/versions"
 	"io/ioutil"
 	"testing"
 
@@ -27,27 +28,27 @@ func TestOpenPGPGrant(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
-	ref, err := OpenPGPReferenceV2(grant, &testPGP)
+	ref, err := OpenPGPReference(grant, &testPGP, versions.LatestGrantVersion)
 	assert.NoError(t, err)
-	assert.EqualValues(t, testRefs, ref)
+	assertRefsEqual(t, testRefs, ref)
 
 	// Create grant from private
 	grant, err = OpenPGPGrant(testRefs, string(keyPrivate), &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
-	ref, err = OpenPGPReferenceV2(grant, &testPGP)
+	ref, err = OpenPGPReference(grant, &testPGP, versions.LatestGrantVersion)
 	assert.NoError(t, err)
-	assert.EqualValues(t, testRefs, ref)
+	assertRefsEqual(t, testRefs, ref)
 
 	// Create grant from signer
 	grant, err = OpenPGPGrant(testRefs, "", &testPGP)
 	assert.NoError(t, err)
 
 	// Try to read reference from grant
-	ref, err = OpenPGPReferenceV2(grant, &testPGP)
+	ref, err = OpenPGPReference(grant, &testPGP, versions.LatestGrantVersion)
 	assert.NoError(t, err)
-	assert.EqualValues(t, testRefs, ref)
+	assertRefsEqual(t, testRefs, ref)
 
 	grant, err = OpenPGPGrant(testRefs, string(keyPublic), nil)
 	assert.Errorf(t, err, "hoard is not currently configured to use openpgp")

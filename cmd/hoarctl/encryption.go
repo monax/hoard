@@ -120,7 +120,7 @@ func (client *Client) Ref(cmd *cli.Cmd) {
 			fatalf("Error sending head: %v", err)
 		}
 
-		var refs reference.Refs
+		var refs []*reference.Ref
 
 		err = hoard.NewStreamer().
 			WithChunkSize(int64(*chunk)).

@@ -22,6 +22,9 @@ export class Ref extends jspb.Message {
     getSalt_asB64(): string;
     setSalt(value: Uint8Array | string): Ref;
 
+    getVersion(): number;
+    setVersion(value: number): Ref;
+
     getType(): Ref.RefType;
     setType(value: Ref.RefType): Ref;
 
@@ -44,6 +47,7 @@ export namespace Ref {
         address: Uint8Array | string,
         secretkey: Uint8Array | string,
         salt: Uint8Array | string,
+        version: number,
         type: Ref.RefType,
         size: number,
     }
@@ -54,4 +58,33 @@ export namespace Ref {
     LINK = 2,
     }
 
+}
+
+export class RefsWithNonce extends jspb.Message { 
+    clearRefsList(): void;
+    getRefsList(): Array<Ref>;
+    setRefsList(value: Array<Ref>): RefsWithNonce;
+    addRefs(value?: Ref, index?: number): Ref;
+
+    getNonce(): Uint8Array | string;
+    getNonce_asU8(): Uint8Array;
+    getNonce_asB64(): string;
+    setNonce(value: Uint8Array | string): RefsWithNonce;
+
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): RefsWithNonce.AsObject;
+    static toObject(includeInstance: boolean, msg: RefsWithNonce): RefsWithNonce.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: RefsWithNonce, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): RefsWithNonce;
+    static deserializeBinaryFromReader(message: RefsWithNonce, reader: jspb.BinaryReader): RefsWithNonce;
+}
+
+export namespace RefsWithNonce {
+    export type AsObject = {
+        refsList: Array<Ref.AsObject>,
+        nonce: Uint8Array | string,
+    }
 }

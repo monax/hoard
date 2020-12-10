@@ -21,7 +21,7 @@ func (client *Client) Cat(cmd *cli.Cmd) {
 		pull, err := client.storage.Pull(context.Background())
 		decoder := json.NewDecoder(os.Stdin)
 		err = hoard.NewStreamer().WithSend(func(chunk []byte) error {
-			refs := new(reference.Refs)
+			refs := new([]*reference.Ref)
 			err := decoder.Decode(refs)
 			if err != nil {
 				return err
@@ -123,7 +123,7 @@ func (client *Client) Put(cmd *cli.Cmd) {
 			fatalf("Error sending head: %v", err)
 		}
 
-		refs := reference.Refs{}
+		refs := []*reference.Ref{}
 		err = hoard.NewStreamer().WithChunkSize(int64(*chunk)).
 			WithInput(os.Stdin).
 			WithSend(func(data []byte) error {

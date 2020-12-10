@@ -57,7 +57,7 @@ func jsonString(v interface{}) string {
 func readReferences(send func(ref *reference.Ref) error) func(chunk []byte) error {
 	decoder := json.NewDecoder(os.Stdin)
 	return func(chunk []byte) error {
-		refs := new(reference.Refs)
+		refs := new([]*reference.Ref)
 		err := decoder.Decode(refs)
 		if err != nil {
 			return err
@@ -71,7 +71,7 @@ func readReferences(send func(ref *reference.Ref) error) func(chunk []byte) erro
 		return nil
 	}
 }
-func recvReferences(refs *reference.Refs, recv func() (*reference.Ref, error)) func() ([]byte, error) {
+func recvReferences(refs *[]*reference.Ref, recv func() (*reference.Ref, error)) func() ([]byte, error) {
 	return func() ([]byte, error) {
 		ref, err := recv()
 		if err != nil {

@@ -9,6 +9,13 @@ message Ref {
     bytes SecretKey = 2;
     bytes Salt = 3;
 
+    // Version should always have been Type the way it was used (to distinguish a header)
+    // unfortunately because version 2 grants rely on JSON serialisation of Ref (for Refs array)
+    // We are stuck with this fields while we need to support version 2 grants.
+    // Version 3 grants and above use deterministic protobuf serialisation for Refs so have the
+    // expected upgrade semantics
+    int32 Version = 4;
+
     enum RefType {
         // Default raw reference containing a body chunk
         BODY = 0;
@@ -18,8 +25,14 @@ message Ref {
         LINK = 2;
     }
     // Type indicates whether to undergo further decoding
-    RefType Type = 4;
+    RefType Type = 5;
     // The size in bytes of the plaintext data
-    int64 Size = 5;
+    int64 Size = 6;
 }
 
+// Note the Salt here is different to the salt that may have been used to encrypt
+// the data pointed to by the reference.
+message RefsWithNonce {
+    repeated Ref Refs = 1;
+    bytes nonce = 2;
+}

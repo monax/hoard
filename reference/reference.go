@@ -1,8 +1,11 @@
 package reference
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/monax/hoard/v8/protodet"
+	"github.com/monax/hoard/v8/versions"
 )
 
 func New(address, secretKey, salt []byte, size int64) *Ref {
@@ -17,42 +20,63 @@ func New(address, secretKey, salt []byte, size int64) *Ref {
 	}
 }
 
-type Refs []*Ref
-
-// Note the Salt here is different to the salt that may have been used to encrypt
-// the data pointed to by the reference.
-type refsWithNonce struct {
-	Refs
-	Nonce []byte `json:",omitempty"`
+// Obtain the canonical plaintext for the Ref with an optional nonce that can be used to make a particular
+// array of refs unique, as is usually required for LINK refs
+func PlaintextFromRefs(refs []*Ref, nonce []byte) ([]byte, error) {
+	refsWithNonce := &RefsWithNonce{
+		Refs:  refs,
+		Nonce: nonce,
+	}
+	bs, err := protodet.Marshal(refsWithNonce)
+	if err != nil {
+		return nil, fmt.Errorf("error while marshalling to plaintext, error supressed for security")
+	}
+	return bs, nil
 }
 
-// Obtain the canonical plaintext for the Ref with an optional nonce that can be
-// be used to salt the plaintext in order to obtain an unpredictable version of
-// the plaintext for encryption purposes (i.e. for Grants). The nonce is
-// discarded when read by FromPlaintext
-func plaintext(wrapper interface{}) []byte {
-	bs, err := json.Marshal(wrapper)
+func MustPlaintextFromRefs(refs []*Ref, nonce []byte) []byte {
+	bs, err := PlaintextFromRefs(refs, nonce)
 	if err != nil {
-		panic(fmt.Errorf("did not expect an error when serialising reference, " +
-			"error suppressed for security"))
+		panic(err)
 	}
 	return bs
 }
 
-func (refs Refs) Plaintext(nonce []byte) []byte {
-	return plaintext(refsWithNonce{Refs: refs, Nonce: nonce})
+func refsFromProtobuf(plaintext []byte) ([]*Ref, error) {
+	wrapper := new(RefsWithNonce)
+	err := protodet.Unmarshal(plaintext, wrapper)
+	return wrapper.Refs, err
 }
 
-func fromPlaintext(wrapper interface{}, plaintext []byte) {
-	err := json.Unmarshal(plaintext, wrapper)
-	if err != nil {
-		panic(fmt.Errorf("did not expect an error when deserialising reference, " +
-			"error suppressed for security"))
+func refsFromJSON(plaintext []byte) ([]*Ref, error) {
+	wrapper := new(RefsWithNonce)
+	m := jsonpb.Unmarshaler{}
+	err := m.Unmarshal(bytes.NewBuffer(plaintext), wrapper)
+	return wrapper.Refs, err
+}
+
+func RefsFromPlaintext(plaintext []byte, version int32) (refs []*Ref, err error) {
+	switch version {
+	case 0, 1, 2:
+		refs, err  = refsFromJSON(plaintext)
+		for _, ref := range refs {
+			if ref.Version == versions.RefVersionIncorrectlyUsedToDenoteHeader {
+				ref.Type = Ref_HEADER
+			}
+		}
+	default:
+		refs, err = refsFromProtobuf(plaintext)
 	}
+	if err != nil {
+		err = fmt.Errorf("error while unmarshalling from plaintexst, error supressed for security")
+	}
+	return
 }
 
-func RepeatedFromPlaintext(plaintext []byte) Refs {
-	wrapper := new(refsWithNonce)
-	fromPlaintext(wrapper, plaintext)
-	return wrapper.Refs
+func MustRefsFromPlaintext(plaintext []byte, version int32) []*Ref {
+	refs, err := RefsFromPlaintext(plaintext, version)
+	if err != nil {
+		panic(err)
+	}
+	return refs
 }
