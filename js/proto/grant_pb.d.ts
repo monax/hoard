@@ -60,6 +60,11 @@ export class Spec extends jspb.Message {
     getOpenpgp(): OpenPGPSpec | undefined;
     setOpenpgp(value?: OpenPGPSpec): Spec;
 
+    getLinknonce(): Uint8Array | string;
+    getLinknonce_asU8(): Uint8Array;
+    getLinknonce_asB64(): string;
+    setLinknonce(value: Uint8Array | string): Spec;
+
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Spec.AsObject;
@@ -76,6 +81,7 @@ export namespace Spec {
         plaintext?: PlaintextSpec.AsObject,
         symmetric?: SymmetricSpec.AsObject,
         openpgp?: OpenPGPSpec.AsObject,
+        linknonce: Uint8Array | string,
     }
 }
 

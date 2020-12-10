@@ -7,7 +7,7 @@ package grant;
 option go_package = "github.com/monax/hoard/v8/grant";
 
 // As the grant is often stored as json and we to specify the correct tags for
-// compatability with the client library. 
+// compatability with the client library.
 message Grant {
     // The grantSpec provides sufficient information to decrypt the reference
     // if hoard has access to the requisite secret
@@ -20,6 +20,10 @@ message Spec {
     PlaintextSpec Plaintext = 1 [json_name="plaintext", (gogoproto.jsontag) = "plaintext"];
     SymmetricSpec Symmetric = 2 [json_name="symmetric", (gogoproto.jsontag) = "symmetric"];
     OpenPGPSpec OpenPGP = 3 [json_name="openpgp", (gogoproto.jsontag) = "openpgp"];
+    // If provided then this nonce (rather than a random unique nonce) will be used when forming link-refs
+    // Grants sharing a link nonce will _share_ links (this allows some kinds of grants to be deterministic but
+    // prevents safe deletion of links)
+    bytes LinkNonce = 4 [json_name="linknonce", (gogoproto.jsontag) = "linknonce"];
 }
 
 message PlaintextSpec {

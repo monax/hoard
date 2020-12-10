@@ -21,13 +21,13 @@ type Server struct {
 	listenURL  string
 	listener   net.Listener
 	hoard      *hoard.Hoard
-	chunk      int
+	chunk      int64
 	grpcServer *grpc.Server
 	ready      chan struct{}
 	logger     log.Logger
 }
 
-func New(listenURL string, store stores.NamedStore, secretManager config.SecretsManager, chunkSize int, logger log.Logger) *Server {
+func New(listenURL string, store stores.NamedStore, secretManager config.SecretsManager, chunkSize int64, logger log.Logger) *Server {
 	return &Server{
 		listenURL: listenURL,
 		hoard:     hoard.NewHoard(store, secretManager, logger),

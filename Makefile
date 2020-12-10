@@ -18,7 +18,12 @@
 # See http://www.grpc.io/docs/quickstart/go.html to get started.
 #
 
-export GO111MODULE := on
+SHELL := bash
+.ONESHELL:
+.SHELLFLAGS := -eu -o pipefail -c
+.DELETE_ON_ERROR:
+MAKEFLAGS += --warn-undefined-variables
+MAKEFLAGS += --no-builtin-rules
 
 # Gets implicit default GOPATH if not set
 GOPATH?=$(shell go env GOPATH)
@@ -41,6 +46,9 @@ PROTOC_GEN_TS_PATH = ${HOARD_TS_PATH}/node_modules/.bin/protoc-gen-ts
 PROTOC_GEN_GRPC_PATH= ${HOARD_TS_PATH}/node_modules/.bin/grpc_tools_node_protoc_plugin
 
 GO_BUILD_ARGS = -ldflags "-extldflags '-static' -X $(shell go list)/project.commit=$(shell cat commit_hash.txt) -X $(shell go list)/project.date=$(shell date '+%Y-%m-%d')"
+
+export REGRESSION_DIR=test/regression
+export REGRESSION_SNAPSHOT=v8.2.3
 
 export DOCKER_HUB := quay.io
 export DOCKER_REPO := $(DOCKER_HUB)/monax/hoard
@@ -165,6 +173,18 @@ test_integration: check
 	go test -v -tags integration ./...
 	scripts/integration/test_gcp.sh
 	# @scripts/integration/test_ipfs.sh ## needs work
+
+# Run a regression test against the currently targeting regression snapshot
+.PHONY: test_regression
+test_regression:
+	scripts/test_regression.sh
+
+# Create a new regression test snapshot using the current git version as a name
+# (note: update REGRESSION_SNAPSHOT at top of Makefile if you want to start testing against this snapshot in the future)
+.PHONY: regression_snapshot
+regression_snapshot: export REGRESSION_SNAPSHOT=$(shell git describe --tags)
+regression_snapshot:
+	scripts/test_regression.sh
 
 # Clean Up
 

@@ -8,7 +8,7 @@ import (
 
 // Streamer is an abstraction for GRPC-ish flows
 type Streamer struct {
-	chunkSize int
+	chunkSize int64
 	reader    io.Reader
 	send      func(chunk []byte) error
 	closeSend func() error
@@ -35,7 +35,7 @@ func NewStreamer() *Streamer {
 	}
 }
 
-func (s *Streamer) WithChunkSize(chunkSize int) *Streamer {
+func (s *Streamer) WithChunkSize(chunkSize int64) *Streamer {
 	s.chunkSize = chunkSize
 	return s
 }

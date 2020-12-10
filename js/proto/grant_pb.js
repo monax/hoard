@@ -395,7 +395,8 @@ proto.grant.Spec.toObject = function(includeInstance, msg) {
   var f, obj = {
     plaintext: (f = msg.getPlaintext()) && proto.grant.PlaintextSpec.toObject(includeInstance, f),
     symmetric: (f = msg.getSymmetric()) && proto.grant.SymmetricSpec.toObject(includeInstance, f),
-    openpgp: (f = msg.getOpenpgp()) && proto.grant.OpenPGPSpec.toObject(includeInstance, f)
+    openpgp: (f = msg.getOpenpgp()) && proto.grant.OpenPGPSpec.toObject(includeInstance, f),
+    linknonce: msg.getLinknonce_asB64()
   };
 
   if (includeInstance) {
@@ -446,6 +447,10 @@ proto.grant.Spec.deserializeBinaryFromReader = function(msg, reader) {
       var value = new proto.grant.OpenPGPSpec;
       reader.readMessage(value,proto.grant.OpenPGPSpec.deserializeBinaryFromReader);
       msg.setOpenpgp(value);
+      break;
+    case 4:
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setLinknonce(value);
       break;
     default:
       reader.skipField();
@@ -498,6 +503,13 @@ proto.grant.Spec.serializeBinaryToWriter = function(message, writer) {
       3,
       f,
       proto.grant.OpenPGPSpec.serializeBinaryToWriter
+    );
+  }
+  f = message.getLinknonce_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
+      4,
+      f
     );
   }
 };
@@ -611,6 +623,48 @@ proto.grant.Spec.prototype.clearOpenpgp = function() {
  */
 proto.grant.Spec.prototype.hasOpenpgp = function() {
   return jspb.Message.getField(this, 3) != null;
+};
+
+
+/**
+ * optional bytes LinkNonce = 4;
+ * @return {!(string|Uint8Array)}
+ */
+proto.grant.Spec.prototype.getLinknonce = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * optional bytes LinkNonce = 4;
+ * This is a type-conversion wrapper around `getLinknonce()`
+ * @return {string}
+ */
+proto.grant.Spec.prototype.getLinknonce_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getLinknonce()));
+};
+
+
+/**
+ * optional bytes LinkNonce = 4;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getLinknonce()`
+ * @return {!Uint8Array}
+ */
+proto.grant.Spec.prototype.getLinknonce_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getLinknonce()));
+};
+
+
+/**
+ * @param {!(string|Uint8Array)} value
+ * @return {!proto.grant.Spec} returns this
+ */
+proto.grant.Spec.prototype.setLinknonce = function(value) {
+  return jspb.Message.setProto3BytesField(this, 4, value);
 };
 
 

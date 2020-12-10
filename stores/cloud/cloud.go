@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"gocloud.dev/gcerrors"
+
 	"github.com/monax/hoard/v8/stores"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
@@ -173,9 +175,12 @@ func (inv *cloudStore) Get(address []byte) ([]byte, error) {
 func (inv *cloudStore) Stat(address []byte) (*stores.StatInfo, error) {
 	reader, err := inv.blob.NewReader(inv.back, fmt.Sprintf("%s/%s", inv.prefix, inv.encode(address)), nil)
 	if err != nil {
-		return &stores.StatInfo{
-			Exists: false,
-		}, nil
+		if gcerrors.Code(err) == gcerrors.NotFound {
+			return &stores.StatInfo{
+				Exists: false,
+			}, nil
+		}
+		return nil, err
 	}
 
 	n := reader.Size()

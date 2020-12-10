@@ -18,13 +18,13 @@ var DefaultHoardConfig = NewHoardConfig(DefaultListenAddress, DefaultChunkSize, 
 type HoardConfig struct {
 	ListenAddress string
 	// Chunk size for data upload / download
-	ChunkSize int
+	ChunkSize int64
 	Storage   *Storage
 	Logging   *Logging
 	Secrets   *Secrets
 }
 
-func NewHoardConfig(listenAddress string, chunkSize int, storageConfig *Storage, loggingConfig *Logging) *HoardConfig {
+func NewHoardConfig(listenAddress string, chunkSize int64, storageConfig *Storage, loggingConfig *Logging) *HoardConfig {
 	return &HoardConfig{
 		ListenAddress: listenAddress,
 		ChunkSize:     chunkSize,

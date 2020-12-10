@@ -113,6 +113,9 @@ export class Header extends jspb.Message {
     getData_asB64(): string;
     setData(value: Uint8Array | string): Header;
 
+    getChunksize(): number;
+    setChunksize(value: number): Header;
+
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Header.AsObject;
@@ -128,6 +131,7 @@ export namespace Header {
     export type AsObject = {
         salt: Uint8Array | string,
         data: Uint8Array | string,
+        chunksize: number,
     }
 }
 

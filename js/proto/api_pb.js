@@ -835,7 +835,8 @@ proto.api.Header.prototype.toObject = function(opt_includeInstance) {
 proto.api.Header.toObject = function(includeInstance, msg) {
   var f, obj = {
     salt: msg.getSalt_asB64(),
-    data: msg.getData_asB64()
+    data: msg.getData_asB64(),
+    chunksize: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -880,6 +881,10 @@ proto.api.Header.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {!Uint8Array} */ (reader.readBytes());
       msg.setData(value);
       break;
+    case 3:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setChunksize(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -920,6 +925,13 @@ proto.api.Header.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeBytes(
       2,
+      f
+    );
+  }
+  f = message.getChunksize();
+  if (f !== 0) {
+    writer.writeInt64(
+      3,
       f
     );
   }
@@ -1007,6 +1019,24 @@ proto.api.Header.prototype.getData_asU8 = function() {
  */
 proto.api.Header.prototype.setData = function(value) {
   return jspb.Message.setProto3BytesField(this, 2, value);
+};
+
+
+/**
+ * optional int64 ChunkSize = 3;
+ * @return {number}
+ */
+proto.api.Header.prototype.getChunksize = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.api.Header} returns this
+ */
+proto.api.Header.prototype.setChunksize = function(value) {
+  return jspb.Message.setProto3IntField(this, 3, value);
 };
 
 

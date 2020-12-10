@@ -21,7 +21,7 @@ func (client *Client) Cat(cmd *cli.Cmd) {
 		pull, err := client.storage.Pull(context.Background())
 		decoder := json.NewDecoder(os.Stdin)
 		err = hoard.NewStreamer().WithSend(func(chunk []byte) error {
-			refs := new(reference.Refs)
+			refs := new([]*reference.Ref)
 			err := decoder.Decode(refs)
 			if err != nil {
 				return err
@@ -71,7 +71,7 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		validateChunkSize(*chunk)
+		validateChunkSize(int64(*chunk))
 
 		// If given address use it
 		push, err := client.storage.Push(context.Background())
@@ -81,7 +81,7 @@ func (client *Client) Insert(cmd *cli.Cmd) {
 
 		var addresses []*api.Address
 
-		err = hoard.NewStreamer().WithChunkSize(*chunk).
+		err = hoard.NewStreamer().WithChunkSize(int64(*chunk)).
 			WithInput(os.Stdin).
 			WithSend(func(data []byte) error {
 				return push.Send(&api.Ciphertext{EncryptedData: data})
@@ -111,7 +111,7 @@ func (client *Client) Put(cmd *cli.Cmd) {
 	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		validateChunkSize(*chunk)
+		validateChunkSize(int64(*chunk))
 
 		put, err := client.cleartext.Put(context.Background())
 		if err != nil {
@@ -123,8 +123,8 @@ func (client *Client) Put(cmd *cli.Cmd) {
 			fatalf("Error sending head: %v", err)
 		}
 
-		refs := reference.Refs{}
-		err = hoard.NewStreamer().WithChunkSize(*chunk).
+		refs := []*reference.Ref{}
+		err = hoard.NewStreamer().WithChunkSize(int64(*chunk)).
 			WithInput(os.Stdin).
 			WithSend(func(data []byte) error {
 				return put.Send(&api.Plaintext{Body: data})

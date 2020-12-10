@@ -8,7 +8,7 @@ import (
 )
 
 // SymmetricGrant encrypts the given reference based on a secret read from the provider store
-func SymmetricGrant(ref reference.Refs, secret []byte) ([]byte, error) {
+func SymmetricGrant(refs []*reference.Ref, secret []byte) ([]byte, error) {
 	if len(secret) < encryption.KeySize {
 		return nil, fmt.Errorf("SymmetricGrant cannot encrypt with a secret of size < %d", encryption.KeySize)
 	}
@@ -18,7 +18,11 @@ func SymmetricGrant(ref reference.Refs, secret []byte) ([]byte, error) {
 		return nil, fmt.Errorf("SymmetricGrant failed to generate random nonce: %v", err)
 	}
 	// Encrypt reference with key and nonce
-	blob, err := encryption.Encrypt(ref.Plaintext(nil), nonce, secret)
+	plaintext, err := reference.PlaintextFromRefs(refs, nil)
+	if err != nil {
+		return nil, err
+	}
+	blob, err := encryption.Encrypt(plaintext, nonce, secret)
 	if err != nil {
 		return nil, fmt.Errorf("SymmetricGrant failed to encyrpt: %v", err)
 	}
@@ -27,11 +31,11 @@ func SymmetricGrant(ref reference.Refs, secret []byte) ([]byte, error) {
 	return encryption.Salinate(blob.EncryptedData, nonce), nil
 }
 
-func SymmetricReferenceV2(ciphertext, secret []byte) (reference.Refs, error) {
+func SymmetricReference(ciphertext, secret []byte, version int32) ([]*reference.Ref, error) {
 	encryptedData, nonce := encryption.Desalinate(ciphertext, encryption.NonceSize)
 	data, err := encryption.Decrypt(encryptedData, nonce, secret)
 	if err != nil {
-		return nil, fmt.Errorf("SymmetricReferenceV2 failed to decrypt: %v", err)
+		return nil, fmt.Errorf("SymmetricReference failed to decrypt: %v", err)
 	}
-	return reference.RepeatedFromPlaintext(data), nil
+	return reference.RefsFromPlaintext(data, version)
 }

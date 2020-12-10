@@ -5,14 +5,22 @@ import (
 
 	"github.com/monax/hoard/v8/api"
 	"github.com/monax/hoard/v8/grant"
-	"github.com/monax/hoard/v8/reference"
 	"github.com/monax/hoard/v8/stores"
 )
 
-const DefaultChunkSize = 1 << 20 // 1MiB
+const MiB = 1 << 20
 
-// How many refs to place in a single PutSeal Grant before introducing an intermediate LINK ref
-const MaxRefsBeforeLinking = 16
+const KiB = 1 << 10
+
+const DefaultChunkSize = 3 * MiB
+
+const GRPCMessageSizeLimit = 4 * MiB
+
+// I would hope a reasonable guess - needs to include GRPC and Hoard message overhead
+// Increasse this is there are issues
+const MessageOverhead = 256 * KiB
+
+const MaxChunkSize = GRPCMessageSizeLimit - MessageOverhead
 
 // Service implements the GRPC Hoard service. It should mostly be plumbing to
 // a DeterministicEncryptedStore (for which hoard.hoard is the canonical example)
@@ -21,20 +29,12 @@ type Service struct {
 	streaming *StreamingService
 }
 
-func NewService(grantService GrantService, chunkSize int) *Service {
+func NewService(grantService GrantService, chunkSize int64) *Service {
 	if chunkSize == 0 {
 		chunkSize = DefaultChunkSize
 	}
 	return &Service{
-		streaming: NewStreamingService(grantService, chunkSize, func(refs []*reference.Ref) bool {
-			// TODO: using LINK refs with a nonce may have a role to play in our deletion system - we could delete a
-			// noncified LINK ref without deleting the underlying linked refs. That would mean we could safely delete
-			// while at the same time getting the benefit of only storing the same data once (as the underlying refs)
-			// in effect data would become inaccessible when the last reference was deleted. We may still want to introduce
-			// some form of reference counting in a stateful 'link layer' if we want to be able to truly delete the data
-			// when it falls out of reference.1
-			return len(refs) > MaxRefsBeforeLinking
-		}),
+		streaming: NewStreamingService(grantService, chunkSize, defaultLinker),
 	}
 }
 

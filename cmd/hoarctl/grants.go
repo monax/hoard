@@ -20,7 +20,7 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 	chunk := addIntOpt(cmd, "chunk", chunkOpt, chunkSize)
 
 	cmd.Action = func() {
-		validateChunkSize(*chunk)
+		validateChunkSize(int64(*chunk))
 
 		spec := &grant.Spec{Plaintext: &grant.PlaintextSpec{}}
 		if *key != "" {
@@ -47,7 +47,7 @@ func (client *Client) PutSeal(cmd *cli.Cmd) {
 			fatalf("Error sending head: %v", err)
 		}
 
-		err = hoard.NewStreamer().WithChunkSize(*chunk).WithInput(os.Stdin).WithSend(func(data []byte) error {
+		err = hoard.NewStreamer().WithChunkSize(int64(*chunk)).WithInput(os.Stdin).WithSend(func(data []byte) error {
 			return putseal.Send(&api.PlaintextAndGrantSpec{
 				Plaintext: &api.Plaintext{
 					Body: data,
@@ -156,7 +156,7 @@ func (client *Client) Unseal(cmd *cli.Cmd) {
 			fatalf("Error closing send: %v", err)
 		}
 
-		refs := reference.Refs{}
+		refs := []*reference.Ref{}
 		err = hoard.NewStreamer().
 			WithRecv(recvReferences(&refs, unseal.Recv)).
 			Stream(context.Background())

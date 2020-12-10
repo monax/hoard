@@ -8,6 +8,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/aws/aws-sdk-go v1.36.1
+	github.com/bradleyjkemp/cupaloy/v2 v2.6.0
 	github.com/cep21/xdgbasedir v0.0.0-20170329171747-21470bfc93b9
 	github.com/eapache/channels v1.1.0
 	github.com/go-kit/kit v0.10.0

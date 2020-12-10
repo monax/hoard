@@ -3,7 +3,6 @@ import {openpgpExample} from "./openpgp";
 
 describe('examples', function () {
   test('buffer based plaintext', async () => {
-    const isIIIIT = Buffer.from([1, 2]) instanceof Uint8Array;
     const data = Buffer.from('some stuff', 'utf8');
     const salt = Buffer.from('foo', 'ascii');
     await example(data, salt);

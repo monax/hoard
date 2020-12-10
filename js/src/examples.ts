@@ -101,8 +101,13 @@ export async function example(data: string | Uint8Array, salt: string | Uint8Arr
   actual = await hoard.unsealGet(grant);
   await assertBytesEqual(await readBytes(actual.body), data);
 
-  const deleted = await readAll(hoard.unsealDelete(grant));
-  assert.deepStrictEqual(deleted[0], addresses[0]);
+  // DELETE!
+  const [deleted] = await readAll(hoard.unsealDelete(grant));
+
+  // We will have deleted the _link_ so get that now
+  const [linkRef] = await readAll(hoard.unseal(grant))
+
+  assert.strictEqual(deleted.getAddress_asB64(), linkRef.getAddress_asB64());
 }
 
 // To run the async example in this case ignoring the promise result uncomment the statements below

@@ -45,7 +45,7 @@ func Config(cmd *cli.Cmd) {
 			fatalf("Error fetching default config for %v: %v", arg, err)
 		}
 		conf.Storage = store
-		conf.ChunkSize = *chunkSizeOpt
+		conf.ChunkSize = int64(*chunkSizeOpt)
 		if len(*secretsOpt) > 0 {
 			conf.Secrets = &config.Secrets{
 				Symmetric: make([]*config.SymmetricSecret, len(*secretsOpt)),

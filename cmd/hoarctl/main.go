@@ -25,7 +25,6 @@ const (
 	fileOpt   string = "File to read"
 
 	chunkSize = 64 * 1024 // 64 Kb
-	grpcLimit = 4 * 1024 * 1024
 )
 
 // Client scopes the available hoard clients

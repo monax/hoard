@@ -12,7 +12,7 @@ import (
 
 func TestDeterministicEncryptedStore(t *testing.T) {
 	hrd := NewHoard(stores.NewMemoryStore(), config.NoopSecretManager, log.NewNopLogger())
-	bunsIn := bs("hot buns")
+	bunsIn := []byte("hot buns")
 
 	ref, err := hrd.Put(bunsIn, make([]byte, 32))
 	assert.NoError(t, err)
@@ -20,7 +20,7 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	bunsOut, err := hrd.Get(ref)
 	assert.Equal(t, bunsIn, bunsOut)
 
-	_, err = hrd.Get(reference.New(ref.Address, pad("wrong secret", 32), nil))
+	_, err = hrd.Get(reference.New(ref.Address, pad("wrong secret", 32), nil, 1024))
 	assert.Error(t, err)
 
 	statInfo, err := hrd.Store().Stat(ref.Address)
@@ -40,12 +40,8 @@ func TestDeterministicEncryptedStore(t *testing.T) {
 	assert.False(t, statInfo.Exists)
 }
 
-func bs(s string) []byte {
-	return ([]byte)(s)
-}
-
 func pad(s string, n int) []byte {
 	b := make([]byte, n)
-	copy(b, bs(s))
+	copy(b, []byte(s))
 	return b
 }
