@@ -11,7 +11,7 @@ import (
 )
 
 func TestSymmetricGrant(t *testing.T) {
-	ref := []*reference.Ref{&reference.Ref{
+	ref := []*reference.Ref{{
 		Address:   []byte("adddressss"),
 		SecretKey: []byte("other secret"),
 	}}

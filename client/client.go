@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -36,6 +37,15 @@ func (p *PlaintextStream) GetHead() *api.Header {
 		return nil
 	}
 	return p.Head
+}
+
+func (p *PlaintextStream) Bytes() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	_, err := p.WriteTo(buf)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func New(conn *grpc.ClientConn) *Client {

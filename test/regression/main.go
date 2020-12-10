@@ -144,12 +144,12 @@ func putSealFile(ctx context.Context, client *client.Client, srcPath string) (*g
 	}
 	return client.PutSeal(ctx,
 		&grant.Spec{
+			LinkNonce: []byte(linkNonce),
 			Symmetric: &grant.SymmetricSpec{
 				PublicID: "DummySecretIsAlwaysUsed",
 			},
 		},
 		&api.Header{
-			//LinkNonce: []byte(linkNonce), -- Not present in 8.2.3
 			Data: []byte(filepath.Base(srcPath)),
 		},
 		file)

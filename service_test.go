@@ -8,6 +8,8 @@ import (
 	"io"
 	"testing"
 
+	"github.com/monax/hoard/v8/client"
+
 	"github.com/go-kit/kit/log"
 	"github.com/monax/hoard/v8/api"
 	"github.com/monax/hoard/v8/config"
@@ -58,8 +60,8 @@ func TestService(t *testing.T) {
 				data := make([]byte, 1000)
 				salt := []byte("celery")
 
-				client := api.NewCleartextClient(conn)
-				putStream, err := client.Put(ctx)
+				cli := api.NewCleartextClient(conn)
+				putStream, err := cli.Put(ctx)
 				require.NoError(t, err)
 				err = putStream.Send(&api.Plaintext{Head: &api.Header{Salt: salt}})
 				require.NoError(t, err)
@@ -78,7 +80,7 @@ func TestService(t *testing.T) {
 				}
 				require.Equal(t, expected, int64(len(refs)))
 
-				getStream, err := client.Get(ctx)
+				getStream, err := cli.Get(ctx)
 				require.NoError(t, err)
 				for _, ref := range refs {
 					err = getStream.Send(ref)
@@ -119,8 +121,8 @@ func TestService(t *testing.T) {
 				ref, err := service.streaming.grantService.Put(msg, []byte{})
 				require.NoError(t, err)
 
-				client := api.NewCleartextClient(conn)
-				getStream, err := client.Get(ctx)
+				cli := api.NewCleartextClient(conn)
+				getStream, err := cli.Get(ctx)
 				require.NoError(t, err)
 				err = getStream.Send(ref)
 				require.NoError(t, err)
@@ -141,8 +143,8 @@ func TestService(t *testing.T) {
 
 			t.Run("ChunkLarge", func(t *testing.T) {
 				size := 124 * 124 * 10
-				client := api.NewCleartextClient(conn)
-				putStream, err := client.Put(ctx)
+				cli := api.NewCleartextClient(conn)
+				putStream, err := cli.Put(ctx)
 				require.NoError(t, err)
 
 				bigBytes := make([]byte, size)
@@ -172,7 +174,7 @@ func TestService(t *testing.T) {
 					}).
 					Stream(context.Background())
 
-				getStream, err := client.Get(ctx)
+				getStream, err := cli.Get(ctx)
 				require.NoError(t, err)
 
 				output := new(bytes.Buffer)
@@ -204,36 +206,48 @@ func TestService(t *testing.T) {
 		})
 
 		t.Run("Grants", func(t *testing.T) {
+			data := []byte(helpers.LongText)
+			salt := []byte("celery")
+			publicID := "code1"
+			cli := client.New(conn)
+
 			t.Run("Streaming", func(t *testing.T) {
-				data := []byte(helpers.LongText)
-				salt := []byte("celery")
-				publicID := "code1"
 				gs := &grant.Spec{
 					Symmetric: &grant.SymmetricSpec{
 						PublicID: publicID,
 					},
 				}
 
-				client := api.NewGrantClient(conn)
-				putStream, err := client.PutSeal(ctx)
+				grt, err := cli.PutSeal(ctx, gs, &api.Header{Salt: salt}, bytes.NewBuffer(data))
 				require.NoError(t, err)
 
-				err = putStream.Send(&api.PlaintextAndGrantSpec{
-					Plaintext: &api.Plaintext{Head: &api.Header{Salt: salt}},
-					GrantSpec: gs,
-				})
-				require.NoError(t, err)
-				err = putStream.Send(&api.PlaintextAndGrantSpec{Plaintext: &api.Plaintext{Body: data}})
+				stream, err := cli.UnsealGet(ctx, grt)
 				require.NoError(t, err)
 
-				grt, err := putStream.CloseAndRecv()
+				bs, err := stream.Bytes()
 				require.NoError(t, err)
+				require.Equal(t, data, bs)
+			})
 
-				getStream, err := client.UnsealGet(ctx, grt)
+			t.Run("Links", func(t *testing.T) {
+
+				gs := &grant.Spec{
+					Plaintext: &grant.PlaintextSpec{},
+				}
+
+				grt, err := cli.PutSeal(ctx, gs, &api.Header{Salt: salt}, bytes.NewBuffer(data))
 				require.NoError(t, err)
-				plaintext, err := ReceiveAllPlaintexts(getStream.Recv)
+				grt2, err := cli.PutSeal(ctx, gs, &api.Header{Salt: salt}, bytes.NewBuffer(data))
 				require.NoError(t, err)
-				require.Equal(t, data, plaintext.GetBody())
+				require.NotEqual(t, grt, grt2, "unique link nonce means grants are not equal")
+
+				// However if we use a fixed link nonce grants should be identical
+				gs.LinkNonce = []byte("constant-link-nonce")
+				grt, err = cli.PutSeal(ctx, gs, &api.Header{Salt: salt}, bytes.NewBuffer(data))
+				require.NoError(t, err)
+				grt2, err = cli.PutSeal(ctx, gs, &api.Header{Salt: salt}, bytes.NewBuffer(data))
+				require.NoError(t, err)
+				require.Equal(t, grt, grt2, "unique link nonce means grants are not equal")
 			})
 		})
 

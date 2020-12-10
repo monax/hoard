@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/monax/hoard/v8/encryption"
+
 	"github.com/monax/hoard/v8/protodet"
 	"github.com/monax/hoard/v8/versions"
-
-	"github.com/monax/hoard/v8/encryption"
 
 	"github.com/monax/hoard/v8/api"
 	"github.com/monax/hoard/v8/grant"
@@ -15,7 +15,8 @@ import (
 	"github.com/monax/hoard/v8/stores"
 )
 
-type Linker func(refs []*reference.Ref, head *api.Header, put func(data, salt []byte) (*reference.Ref, error)) ([]*reference.Ref, error)
+type Linker func(refs []*reference.Ref, salt []byte, linkNonce []byte,
+	put func(data, salt []byte) (*reference.Ref, error)) ([]*reference.Ref, error)
 
 // StreamingService provides the API implementation for Service without relying directly on the
 // GRPC generated streaming types
@@ -65,7 +66,7 @@ func (service *StreamingService) PutSeal(sendAndClose func(*grant.Grant) error, 
 		}, service.chunkSize)
 
 	// Convert base refs into link ref(s) (usually a single unique link ref to allow for safe deletion of links)
-	refs, err = service.linker(refs, head, service.grantService.Put)
+	refs, err = service.linker(refs, head.GetSalt(), spec.LinkNonce, service.grantService.Put)
 	if err != nil {
 		return fmt.Errorf("could not link refs: %w", err)
 	}
@@ -436,18 +437,22 @@ func encrypt(first *api.Plaintext,
 		chunkSize)
 }
 
-func defaultLinker(refs []*reference.Ref, head *api.Header, put func(data, salt []byte) (*reference.Ref, error)) ([]*reference.Ref, error) {
-	// Always link refs and always use a unique nonce to allow them to be deletable
-	nonce, err := encryption.NewNonce(encryption.NonceSize)
-	if err != nil {
-		return nil, fmt.Errorf("could not create nonce for LINK ref: %w", err)
+var defaultLinker Linker = func(refs []*reference.Ref, salt []byte, linkNonce []byte,
+	put func(data, salt []byte) (*reference.Ref, error)) ([]*reference.Ref, error) {
+	var err error
+	// By default link refs use a unique nonce to allow them to be deletable unless the grant specifies otherwise
+	if len(linkNonce) == 0 {
+		linkNonce, err = encryption.NewNonce(encryption.NonceSize)
+		if err != nil {
+			return nil, fmt.Errorf("could not create nonce for LINK ref: %w", err)
+		}
 	}
 	// Store refs as a plaintext document
-	plaintext, err := reference.PlaintextFromRefs(refs, nonce)
+	plaintext, err := reference.PlaintextFromRefs(refs, linkNonce)
 	if err != nil {
 		return nil, err
 	}
-	ref, err := put(plaintext, head.GetSalt())
+	ref, err := put(plaintext, salt)
 	if err != nil {
 		return nil, err
 	}
