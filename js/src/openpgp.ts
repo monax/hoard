@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { decrypt, DecryptOptions, initWorker, key, message } from 'openpgp';
 import * as path from 'path';
 import { Client, Header, make, OpenPGPSpec, Spec } from './index';
-import { readBytes } from './stream';
+import {readAll} from "./streaming";
 
 const hoard = new Client('localhost:53431');
 
@@ -39,6 +39,6 @@ export async function openpgpExample(data: string | Uint8Array, salt: string | U
   const references = JSON.parse((await decrypt(options)).data);
   console.log(references);
   const { body } = await hoard.get(references);
-  const plaintext = await readBytes(body);
+  const plaintext = await readAll(body);
   console.log(plaintext);
 }
