@@ -1,6 +1,8 @@
 import * as fixtures from './fixtures';
-import {Client, Header, make, Spec, SymmetricSpec} from './index';
-import {bytesReadable, readAll, readBytes, readLengthPrefixed} from './streaming';
+import {Client, Header, make, Plaintext, Spec, SymmetricSpec} from './index';
+import {bytesReadable, readAll, readBytes} from './streaming';
+
+const MiB = 1 << 20
 
 describe('Grants', function () {
   const hoard = new Client('localhost:53431');
@@ -16,7 +18,7 @@ describe('Grants', function () {
 
     header.serializeBinary();
     const grant = await hoard.putSeal(spec, bytesReadable(data), header);
-    const { head, body } = await hoard.unsealGet(grant);
+    const {head, body} = await hoard.unsealGet(grant);
     const decrypted = await readBytes(body);
     expect(decrypted.toString()).toStrictEqual(data.toString());
     if (!head) {
@@ -36,25 +38,30 @@ describe('Grants', function () {
     const veryLongText = fixtures.LONG_TEXT.repeat(1000);
 
     const grant = await hoard.putSeal(spec, veryLongText, emptyHeader);
-    const { body } = await hoard.unsealGet(grant);
+    const {body} = await hoard.unsealGet(grant);
     const bs = await readBytes(body);
     expect(bs.toString()).toStrictEqual(veryLongText.toString());
   });
 
   test('can stop reading a stream early', async () => {
-    const veryLongText = Buffer.from(fixtures.LONG_TEXT.repeat(100), 'utf8');
-    const firstN = 3;
+    const txt = fixtures.LONG_TEXT;
+    const veryLongText = Buffer.from(txt.repeat(100 * MiB / txt.length), 'utf8');
+    const firstN = 2;
 
     const grant = await hoard.putSeal(spec, veryLongText);
-    const pts = await readAll(hoard.grant.unsealGet(grant), (acc) => acc.length >= firstN);
+    const pts = await readAll<Plaintext>(hoard.grant.unsealGet(grant), (acc) => acc.length >= firstN);
     expect(pts.length).toStrictEqual(firstN);
   });
 
-  test('can read length prefixed value', async () => {
-    // 5 is the single-byte length prefix, [1,2,3,4,5] should be value extracted
-    const vals = [5, 1, 2, 3, 4, 5, 6, 5, 4, 3, 4, 5, 6, 7, 8, 8, 6, 4, 4];
-    const bs = await readLengthPrefixed(bytesReadable(vals), 1);
-    const expected = Buffer.from(vals.slice(1, vals[0] + 1));
-    expect(bs).toEqual(expected);
+  test('can put and get large text', async () => {
+    const txt = fixtures.LONG_TEXT;
+    const size = 200 * MiB;
+    const veryLongText = Buffer.from(txt.repeat(size / txt.length), 'utf8');
+
+    const grant = await hoard.putSeal(spec, veryLongText);
+    const {body} = await hoard.unsealGet(grant);
+    const output = await readBytes(body, veryLongText.length + 1)
+    expect(output.length).toStrictEqual(veryLongText.length);
   });
+
 });

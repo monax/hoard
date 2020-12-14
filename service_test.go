@@ -40,7 +40,7 @@ func writeUIntBE(buffer []byte, value, offset, byteLength int64) error {
 }
 
 func TestService(t *testing.T) {
-	chunkSize := int64(16)
+	chunkSize := int64(64 * KiB)
 	salt, err := encryption.NewNonce(encryption.NonceSize)
 	assert.NoError(t, err)
 	secret, err := encryption.DeriveSecretKey([]byte("shhhh"), salt)
@@ -142,66 +142,27 @@ func TestService(t *testing.T) {
 			})
 
 			t.Run("ChunkLarge", func(t *testing.T) {
-				size := 124 * 124 * 10
-				cli := api.NewCleartextClient(conn)
-				putStream, err := cli.Put(ctx)
-				require.NoError(t, err)
+				size := 200 * MiB
+				cli := client.New(conn)
+				spec := &grant.Spec{
+					Symmetric: &grant.SymmetricSpec{
+						PublicID: "sssh",
+					},
+				}
 
 				bigBytes := make([]byte, size)
 				bigBytes[333] = 23
 				input := bytes.NewBuffer(bigBytes)
-
-				var refs []*reference.Ref
-				err = NewStreamer().
-					WithChunkSize(512).
-					WithInput(input).
-					WithSend(
-						func(chunk []byte) error {
-							err := putStream.Send(&api.Plaintext{
-								Body: chunk,
-							})
-							return err
-						}).
-					WithCloseSend(putStream.CloseSend).
-					WithRecv(func() ([]byte, error) {
-						ref, err := putStream.Recv()
-						if err != nil {
-							return nil, err
-						}
-						refs = append(refs, ref)
-						// Hi, I'm Go, I don't have generics.
-						return nil, nil
-					}).
-					Stream(context.Background())
-
-				getStream, err := cli.Get(ctx)
+				grt, err := cli.PutSeal(ctx, spec, nil, input)
 				require.NoError(t, err)
 
-				output := new(bytes.Buffer)
-
-				err = NewStreamer().
-					WithSend(func(chunk []byte) error {
-						if len(refs) == 0 {
-							return io.EOF
-						}
-						ref := refs[0]
-						refs = refs[1:]
-						return getStream.Send(ref)
-					}).
-					WithRecv(func() ([]byte, error) {
-						pt, err := getStream.Recv()
-						if err != nil {
-							return nil, err
-						}
-						return pt.Body, nil
-					}).
-					WithCloseSend(getStream.CloseSend).
-					WithOutput(output).
-					Stream(context.Background())
-
+				stream, err := cli.UnsealGet(ctx, grt)
 				require.NoError(t, err)
 
-				require.True(t, bytes.Equal(bigBytes, output.Bytes()))
+				output, err := stream.Bytes()
+				require.NoError(t, err)
+
+				require.True(t, bytes.Equal(bigBytes, output))
 			})
 		})
 

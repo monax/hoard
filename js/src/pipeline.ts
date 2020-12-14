@@ -1,6 +1,6 @@
 import {Stream} from 'stream';
 import {Duplexed} from './duplexed';
-import {cancelAndDestroy, Duplex, isReadable, isWritable, Readable, Writable} from './stream';
+import {cancelAndDestroy, Duplex, isReadableStreak, isWritableStream, Readable, Writable} from './stream';
 
 // A pipeline that returns Duplex stream when it can...
 
@@ -20,22 +20,22 @@ export function pipeline<First extends Readable, Transforms extends Duplex[], La
   const first = streams[0];
   const last = streams[streams.length - 1];
 
-  if (!isReadable(first)) {
+  if (!isReadableStreak(first)) {
     throw new Error(`First stream in pipe must be readable`);
   }
 
-  if (!isWritable(last)) {
+  if (!isWritableStream(last)) {
     throw new Error(`Last stream in pipe must be writable`);
   }
 
   // The last stream is returned after being piped
   streams.reduce(piper());
 
-  const piped: Stream = isWritable(first)
-    ? isReadable(last)
+  const piped: Stream = isWritableStream(first)
+    ? isReadableStreak(last)
       ? new Duplexed(first, last) // Duplex
       : first // Writable
-    : isReadable(last)
+    : isReadableStreak(last)
     ? last // Readable
     : last; // Neither (but we still need to hang events off something
 
@@ -55,10 +55,10 @@ export function pipeline<First extends Readable, Transforms extends Duplex[], La
 
 function piper(): <Left extends Stream, Right extends Stream>(left: Left, right: Right, index: number) => Right {
   return (left, right, index) => {
-    if (!isReadable(left)) {
+    if (!isReadableStreak(left)) {
       throw new Error(`Stream to the left of pipe is not readable`);
     }
-    if (!isWritable(right)) {
+    if (!isWritableStream(right)) {
       throw new Error(`Stream to the right of pipe is not writable`);
     }
     const leftObjectMode = Boolean(left.readableObjectMode);

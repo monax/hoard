@@ -34,7 +34,7 @@ func NewService(grantService GrantService, chunkSize int64) *Service {
 		chunkSize = DefaultChunkSize
 	}
 	return &Service{
-		streaming: NewStreamingService(grantService, chunkSize, defaultLinker),
+		streaming: NewStreamingService(grantService, chunkSize),
 	}
 }
 
