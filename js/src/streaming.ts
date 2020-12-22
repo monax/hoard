@@ -1,32 +1,34 @@
 import * as grpc from '@grpc/grpc-js';
+import {ObjectDuplex} from "@grpc/grpc-js/build/src/object-stream";
 import * as nstream from 'stream';
-import { Stream, Transform, TransformOptions } from 'stream';
-import { pipeline } from './pipeline';
+import {Stream, Transform, TransformOptions} from 'stream';
+import {pipeline} from './pipeline';
+import {Slice} from './slice'
 import {
   BytesLike,
   BytesReadable,
   cancelAndDestroy,
   Duplex,
   HeaderStream,
-  isReadable,
+  isReadableStreak,
   Readable,
   ReadableLike,
 } from './stream';
 
-export const DEFAULT_CHUNK_SIZE = 2 ** 16;
+const KiB = 1 << 10
 
 export function bytesReadable(bs: BytesLike): BytesReadable {
   if (bs instanceof nstream.Stream) {
-    if (isReadable(bs)) {
+    if (isReadableStreak(bs)) {
       return bs;
     }
-    throw new Error(`BytesLike '${bs}' is Stream but not readable`);
+    throw new Error(`BytesLike '${bs}' does not seem to be a readable stream`);
   }
-  return nstream.Readable.from(Buffer.from(bs), { objectMode: false });
+  return nstream.Readable.from(Buffer.from(bs), {objectMode: false});
 }
 
 export function readable<T>(r: ReadableLike<T>): Readable<T> {
-  if (isReadable(r)) {
+  if (isReadableStreak(r)) {
     return r;
   }
   return nstream.Readable.from(r);
@@ -68,13 +70,21 @@ export function read<T, O = T[]>(
 export function readAll<T>(stream: Readable<T>, earlyExit?: (accum: T[], data: T) => boolean): Promise<T[]> {
   return read(
     stream,
-    (accum, data) => (earlyExit && earlyExit(accum, data) ? exitEarly : accum.concat(data)),
+    (accum, data) => {
+      if (earlyExit && earlyExit(accum, data)) {
+        return exitEarly
+      }
+      accum.push(data)
+      return accum
+    },
     [] as T[],
   );
 }
 
-export function readBytes(stream: BytesLike): Promise<Uint8Array> {
-  return read(bytesReadable(stream), (accum, data) => Buffer.concat([accum, data]), Buffer.alloc(0));
+export async function readBytes(stream: BytesLike, sizeHint = KiB): Promise<Buffer> {
+  const slice = await read(bytesReadable(stream), (accum, data) => accum.appendInPlace(data),
+    new Slice(Buffer.allocUnsafe(sizeHint)));
+  return slice.buffer()
 }
 
 export function waitFor(stream: Stream): Promise<void> {
@@ -82,16 +92,11 @@ export function waitFor(stream: Stream): Promise<void> {
     stream.on('error', (err: Error & { code?: grpc.status }) =>
       err.code === grpc.status.CANCELLED ? resolve() : reject(err),
     );
-    stream.on('close', resolve);
+    // Writable
+    stream.on('finish', resolve);
+    // Readable
     stream.on('end', resolve);
-  });
-}
-
-export function passThrough<T>(): Duplex<T, T> {
-  return new Transform({
-    transform(input: T, encoding, callback) {
-      callback(null, input);
-    },
+    stream.on('close', resolve);
   });
 }
 
@@ -107,40 +112,21 @@ export function mapStream<Input, Output>(
   });
 }
 
-export function prefixStream<T>(prefix: T[], opts?: Partial<TransformOptions>): Duplex<T, T> {
-  const [first] = prefix;
-  return new Transform({
-    readableObjectMode: isObjectModeElement(first),
-    transform(input: T, encoding, callback) {
-      // Push prefix before the first element and then replace with passthrough function
-      prefix.forEach((p) => this.push(p));
-      this.push(input);
-      this._transform = (input: T, encoding, callback) => callback(null, input);
-      callback();
-    },
-    ...opts,
-  });
-}
-
 export function pushBytesToObjects<T>(
   body: BytesLike,
   bufferToOutput: (buf: Uint8Array) => T,
-  header?: T,
+  chunkSize: number,
 ): Readable<T> {
-  const prefix: T[] = [];
-  if (header) {
-    prefix.push(header);
-  }
   return pipeline(
     bytesReadable(body),
-    bytesToObject(bufferToOutput),
-    prefixStream(prefix, { writableObjectMode: true, readableObjectMode: true }),
+    bytesToObject(bufferToOutput, chunkSize),
   );
 }
 
 export async function pullBytesFromObjects<T, H = void>(
   stream: Readable<T>,
   objectToBuffer: (obj: T) => Uint8Array,
+  chunkSize: number,
   getHeader: (obj: T) => H | undefined,
 ): Promise<HeaderStream<H>> {
   const first = await new Promise<T>((resolve, reject) => {
@@ -151,7 +137,7 @@ export async function pullBytesFromObjects<T, H = void>(
     });
     stream.on('error', reject);
   });
-  const outputStream = objectToBytes(objectToBuffer);
+  const outputStream = objectToBytes(objectToBuffer, chunkSize);
   const head = getHeader(first);
   if (!head) {
     outputStream.write(first);
@@ -164,8 +150,8 @@ export async function pullBytesFromObjects<T, H = void>(
 
 export function bytesToObject<Output>(
   bufferToOutput: (buf: Uint8Array) => Output,
-  chunkSize = DEFAULT_CHUNK_SIZE,
-): Transform {
+  chunkSize: number,
+): ObjectDuplex<Uint8Array, Output> {
   return buffered<Uint8Array, Output>((buf) => buf, bufferToOutput, chunkSize, {
     readableObjectMode: true,
     writableObjectMode: false,
@@ -174,8 +160,8 @@ export function bytesToObject<Output>(
 
 export function objectToBytes<Input>(
   inputToBuffer: (input: Input) => Uint8Array,
-  chunkSize = DEFAULT_CHUNK_SIZE,
-): Transform {
+  chunkSize: number,
+): ObjectDuplex<Input, Uint8Array> {
   return buffered<Input, Uint8Array>(inputToBuffer, (buf) => buf, chunkSize, {
     readableObjectMode: false,
     writableObjectMode: true,
@@ -187,30 +173,47 @@ export function objectToBytes<Input>(
 function buffered<Input, Output>(
   inputToBuffer: (input: Input) => Uint8Array,
   bufferToOutput: (buf: Uint8Array) => Output,
-  chunkSize = DEFAULT_CHUNK_SIZE,
+  chunkSize: number,
   transformOptions: TransformOptions = {},
-): Transform {
-  let buffer = Buffer.alloc(0);
+): ObjectDuplex<Input, Output> {
+  let bufferOffset = 0
+  let buffer = Buffer.allocUnsafe(chunkSize);
 
-  const push = (transform: Transform, buffer: Buffer) => {
-    if (transform.readableLength == 0) {
-      const output = bufferToOutput(buffer);
-      transform.push(output);
-    }
+  const flush = (transform: Transform): void => {
+    transform.push(bufferToOutput(buffer));
+    bufferOffset = 0
+    buffer = Buffer.allocUnsafe(chunkSize)
   };
 
   const transform = new Transform({
-    transform(msg, encoding, callback) {
-      buffer = Buffer.concat([buffer, inputToBuffer(msg)]);
-      if (buffer.length > chunkSize) {
-        push(this, buffer.slice(0, chunkSize));
-        buffer = buffer.slice(chunkSize);
+    transform(msg, encoding, callback): void {
+      // Buffer.from should be zero copy here
+      const input = Buffer.from(inputToBuffer(msg));
+
+      if (chunkSize === 0) {
+        return callback(null, input);
       }
+
+      let written = 0
+      // Copy from the accum into the buffer until it is full
+      while (written < input.length) {
+        const n = input.copy(buffer, bufferOffset, written)
+        bufferOffset += n
+        written += n
+        if (bufferOffset == chunkSize) {
+          flush(this)
+        }
+      }
+
+      // If there were enough bytes in accum to fill the buffer then flush the buffer
       callback();
     },
 
     flush(callback) {
-      push(this, buffer);
+      if (bufferOffset > 0) {
+        buffer = buffer.slice(0, bufferOffset)
+        flush(this);
+      }
       callback();
     },
     ...transformOptions,
@@ -219,48 +222,4 @@ function buffered<Input, Output>(
   transform.on('unpipe', cancelAndDestroy);
 
   return transform;
-}
-
-// Reads from the provided byteStream until a varint length-prefixed prefix of the stream can be returned.
-// The stream will be destroyed once the prefix has been read so will not be totally consumed
-export async function readLengthPrefixed(stream: Readable<Uint8Array>, byteLength: number): Promise<Buffer> {
-  let buffer = Buffer.alloc(0);
-  let prefixLength = 0;
-
-  const prefix = await read(
-    stream,
-    (accum, data) => {
-      if (accum) {
-        // We have set the buffer
-        return exitEarly;
-      }
-      let buf = Buffer.concat([buffer, data]);
-      // First try to read the length prefix
-      if (prefixLength === 0) {
-        if (buf.length >= byteLength) {
-          prefixLength = buf.readUIntBE(0, byteLength);
-          // Chop off the length prefix itself
-          buf = buf.slice(byteLength);
-        }
-      }
-      if (buf.length >= prefixLength) {
-        // If we have read the length prefix and it is contained within
-        // our current buffer then we are done
-        return buf.slice(0, prefixLength);
-      }
-      // Keep growing the buffer until it contains sufficient data
-      buffer = buf;
-      return undefined;
-    },
-    undefined as undefined | Buffer,
-  );
-  if (!prefix) {
-    throw new Error(`Could not read length-prefixed prefix from stream`);
-  }
-  return prefix;
-}
-
-// Guess the appropriate object mode setting based on a candidate elemetn
-function isObjectModeElement(t: unknown): boolean {
-  return t !== null && t !== undefined && typeof t !== 'string' && !(t instanceof Uint8Array);
 }

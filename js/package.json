@@ -1,6 +1,6 @@
 {
   "name": "@monax/hoard",
-  "version": "0.0.2",
+  "version": "0.0.0",
   "description": "Hoard client library",
   "main": "dist/index.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "url": "git+https://github.com/monax/hoard.git"
   },
   "jest": {
+    "testTimeout": 60000,
     "preset": "ts-jest",
     "testEnvironment": "node"
   },
@@ -36,7 +37,7 @@
   },
   "homepage": "https://github.com/monax/hoard#readme",
   "dependencies": {
-    "@grpc/grpc-js": "^1.2.1",
+    "@grpc/grpc-js": "^1.2.2",
     "@types/google-protobuf": "^3.7.4",
     "google-protobuf": "^3.14.0",
     "openpgp": "^4.10.8"

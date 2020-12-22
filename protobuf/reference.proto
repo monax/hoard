@@ -36,3 +36,9 @@ message RefsWithNonce {
     repeated Ref Refs = 1;
     bytes nonce = 2;
 }
+
+message Link {
+    Ref Header = 1;
+    repeated Ref Body = 2;
+    Ref Trailer = 3;
+}

@@ -157,7 +157,7 @@ build_dist:
 
 .PHONY:	test
 test: check
-	go test -v ./... ${GO_TEST_ARGS}
+	go test -v ./...
 
 .PHONY: test_js
 test_js: build install yarn_install

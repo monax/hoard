@@ -1,5 +1,5 @@
-import { ObjectReadable, ObjectWritable } from '@grpc/grpc-js/build/src/object-stream';
-import { Stream } from 'stream';
+import {ObjectReadable, ObjectWritable} from '@grpc/grpc-js/build/src/object-stream';
+import {Stream} from 'stream';
 
 // The GRPC types use a hack in order to overlap with the native Node stream types
 // it sort of works and allows us to use types annotations in various places so we
@@ -22,19 +22,19 @@ function isCancellable(stream: Stream): stream is Cancellable {
   return typeof (stream as any)['cancel'] === 'function';
 }
 
-export function isWritable(s: unknown): s is Writable {
-  return (s as any)['writable'] ?? false;
+export function isWritableStream(s: unknown): s is Writable {
+  return (s as any)['writable'] !== undefined;
 }
 
-export function isReadable(s: unknown): s is Readable {
-  return (s as any)['readable'] ?? false;
+export function isReadableStreak(s: unknown): s is Readable {
+  return (s as any)['readable'] !== undefined;
 }
 
 export function cancelAndDestroy(stream: Stream, err?: Error): void {
   if (isCancellable(stream)) {
     stream.cancel();
   }
-  if (isReadable(stream) || isWritable(stream)) {
+  if (isReadableStreak(stream) || isWritableStream(stream)) {
     stream.destroy(err || undefined);
   }
 }

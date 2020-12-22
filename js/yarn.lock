@@ -295,10 +295,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@grpc/grpc-js@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.2.1.tgz#6a0b4e1bc6039d84f945569ff8c3059f81284afe"
-  integrity sha512-JpGh2CgqnwVII0S9TMEX3HY+PkLJnb7HSAar3Md1Y3aWxTZqAGb7gTrNyBWn/zueaGFsMYRm2u/oYufWFYVoIQ==
+"@grpc/grpc-js@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.npmjs.org/@grpc/grpc-js/-/grpc-js-1.2.2.tgz#ee4a7417fe15a686a8e369c36ec4c80678445c67"
+  integrity sha512-iK/T984Ni6VnmlQK/LJdUk+VsXSaYIWkgzJ0LyOcxN2SowAmoRjG28kS7B1ui/q/MAv42iM3051WBt5QorFxmg==
   dependencies:
     "@types/node" "^12.12.47"
     google-auth-library "^6.1.1"
