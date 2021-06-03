@@ -153,6 +153,12 @@ docker_build: commit_hash
 build_dist:
 	@goreleaser --rm-dist --skip-publish --skip-validate
 
+.PHONY: publish_js
+publish_js:
+	yarn --cwd js install
+	yarn --cwd js build
+	yarn --cwd js publish --non-interactive --access public --no-git-tag-version --new-version $(shell ./scripts/local_version.sh)
+
 # Testing
 
 .PHONY:	test

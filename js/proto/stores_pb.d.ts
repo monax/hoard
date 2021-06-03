@@ -11,16 +11,12 @@ export class StatInfo extends jspb.Message {
     getAddress_asU8(): Uint8Array;
     getAddress_asB64(): string;
     setAddress(value: Uint8Array | string): StatInfo;
-
     getExists(): boolean;
     setExists(value: boolean): StatInfo;
-
     getSize(): number;
     setSize(value: number): StatInfo;
-
     getLocation(): string;
     setLocation(value: string): StatInfo;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): StatInfo.AsObject;

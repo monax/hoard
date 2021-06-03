@@ -9,8 +9,6 @@ services:
       - GCLOUD_SERVICE_KEY
       - HOARD_JSON_CONFIG
     network_mode: host
-    ports:
-      - "53431:53431"
   hoarctl:
     build: ../..
     network_mode: host

@@ -16,12 +16,10 @@ export class GrantAndGrantSpec extends jspb.Message {
     getGrant(): grant_pb.Grant | undefined;
     setGrant(value?: grant_pb.Grant): GrantAndGrantSpec;
 
-
     hasGrantspec(): boolean;
     clearGrantspec(): void;
     getGrantspec(): grant_pb.Spec | undefined;
     setGrantspec(value?: grant_pb.Spec): GrantAndGrantSpec;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): GrantAndGrantSpec.AsObject;
@@ -47,12 +45,10 @@ export class PlaintextAndGrantSpec extends jspb.Message {
     getPlaintext(): Plaintext | undefined;
     setPlaintext(value?: Plaintext): PlaintextAndGrantSpec;
 
-
     hasGrantspec(): boolean;
     clearGrantspec(): void;
     getGrantspec(): grant_pb.Spec | undefined;
     setGrantspec(value?: grant_pb.Spec): PlaintextAndGrantSpec;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): PlaintextAndGrantSpec.AsObject;
@@ -78,12 +74,10 @@ export class ReferenceAndGrantSpec extends jspb.Message {
     getReference(): reference_pb.Ref | undefined;
     setReference(value?: reference_pb.Ref): ReferenceAndGrantSpec;
 
-
     hasGrantspec(): boolean;
     clearGrantspec(): void;
     getGrantspec(): grant_pb.Spec | undefined;
     setGrantspec(value?: grant_pb.Spec): ReferenceAndGrantSpec;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): ReferenceAndGrantSpec.AsObject;
@@ -107,15 +101,12 @@ export class Header extends jspb.Message {
     getSalt_asU8(): Uint8Array;
     getSalt_asB64(): string;
     setSalt(value: Uint8Array | string): Header;
-
     getData(): Uint8Array | string;
     getData_asU8(): Uint8Array;
     getData_asB64(): string;
     setData(value: Uint8Array | string): Header;
-
     getChunksize(): number;
     setChunksize(value: number): Header;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Header.AsObject;
@@ -141,12 +132,10 @@ export class Plaintext extends jspb.Message {
     getBody_asB64(): string;
     setBody(value: Uint8Array | string): Plaintext;
 
-
     hasHead(): boolean;
     clearHead(): void;
     getHead(): Header | undefined;
     setHead(value?: Header): Plaintext;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Plaintext.AsObject;
@@ -171,7 +160,6 @@ export class Ciphertext extends jspb.Message {
     getEncrypteddata_asB64(): string;
     setEncrypteddata(value: Uint8Array | string): Ciphertext;
 
-
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Ciphertext.AsObject;
     static toObject(includeInstance: boolean, msg: Ciphertext): Ciphertext.AsObject;
@@ -195,12 +183,10 @@ export class ReferenceAndCiphertext extends jspb.Message {
     getReference(): reference_pb.Ref | undefined;
     setReference(value?: reference_pb.Ref): ReferenceAndCiphertext;
 
-
     hasCiphertext(): boolean;
     clearCiphertext(): void;
     getCiphertext(): Ciphertext | undefined;
     setCiphertext(value?: Ciphertext): ReferenceAndCiphertext;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): ReferenceAndCiphertext.AsObject;
@@ -224,7 +210,6 @@ export class Address extends jspb.Message {
     getAddress_asU8(): Uint8Array;
     getAddress_asB64(): string;
     setAddress(value: Uint8Array | string): Address;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Address.AsObject;

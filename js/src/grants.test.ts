@@ -1,8 +1,8 @@
 import * as fixtures from './fixtures';
-import {Client, Header, make, Plaintext, Spec, SymmetricSpec} from './index';
-import {bytesReadable, readAll, readBytes} from './streaming';
+import { Client, deserializeGrant, Header, make, Plaintext, Spec, SymmetricSpec } from './index';
+import { bytesReadable, readAll, readBytes } from './streaming';
 
-const MiB = 1 << 20
+const MiB = 1 << 20;
 
 describe('Grants', function () {
   const hoard = new Client('localhost:53431');
@@ -18,7 +18,7 @@ describe('Grants', function () {
 
     header.serializeBinary();
     const grant = await hoard.putSeal(spec, bytesReadable(data), header);
-    const {head, body} = await hoard.unsealGet(grant);
+    const { head, body } = await hoard.unsealGet(grant);
     const decrypted = await readBytes(body);
     expect(decrypted.toString()).toStrictEqual(data.toString());
     if (!head) {
@@ -38,14 +38,14 @@ describe('Grants', function () {
     const veryLongText = fixtures.LONG_TEXT.repeat(1000);
 
     const grant = await hoard.putSeal(spec, veryLongText, emptyHeader);
-    const {body} = await hoard.unsealGet(grant);
+    const { body } = await hoard.unsealGet(grant);
     const bs = await readBytes(body);
     expect(bs.toString()).toStrictEqual(veryLongText.toString());
   });
 
   test('can stop reading a stream early', async () => {
     const txt = fixtures.LONG_TEXT;
-    const veryLongText = Buffer.from(txt.repeat(100 * MiB / txt.length), 'utf8');
+    const veryLongText = Buffer.from(txt.repeat((100 * MiB) / txt.length), 'utf8');
     const firstN = 2;
 
     const grant = await hoard.putSeal(spec, veryLongText);
@@ -59,9 +59,15 @@ describe('Grants', function () {
     const veryLongText = Buffer.from(txt.repeat(size / txt.length), 'utf8');
 
     const grant = await hoard.putSeal(spec, veryLongText);
-    const {body} = await hoard.unsealGet(grant);
-    const output = await readBytes(body, veryLongText.length + 1)
+    const { body } = await hoard.unsealGet(grant);
+    const output = await readBytes(body, veryLongText.length + 1);
     expect(output.length).toStrictEqual(veryLongText.length);
   });
 
+  test('Stream produces error with an empty grant', async () => {
+    // This gets pass the Protobuf binary decoder evenn though it is junk because the first byte (D == 12) is
+    // interpreted as the 'End Group' wire type, because when masked with 7 (0b111), 7 & 12 = 4 = <End Group>
+    const grant = deserializeGrant('DEADBEEFCAFEBABE');
+    await expect(() => hoard.unsealGet(grant)).rejects.toThrow(/grant type not recognised/);
+  });
 });

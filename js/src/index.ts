@@ -1,4 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
+import {BinaryReader} from "google-protobuf";
 import * as api from '../proto/api_grpc_pb';
 import {
   Address,
@@ -227,4 +228,22 @@ export function promisify<T>(fn: (callback: grpc.requestCallback<T>) => unknown)
       return err ? reject(err) : value ? resolve(value) : reject(new Error('No value or error returned'));
     }),
   );
+}
+
+export function serializeGrant(grant: Grant): string {
+  return bufferFromGrant(grant).toString('base64');
+}
+
+export function deserializeGrant(grant: Uint8Array | string): Grant {
+  if (typeof grant === 'string') {
+    grant = Buffer.from(grant, 'base64');
+  }
+  // For reasons that are not clear to me Grant.deserializeBinary fails to pass instanceof Grant by the
+  // time it gets to GRPC thus throwing an error
+  const reader = new BinaryReader(grant);
+  return Grant.deserializeBinaryFromReader(new Grant(), reader);
+}
+
+export function bufferFromGrant(grant: Grant): Buffer {
+  return Buffer.from(grant.serializeBinary());
 }

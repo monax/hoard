@@ -38,11 +38,7 @@ jobs:
         run: |
           git config --global user.email "${GITHUB_ACTOR}"
           git config --global user.name "${GITHUB_ACTOR}"
-          cd js
-          yarn install
-          yarn build
-          yarn version --no-git-tag-version --new-version $(git describe --tags)
-          yarn publish --non-interactive --access public .
+          make publish_js
 
   docker:
     runs-on: ubuntu-latest

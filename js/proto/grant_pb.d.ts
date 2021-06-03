@@ -13,15 +13,12 @@ export class Grant extends jspb.Message {
     clearSpec(): void;
     getSpec(): Spec | undefined;
     setSpec(value?: Spec): Grant;
-
     getEncryptedreferences(): Uint8Array | string;
     getEncryptedreferences_asU8(): Uint8Array;
     getEncryptedreferences_asB64(): string;
     setEncryptedreferences(value: Uint8Array | string): Grant;
-
     getVersion(): number;
     setVersion(value: number): Grant;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Grant.AsObject;
@@ -48,23 +45,19 @@ export class Spec extends jspb.Message {
     getPlaintext(): PlaintextSpec | undefined;
     setPlaintext(value?: PlaintextSpec): Spec;
 
-
     hasSymmetric(): boolean;
     clearSymmetric(): void;
     getSymmetric(): SymmetricSpec | undefined;
     setSymmetric(value?: SymmetricSpec): Spec;
 
-
     hasOpenpgp(): boolean;
     clearOpenpgp(): void;
     getOpenpgp(): OpenPGPSpec | undefined;
     setOpenpgp(value?: OpenPGPSpec): Spec;
-
     getLinknonce(): Uint8Array | string;
     getLinknonce_asU8(): Uint8Array;
     getLinknonce_asB64(): string;
     setLinknonce(value: Uint8Array | string): Spec;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Spec.AsObject;
@@ -106,7 +99,6 @@ export class SymmetricSpec extends jspb.Message {
     getPublicid(): string;
     setPublicid(value: string): SymmetricSpec;
 
-
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): SymmetricSpec.AsObject;
     static toObject(includeInstance: boolean, msg: SymmetricSpec): SymmetricSpec.AsObject;
@@ -126,7 +118,6 @@ export namespace SymmetricSpec {
 export class OpenPGPSpec extends jspb.Message { 
     getPublickey(): string;
     setPublickey(value: string): OpenPGPSpec;
-
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): OpenPGPSpec.AsObject;
