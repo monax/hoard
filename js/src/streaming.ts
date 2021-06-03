@@ -1,9 +1,9 @@
 import * as grpc from '@grpc/grpc-js';
-import {ObjectDuplex} from "@grpc/grpc-js/build/src/object-stream";
+import { ObjectDuplex } from '@grpc/grpc-js/build/src/object-stream';
 import * as nstream from 'stream';
-import {Stream, Transform, TransformOptions} from 'stream';
-import {pipeline} from './pipeline';
-import {Slice} from './slice'
+import { Stream, Transform, TransformOptions } from 'stream';
+import { pipeline } from './pipeline';
+import { Slice } from './slice';
 import {
   BytesLike,
   BytesReadable,
@@ -15,7 +15,7 @@ import {
   ReadableLike,
 } from './stream';
 
-const KiB = 1 << 10
+const KiB = 1 << 10;
 
 export function bytesReadable(bs: BytesLike): BytesReadable {
   if (bs instanceof nstream.Stream) {
@@ -24,7 +24,10 @@ export function bytesReadable(bs: BytesLike): BytesReadable {
     }
     throw new Error(`BytesLike '${bs}' does not seem to be a readable stream`);
   }
-  return nstream.Readable.from(Buffer.from(bs), {objectMode: false});
+  if (bs instanceof Uint8Array || typeof bs === 'string') {
+    bs = Buffer.from(bs);
+  }
+  return nstream.Readable.from(bs, { objectMode: false });
 }
 
 export function readable<T>(r: ReadableLike<T>): Readable<T> {
@@ -72,19 +75,22 @@ export function readAll<T>(stream: Readable<T>, earlyExit?: (accum: T[], data: T
     stream,
     (accum, data) => {
       if (earlyExit && earlyExit(accum, data)) {
-        return exitEarly
+        return exitEarly;
       }
-      accum.push(data)
-      return accum
+      accum.push(data);
+      return accum;
     },
     [] as T[],
   );
 }
 
 export async function readBytes(stream: BytesLike, sizeHint = KiB): Promise<Buffer> {
-  const slice = await read(bytesReadable(stream), (accum, data) => accum.appendInPlace(data),
-    new Slice(Buffer.allocUnsafe(sizeHint)));
-  return slice.buffer()
+  const slice = await read(
+    bytesReadable(stream),
+    (accum, data) => accum.appendInPlace(data),
+    new Slice(Buffer.allocUnsafe(sizeHint)),
+  );
+  return slice.buffer();
 }
 
 export function waitFor(stream: Stream): Promise<void> {
@@ -117,10 +123,7 @@ export function pushBytesToObjects<T>(
   bufferToOutput: (buf: Uint8Array) => T,
   chunkSize: number,
 ): Readable<T> {
-  return pipeline(
-    bytesReadable(body),
-    bytesToObject(bufferToOutput, chunkSize),
-  );
+  return pipeline(bytesReadable(body), bytesToObject(bufferToOutput, chunkSize));
 }
 
 export async function pullBytesFromObjects<T, H = void>(
@@ -132,10 +135,14 @@ export async function pullBytesFromObjects<T, H = void>(
   const first = await new Promise<T>((resolve, reject) => {
     stream.on('readable', () => {
       stream.pause();
-      resolve(stream.read(1));
+      const first = stream.read(1);
+      // If the first frame is null this should mean that an error will follow so wait to reject that
+      if (first) {
+        resolve(first);
+      }
       stream.resume();
     });
-    stream.on('error', reject);
+    stream.on('error', (err) => reject(err));
   });
   const outputStream = objectToBytes(objectToBuffer, chunkSize);
   const head = getHeader(first);
@@ -176,13 +183,13 @@ function buffered<Input, Output>(
   chunkSize: number,
   transformOptions: TransformOptions = {},
 ): ObjectDuplex<Input, Output> {
-  let bufferOffset = 0
+  let bufferOffset = 0;
   let buffer = Buffer.allocUnsafe(chunkSize);
 
   const flush = (transform: Transform): void => {
     transform.push(bufferToOutput(buffer));
-    bufferOffset = 0
-    buffer = Buffer.allocUnsafe(chunkSize)
+    bufferOffset = 0;
+    buffer = Buffer.allocUnsafe(chunkSize);
   };
 
   const transform = new Transform({
@@ -194,14 +201,14 @@ function buffered<Input, Output>(
         return callback(null, input);
       }
 
-      let written = 0
+      let written = 0;
       // Copy from the accum into the buffer until it is full
       while (written < input.length) {
-        const n = input.copy(buffer, bufferOffset, written)
-        bufferOffset += n
-        written += n
+        const n = input.copy(buffer, bufferOffset, written);
+        bufferOffset += n;
+        written += n;
         if (bufferOffset == chunkSize) {
-          flush(this)
+          flush(this);
         }
       }
 
@@ -211,7 +218,7 @@ function buffered<Input, Output>(
 
     flush(callback) {
       if (bufferOffset > 0) {
-        buffer = buffer.slice(0, bufferOffset)
+        buffer = buffer.slice(0, bufferOffset);
         flush(this);
       }
       callback();

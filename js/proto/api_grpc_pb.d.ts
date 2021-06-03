@@ -77,7 +77,7 @@ interface IGrantService_IUnsealDelete extends grpc.MethodDefinition<grant_pb.Gra
 
 export const GrantService: IGrantService;
 
-export interface IGrantServer {
+export interface IGrantServer extends grpc.UntypedServiceImplementation {
     putSeal: handleClientStreamingCall<api_pb.PlaintextAndGrantSpec, grant_pb.Grant>;
     unsealGet: grpc.handleServerStreamingCall<grant_pb.Grant, api_pb.Plaintext>;
     seal: handleClientStreamingCall<api_pb.ReferenceAndGrantSpec, grant_pb.Grant>;
@@ -153,7 +153,7 @@ interface ICleartextService_IGet extends grpc.MethodDefinition<reference_pb.Ref,
 
 export const CleartextService: ICleartextService;
 
-export interface ICleartextServer {
+export interface ICleartextServer extends grpc.UntypedServiceImplementation {
     put: grpc.handleBidiStreamingCall<api_pb.Plaintext, reference_pb.Ref>;
     get: grpc.handleBidiStreamingCall<reference_pb.Ref, api_pb.Plaintext>;
 }
@@ -201,7 +201,7 @@ interface IEncryptionService_IDecrypt extends grpc.MethodDefinition<api_pb.Refer
 
 export const EncryptionService: IEncryptionService;
 
-export interface IEncryptionServer {
+export interface IEncryptionServer extends grpc.UntypedServiceImplementation {
     encrypt: grpc.handleBidiStreamingCall<api_pb.Plaintext, api_pb.ReferenceAndCiphertext>;
     decrypt: grpc.handleBidiStreamingCall<api_pb.ReferenceAndCiphertext, api_pb.Plaintext>;
 }
@@ -269,7 +269,7 @@ interface IStorageService_IDelete extends grpc.MethodDefinition<api_pb.Address, 
 
 export const StorageService: IStorageService;
 
-export interface IStorageServer {
+export interface IStorageServer extends grpc.UntypedServiceImplementation {
     push: grpc.handleBidiStreamingCall<api_pb.Ciphertext, api_pb.Address>;
     pull: grpc.handleBidiStreamingCall<api_pb.Address, api_pb.Ciphertext>;
     stat: grpc.handleUnaryCall<api_pb.Address, stores_pb.StatInfo>;

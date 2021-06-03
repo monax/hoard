@@ -39,7 +39,14 @@ func FullVersion() string {
 // To cut a new release add a release to the front of this slice then run the
 // release tagging script: ./scripts/tag_release.sh
 var History relic.ImmutableHistory = relic.NewHistory("Monax Hoard", "https://github.com/monax/hoard").
-	MustDeclareReleases("9.0.0",
+	MustDeclareReleases("9.1.0",
+		`### Fixed
+- [JS] Streaming functions in JS client would swallow all GRPC errors and instead throw on a null exception on getHead for the first frame of messages, now we wait for error message and reject with that message
+
+### Added
+- [JS] Convenience methods for serialising and deserialising grants to base64 so grants can be treated as opaque identifiers
+`,
+		"9.0.0",
 		`This is a fairly major release and the client APIs change significantly. However Grant v2s are still supported and the protobuf API is backwards-compatible.
 
 ### Added

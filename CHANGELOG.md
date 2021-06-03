@@ -1,4 +1,12 @@
 # [Monax Hoard](https://github.com/monax/hoard) Changelog
+## [9.1.0]
+### Fixed
+- [JS] Streaming functions in JS client would swallow all GRPC errors and instead throw on a null exception on getHead for the first frame of messages, now we wait for error message and reject with that message
+
+### Added
+- [JS] Convenience methods for serialising and deserialising grants to base64 so grants can be treated as opaque identifiers
+
+
 ## [9.0.0]
 This is a fairly major release and the client APIs change significantly. However Grant v2s are still supported and the protobuf API is backwards-compatible.
 
@@ -227,6 +235,7 @@ This is the first Hoard open source release and includes:
 	- Hoar-Daemon hoard
 	- Hoar-Control hoarctl CLI
 
+[9.1.0]: https://github.com/monax/hoard/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/monax/hoard/compare/v8.2.3...v9.0.0
 [8.2.3]: https://github.com/monax/hoard/compare/v8.2.2...v8.2.3
 [8.2.2]: https://github.com/monax/hoard/compare/v8.2.1...v8.2.2

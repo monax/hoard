@@ -190,6 +190,21 @@ func TestService(t *testing.T) {
 				require.Equal(t, data, bs)
 			})
 
+			t.Run("Streaming_EmptyGrant", func(t *testing.T) {
+				_, err := cli.UnsealGet(ctx, &grant.Grant{})
+				require.Error(t, err)
+
+				_, err = cli.UnsealGet(ctx, &grant.Grant{
+					Spec:                nil,
+					EncryptedReferences: []byte{},
+					Version:             0,
+				})
+				require.Error(t, err)
+
+				_, err = cli.UnsealGet(ctx, nil)
+				require.Error(t, err)
+			})
+
 			t.Run("Links", func(t *testing.T) {
 
 				gs := &grant.Spec{
