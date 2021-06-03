@@ -1,8 +1,8 @@
-name: master
+name: main
 on:
   push:
-    branches:    
-      - master
+    branches:
+      - main
 
 jobs:
   unit:
@@ -22,7 +22,7 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
-    env: 
+    env:
       GCLOUD_SERVICE_KEY: ${{ secrets.GCLOUD_SERVICE_KEY }}
     steps:
       - uses: actions/checkout@v2
