@@ -13,12 +13,11 @@ require (
 	github.com/eapache/channels v1.1.0
 	github.com/go-kit/kit v0.10.0
 	github.com/go-stack/stack v1.8.0
-	github.com/gogo/protobuf v1.3.1
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.4.3
 	github.com/jawher/mow.cli v1.2.0
 	github.com/monax/relic v2.0.0+incompatible
 	github.com/stretchr/testify v1.6.1
-	github.com/test-go/testify v1.1.4
 	gocloud.dev v0.20.0
 	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c
 	golang.org/x/oauth2 v0.0.0-20201203001011-0b49973bad19
